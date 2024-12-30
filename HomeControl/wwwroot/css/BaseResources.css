@@ -1,0 +1,8 @@
+﻿:root {
+    --smallBorderRadius: 4px;
+    --smallGap: 8px;
+    --mediumGap: 12px;
+    --largeGap: 18px;
+    --smallDeviceWidth: 768px;
+    --headerHeight: 0px;
+}

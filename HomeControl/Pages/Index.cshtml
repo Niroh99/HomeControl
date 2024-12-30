@@ -1,0 +1,26 @@
+﻿@page
+@using HomeControl.Integrations
+@model IndexModel
+@{
+	ViewData["Title"] = "Home";
+}
+
+<div class="grid body-content">
+	@{
+		foreach (var menuItem in MenuPageModel.MenuItems)
+		{
+			if (menuItem.Name == "Home") continue;
+
+			<div class="card shadow-2 card-a-container">
+				<a class="card-a" href="@menuItem.Url">
+					<div class="grid-1fr-auto card-padding">
+						<h3>@menuItem.Name</h3>
+						<div class="centered-content">
+							<custom-svg class="card-a-marker"></custom-svg>
+						</div>
+					</div>
+				</a>
+			</div>
+		}
+	}
+</div>

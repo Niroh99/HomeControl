@@ -1,0 +1,101 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<title>@ViewData["Title"] - HomeControl</title>
+	<link rel="stylesheet" href="~/css/BaseResources.css" asp-append-version="true" />
+	<link rel="stylesheet" href="~/css/DarkTheme.css" asp-append-version="true" />
+	<link rel="stylesheet" href="~/css/site.css" asp-append-version="true" async/>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+</head>
+<body>
+	<header class="shadow-4">
+		<div class="centered-content" style="display: grid; grid-template-columns: auto 1fr">
+			@{
+				if (ViewData.ContainsKey(MenuPageModel.ShowMenuKey) && (bool)ViewData[MenuPageModel.ShowMenuKey])
+				{
+					<div class="title-displacer centered-content">
+						<button id="main-menu-button" class="shadow-2" onclick="ToggleMainMenu()">
+							<custom-svg style="width: 12px; height: 12px; --path: hamburger" />
+						</button>
+					</div>
+				}
+				else
+				{
+					<div></div>
+				}
+			}
+			<div class="padded-medium">
+				<div class="title-container">
+					<h1 class="lesser">@ViewData["Title"]</h1>
+				</div>
+			</div>
+		</div>
+	</header>
+	<main role="main">
+		@{
+			if (ViewData.ContainsKey(MenuPageModel.ShowMenuKey) && (bool)ViewData[MenuPageModel.ShowMenuKey])
+			{
+				<div id="main-menu-container">
+					<div id="body-container">
+						@RenderBody()
+					</div>
+					<button id="main-menu-overlay" class="main-menu-component overlay-button hidden" onclick="ToggleMainMenu()"></button>
+					<div id="main-menu" class="main-menu-component flex flex-vertical hidden">
+						@{
+							var selectedMenuItemName = (string)ViewData[MenuPageModel.MenuItemKey];
+
+							foreach (var menuItem in MenuPageModel.MenuItems)
+							{
+								string menuItemClasses = "menu-item padded";
+
+								if (selectedMenuItemName != null && menuItem.Name == selectedMenuItemName)
+								{
+									menuItemClasses += " highlighted-menu-item shadow-2";
+								}
+
+								<div class="@menuItemClasses">
+									<a class="menu-item-a" href="@menuItem.Url">
+										<h3>@menuItem.Name</h3>
+									</a>
+								</div>
+							}
+						}
+					</div>
+				</div>
+			}
+			else
+			{
+				<div id="body-container">
+					@RenderBody()
+				</div>
+			}
+		}
+	</main>
+
+	<!--<footer>
+	</footer>-->
+
+	<div id="busy-overlay" class="overlay background40 grid hidden">
+		<div class="card padded shadow-2" style="margin: auto; min-width: 100px">
+			<span id="BusyMessage"></span>
+		</div>
+	</div>
+
+	<div id="dialog-overlay" class="overlay grid hidden">
+		<button class="overlay-button" onclick="closeAllDialogs()" style="grid-column: 1; grid-row: 1;"></button>
+
+		@RenderSection("Dialogs", false)
+	</div>
+
+	<script src="~/lib/jquery/dist/jquery.min.js"></script>
+	<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+	<script src="~/js/site.js" asp-append-version="true"></script>
+	<script src="~/js/mainMenu.js" asp-append-version="true"></script>
+	<script src="~/js/dialog.js" asp-append-version="true"></script>
+	<script src="~/js/customSvg.js" asp-append-version="true"></script>
+	<script src="~/js/busy.js" asp-append-version="true"></script>
+
+	@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

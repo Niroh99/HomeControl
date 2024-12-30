@@ -1,0 +1,15 @@
+﻿:root {
+    --background: #1B1B1B;
+    --background40: #00000066;
+    --foreground: #D3D3D3;
+    --foreground60: #D3D3D399;
+    --foreground80: #D3D3D3CC;
+    --elevatedBackground: #2C2C2C;
+    --controls: #3e3e3e;
+    --caption: #232323;
+    --hightligts: #5A669C;
+    --hightlightedForeground: #FFFFFF;
+    --borders: #4B4B4B;
+    --shadow2: #00000047 0px 1px 2px;
+    --shadow4: #00000047 0px 2px 4px;
+}

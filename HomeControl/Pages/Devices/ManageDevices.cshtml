@@ -1,0 +1,37 @@
+﻿@page
+@model ManageDevicesModel
+@{
+	ViewData["Title"] = "Devices > Manage Devices";
+}
+
+@section Scripts {
+	<script>
+		var discoverDevicesForm = document.getElementById("DiscoverDevicesForm");
+
+		function DiscoveryDevices() {
+			BusyWithMessage("Discovering devices...");
+
+			discoverDevicesForm.submit();
+		}
+	</script>
+}
+
+<div class="grid body-content">
+	<form id="DiscoverDevicesForm" method="post" asp-page-handler="DiscoverDevices" class="card shadow-2 grid-1fr-auto card-padding">
+		<div class="centered-content">
+			<h3>Discover Devices</h3>
+		</div>
+		<button type="button" class="shadow-2" onclick="DiscoveryDevices()">Discover</button>
+	</form>
+	<div class="card shadow-2 card-a-container">
+		<a class="card-a" asp-page="RemoveDevice">
+			<div class="grid-1fr-auto card-padding">
+				<h3>Remove Device</h3>
+
+				<div class="centered-content">
+					<custom-svg class="card-a-marker"></custom-svg>
+				</div>
+			</div>
+		</a>
+	</div>
+</div>

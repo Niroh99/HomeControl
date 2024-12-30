@@ -1,0 +1,120 @@
+﻿@page
+@using HomeControl.Integrations
+@model HomeControl.Pages.Devices.IndexModel
+@{
+	ViewData["Title"] = "Devices";
+}
+
+<div class="grid body-content">
+	<div class="card shadow-2 card-a-container">
+		<a class="card-a" asp-page="ManageDevices">
+			<div class="grid-1fr-auto card-padding">
+				<h3>Manage Devices</h3>
+
+				<div class="centered-content">
+					<custom-svg class="card-a-marker"></custom-svg>
+				</div>
+			</div>
+		</a>
+	</div>
+
+	<h2 class="lesser">Devices</h2>
+
+	@{
+		foreach (var device in Model.Devices)
+		{
+			<form method="post" class="card shadow-2">
+				<details>
+					<summary>
+						<div class="grid card-padding medium-gap" style="grid-template-columns: 1fr auto auto">
+							<div class="centered-content">
+								<h3>@device.DisplayName</h3>
+							</div>
+
+							<div class="flex">
+								@{
+									foreach (var feature in device.GetExecutableFeatures())
+									{
+										<button class="shadow-2" asp-page-handler="ExecuteFeature" asp-all-route-data="@Model.GetDeviceFeatureRouteData(device, feature)">@feature.Name</button>
+									}
+								}
+							</div>
+							<div class="centered-content">
+								<custom-svg class="summary-marker"></custom-svg>
+								<custom-svg class="summary-marker summary-marker-open"></custom-svg>
+							</div>
+						</div>
+					</summary>
+					<div class="card-element grid-1fr-auto card-padding">
+						<div class="centered-content">
+							<span class="field-label">Alias:</span>
+							<span>@device.DisplayName</span>
+						</div>
+						<button class="shadow-2" type="button">Edit</button>
+					</div>
+					<div class="grid-1-2 card-padding">
+						@{
+							void DisplayChildProperty(IProperty property)
+							{
+								switch (property)
+								{
+									case PlaceholderProperty:
+										<div></div>
+										break;
+									case SingleProperty singleProperty:
+										<span style ="word-break: break-all">@singleProperty.Value</span>
+										<span class="field-label">@singleProperty.Label</span>
+
+										break;
+									case MultiProperty multiProperty:
+										<span class="field-label">@multiProperty.Label</span>
+
+										foreach (var childProperty in multiProperty.ChildProperties)
+										{
+											DisplayChildProperty(childProperty);
+										}
+
+										break;
+								}
+							}
+
+							void DisplayProperty(IProperty property)
+							{
+								switch (property)
+								{
+									case PlaceholderProperty:
+										<div></div>
+										break;
+									case SingleProperty singleProperty:
+										<div>
+											<span class="field-label">@singleProperty.Label</span>
+											<span style="word-break: break-all">@singleProperty.Value</span>
+										</div>
+
+										break;
+									case MultiProperty multiProperty:
+										<div>
+											<span class="field-label">@multiProperty.Label</span>
+											@{
+												foreach (var childProperty in multiProperty.ChildProperties)
+												{
+													DisplayChildProperty(childProperty);
+												}
+											}
+										</div>
+
+										break;
+								}
+							}
+
+							foreach (var property in device.GetProperties())
+							{
+								DisplayProperty(property);
+							}
+						}
+					</div>
+				</details>
+			</form>
+		}
+	}
+</div>
