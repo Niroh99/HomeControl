@@ -9,6 +9,9 @@ namespace HomeControl.Integrations.TPLink
 
         public const string GetSysInfoCommand = "get_sysinfo";
 
+        public const string SetDeviceAliasCommand = "set_dev_alias";
+        public const string SetDeviceAliasArgument = "alias";
+
         public Device(string hostname, int port = 9999)
         {
             Hostname = hostname;
@@ -58,6 +61,8 @@ namespace HomeControl.Integrations.TPLink
 
         public string DisplayName => Alias;
 
+        public bool SupportsRename { get => true; }
+
         public void Refresh()
         {
             var message = new ProtocolMessage(ProtocolMessageSystem, GetSysInfoCommand, null, null);
@@ -91,14 +96,15 @@ namespace HomeControl.Integrations.TPLink
 
         public abstract IEnumerable<IProperty> GetProperties();
 
-        public Models.Device ToSerializableDevice()
+        public void Rename(string name)
         {
-            return new Models.Device
-            {
-                Hostname = Hostname,
-                Port = Port,
-                Type = DeviceType
-            };
+            //var tplinkDevice = new TPLinkSmartDevices.Devices.TPLinkSmartPlug(Hostname, Port);
+
+            //tplinkDevice.SetAlias(name);
+
+            var message = new ProtocolMessage(ProtocolMessageSystem, SetDeviceAliasCommand, SetDeviceAliasArgument, name);
+
+            message.Execute(Hostname, Port);
         }
     }
 }

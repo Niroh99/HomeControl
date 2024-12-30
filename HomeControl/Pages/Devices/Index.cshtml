@@ -5,6 +5,48 @@
 	ViewData["Title"] = "Devices";
 }
 
+@section Dialogs {
+	<dialog id="ChangaDisplayNameDialog" onclose="changeDisplayNameDialogClosed()">
+		<form method="post" class="grid padded" asp-page-handler="Rename">
+			<input id="DeviceId" type="hidden" name="DeviceId" />
+			<div class="grid" style="gap: 0">
+				<label for="DisplayName">Name</label>
+				<input id="DisplayName" name="DisplayName" />
+			</div>
+			<div class="flex" style="justify-content: right">
+				<button class="shadow-2">Rename</button>
+				<button class="shadow-2" type="button" onclick="closeChangeDisplayNameDialog()">Cancel</button>
+			</div>
+		</form>
+	</dialog>
+}
+
+@section Scripts {
+	<script>
+		var changeDisplayNameDialog = document.getElementById("ChangaDisplayNameDialog");
+
+		var deviceIdInput = document.getElementById("DeviceId");
+
+		var displayNameInput = document.getElementById("DisplayName");
+		
+		function openChangeDisplayNameDialog(deviceId, displayName) {
+			deviceIdInput.value = deviceId;
+			displayNameInput.value = displayName;
+
+			showDialog(changeDisplayNameDialog);
+		}
+
+		function closeChangeDisplayNameDialog() {
+			closeDialog(changeDisplayNameDialog);
+		}
+
+		function changeDisplayNameDialogClosed() {
+			deviceIdInput.value = null;
+			displayNameInput.value = null;
+		}
+	</script>
+}
+
 <div class="grid body-content">
 	<div class="card shadow-2 card-a-container">
 		<a class="card-a" asp-page="ManageDevices">
@@ -45,13 +87,18 @@
 							</div>
 						</div>
 					</summary>
-					<div class="card-element grid-1fr-auto card-padding">
-						<div class="centered-content">
-							<span class="field-label">Alias:</span>
-							<span>@device.DisplayName</span>
-						</div>
-						<button class="shadow-2" type="button">Edit</button>
-					</div>
+					@{
+						if (device.SupportsRename)
+						{
+							<div class="card-element grid-1fr-auto card-padding">
+								<div class="centered-content">
+									<span class="field-label">Name:</span>
+									<span>@device.DisplayName</span>
+								</div>
+								<button class="shadow-2" type="button" onclick="openChangeDisplayNameDialog(@Json.Serialize(device.Owner.Id), '@device.DisplayName')">Rename</button>
+							</div>
+						}
+					}
 					<div class="grid-1-2 card-padding">
 						@{
 							void DisplayChildProperty(IProperty property)
@@ -62,7 +109,7 @@
 										<div></div>
 										break;
 									case SingleProperty singleProperty:
-										<span style ="word-break: break-all">@singleProperty.Value</span>
+										<span style="word-break: break-all">@singleProperty.Value</span>
 										<span class="field-label">@singleProperty.Label</span>
 
 										break;

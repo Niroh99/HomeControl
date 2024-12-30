@@ -365,3 +365,6 @@ FodyWeavers.xsd
 # SQLite Databases
 *.db
 *.db-journal
+
+# Bash scripts
+*.sh

@@ -10,8 +10,12 @@ namespace HomeControl.Integrations
 
         string DisplayName { get; }
 
+        bool SupportsRename { get; }
+
         IEnumerable<Feature> GetExecutableFeatures();
 
         IEnumerable<IProperty> GetProperties();
+
+        void Rename(string name);
     }
 }

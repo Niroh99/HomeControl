@@ -35,14 +35,25 @@ namespace HomeControl.Pages.Devices
 
         public IActionResult OnPostExecuteFeature(int deviceId, string featureName)
         {
-            var serializableDevice = Device.Select(deviceId);
+            var device = Device.Select(deviceId);
 
-            var device = serializableDevice.Create();
+            var integrationDevice = device.Create();
 
-            var feature = device.GetExecutableFeatures().FirstOrDefault(x => x.Name == featureName);
+            var feature = integrationDevice.GetExecutableFeatures().FirstOrDefault(x => x.Name == featureName);
 
             if (feature != null) feature.Execute.Invoke();
             
+            return RedirectToPage();
+        }
+
+        public IActionResult OnPostRename(int deviceId, string displayName)
+        {
+            var device = Device.Select(deviceId);
+
+            var integrationDevice = device.Create();
+
+            integrationDevice.Rename(displayName);
+
             return RedirectToPage();
         }
 

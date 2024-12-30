@@ -66,7 +66,7 @@ button {
 }
 
     button:active {
-        background: var(--hightligts);
+        background: var(--highlights);
         color: var(--highlightedForeground);
     }
 
@@ -90,7 +90,7 @@ button {
         }
 
     button.toggled {
-        background: var(--hightligts);
+        background: var(--highlights);
         color: var(--highlightedForeground);
     }
 
@@ -147,6 +147,20 @@ dialog {
     border-radius: 0 0 var(--smallBorderRadius) var(--smallBorderRadius);
     border-top: 1px solid var(--borders);
 }
+
+input {
+    border: 1px solid var(--borders);
+    background: var(--background);
+    color: var(--foreground);
+    padding: var(--smallGap) var(--mediumGap) var(--smallGap) var(--mediumGap);
+    border-radius: var(--smallBorderRadius);
+}
+
+    input:focus {
+        outline: none;
+        border-bottom-width: 2px;
+        border-bottom-color: var(--highlights);
+    }
 
 .overlay {
     border-radius: 0;
@@ -244,7 +258,7 @@ custom-svg.card-a-marker {
 
 .highlighted-menu-item {
     background: var(--elevatedBackground);
-    border-left: 2px solid var(--hightligts);
+    border-left: 2px solid var(--highlights);
 }
 
 .menu-item-a {
