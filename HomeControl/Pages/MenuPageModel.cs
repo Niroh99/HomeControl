@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc.RazorPages;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace HomeControl.Pages
 {
@@ -10,22 +11,23 @@ namespace HomeControl.Pages
         public static readonly List<MenuItem> MenuItems = new()
         {
             new ("Home", "/"),
-            new (Devices.IndexModel.MenuItem, Devices.IndexModel.MenuItemUrl)
+            new (Devices.IndexModel.MenuItem, Devices.IndexModel.MenuItemUrl),
+            new (Media.IndexModel.MenuItem, Media.IndexModel.PageUrl)
         };
 
         public MenuPageModel(string menuItem)
         {
-            _showMenu = true;
             _menuItem = menuItem;
         }
 
-        private bool _showMenu;
-        private string _menuItem;
+        private readonly string _menuItem;
 
-        public virtual void OnGet()
+        public virtual IActionResult OnGet()
         {
-            ViewData[ShowMenuKey] = _showMenu;
+            ViewData[ShowMenuKey] = true;
             ViewData[MenuItemKey] = _menuItem;
+
+            return null;
         }
     }
 

@@ -12,11 +12,13 @@ namespace HomeControl.Pages.Devices
 
         public List<IDevice> Devices { get; } = new List<IDevice>();
 
-        public override void OnGet()
+        public override IActionResult OnGet()
         {
             base.OnGet();
 
             Devices.AddRange(CreateDevices(Device.SelectAll()).OrderBy(x => x.DisplayName));
+
+            return null;
         }
 
         public IActionResult OnPostRemoveDevice(int deviceId)

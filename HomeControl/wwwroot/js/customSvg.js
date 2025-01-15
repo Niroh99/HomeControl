@@ -31,6 +31,12 @@
                     fill: false,
                     data: "M 0 1 L 12 1 M 0 6 L 12 6 M 0 11 L 12 11"
                 }
+            case "directory":
+                return {
+                    strokeWidth: "1px",
+                    fill: false,
+                    data: "M 1 1 L 8 1 L 10 4 L 17 4 L 17 15 L 1 15 Z"
+                }
         }
     }
 

@@ -1,3 +1,8 @@
+using HomeControl.Helpers;
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Mvc.Formatters;
+using Microsoft.AspNetCore.StaticFiles;
+using Microsoft.Extensions.FileProviders;
 using System.Net;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,7 +15,8 @@ builder.WebHost.ConfigureKestrel(serverOptions =>
     serverOptions.Listen(IPAddress.Any, 5000);
 });
 
-// Add services to the container.
+builder.Services.AddControllers();
+
 builder.Services.AddRazorPages();
 
 builder.Services.AddDistributedMemoryCache();
@@ -22,6 +28,8 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
+builder.Services.AddSingleton<IFileProvider>(new PhysicalFileProvider(HomeControl.Pages.Media.IndexModel.BasePath));
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -29,7 +37,17 @@ if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
 }
+
 app.UseStaticFiles();
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(HomeControl.Pages.Media.IndexModel.BasePath),
+    ContentTypeProvider = FileHelper.CreateFileExtensionContentTypeProvider(),
+    RequestPath = new PathString("/Media"),
+    ServeUnknownFileTypes = true,
+    DefaultContentType = FileHelper.ApplicationOctedStreamContentType,
+});
 
 app.UseRouting();
 
@@ -38,5 +56,7 @@ app.UseAuthorization();
 app.UseSession();
 
 app.MapRazorPages();
+
+app.MapControllers();
 
 app.Run();

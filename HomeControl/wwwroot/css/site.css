@@ -63,6 +63,7 @@ button {
     border-radius: var(--smallBorderRadius);
     padding: var(--smallGap) var(--mediumGap) var(--smallGap) var(--mediumGap);
     width: 100%;
+    font-size: inherit;
 }
 
     button:active {
@@ -78,10 +79,10 @@ button {
         border-radius: 0;
         padding: 0;
         position: absolute;
-        top: 0;
+        top: var(--scrollY);
         left: 0;
-        width: 100%;
-        height: 100%;
+        width: 100vw;
+        height: 100vh;
         background: var(--background40);
     }
 
@@ -150,6 +151,7 @@ dialog {
 
 input {
     border: 1px solid var(--borders);
+    border-bottom-width: 2px;
     background: var(--background);
     color: var(--foreground);
     padding: var(--smallGap) var(--mediumGap) var(--smallGap) var(--mediumGap);
@@ -168,7 +170,7 @@ input {
     position: absolute;
     top: var(--scrollY);
     left: 0;
-    width: 100vw;
+    width: 100%;
     height: 100vh;
 }
 
@@ -204,7 +206,7 @@ input {
 }
 
 .card-padding {
-    padding: var(--smallGap) var(--largeGap) var(--smallGap) var(--largeGap);
+    padding: var(--mediumGap);
 }
 
 .padded {
@@ -231,17 +233,47 @@ input {
     border-color: var(--borders);
 }
 
-.card-a {
+a.card-a {
     color: var(--foreground);
     text-decoration: none;
     line-height: 34px;
 }
 
-    .card-a:link {
+    a.card-a:link {
         color: var(--foreground);
     }
 
-    .card-a:visited {
+    a.card-a:visited {
+        color: var(--foreground);
+    }
+
+a.button-a {
+    text-decoration: none;
+    cursor: default;
+    background: var(--controls);
+    border: none;
+    color: var(--foreground);
+    border-radius: var(--smallBorderRadius);
+    padding: var(--smallGap) var(--mediumGap) var(--smallGap) var(--mediumGap);
+    width: 100%;
+    font-size: inherit;
+}
+
+    a.button-a:active {
+        background: var(--highlights);
+        color: var(--highlightedForeground);
+        cursor: default;
+    }
+
+    a.button-a:hover {
+        cursor: default;
+    }
+
+    a.button-a:link {
+        color: var(--foreground);
+    }
+
+    a.button-a:visited {
         color: var(--foreground);
     }
 
@@ -350,7 +382,7 @@ custom-svg.card-a-marker {
 }
 
 #main-menu-overlay {
-    top: var(--headerHeight);
+    top: calc(var(--headerHeight) + var(--scrollY));
     height: calc(100vh - var(--headerHeight));
 }
 

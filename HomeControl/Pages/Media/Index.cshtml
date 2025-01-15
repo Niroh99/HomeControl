@@ -1,0 +1,140 @@
+﻿@page
+@model HomeControl.Pages.Media.IndexModel
+@{
+	ViewData["Title"] = "Media";
+}
+
+@section Dialogs {
+	<dialog id="UploadFileDialog">
+		<form id="UploadFileForm" action="/Media/UploadFile?directoryPath=@Model.GetDirectoryPath()" method="post" enctype="multipart/form-data" class="grid card-padding">
+			<div class="grid">
+				<label for="File">File</label>
+				<input type="file" id="File" name="file" />
+			</div>
+			<div class="flex" style="justify-content: right">
+				<button class="shadow-2" type="button" onclick="submitUploadFileForm()">Upload</button>
+				<button class="shadow-2" type="button" onclick="closeUploadFileDialog()">Cancel</button>
+			</div>
+		</form>
+	</dialog>
+
+	<dialog id="DeleteFileDialog">
+		<form method="post" class="grid card-padding" asp-page-handler="DeleteFile">
+			<input type="hidden" id="FileToDelete" name="filename" />
+			<input type="hidden" name="directoryPath" value="@Model.GetDirectoryPath()" />
+			<span>Delete File?</span>
+			<div class="flex" style="justify-content: right">
+				<button class="shadow-2">Delete</button>
+				<button class="shadow-2" type="button" onclick="closeUploadFileDialog()">Cancel</button>
+			</div>
+		</form>
+	</dialog>
+}
+
+@section Scripts {
+	<script>
+		var uploadFileDialog = document.getElementById("UploadFileDialog");
+
+		function showUploadFileDialog() {
+			showDialog(uploadFileDialog);
+		}
+
+		function closeUploadFileDialog() {
+			closeDialog(uploadFileDialog);
+		}
+
+		function submitUploadFileForm() {
+
+			closeUploadFileDialog();
+
+			BusyWithMessage("Uploading File...");
+
+			let uploadFileForm = document.getElementById("UploadFileForm");
+
+			uploadFileForm.submit();
+		}
+
+		var deleteFileDialog = document.getElementById("DeleteFileDialog");
+
+		function showDeleteFileDialog(filename) {
+			let fileToDeleteField = document.getElementById("FileToDelete");
+
+			fileToDeleteField.value = filename;
+
+			showDialog(deleteFileDialog);
+		}
+	</script>
+}
+
+<div class="body-content grid">
+	@{
+		if (Model.BasePathExists)
+		{
+			<h3 class="lesser">@Model.GetDisplayPath()</h3>
+
+			<div class="flex">
+				<button class="shadow-2" onclick="showUploadFileDialog()">Upload File</button>
+			</div>
+
+			if (Model.DirectoryExists)
+			{
+				if (Model.HasMedia)
+				{
+					foreach (var directory in Model.Directories)
+					{
+						<div class="card card-a-container shadow-2">
+							<a class="card-a" href="@Model.BuildNavigateQuery(directory.Name)">
+								<div class="grid card-padding" style="grid-template-columns: auto 1fr auto">
+									<div class="centered-content">
+										<custom-svg style="width: 18px; height: 16px; --path: directory; align-content: center"></custom-svg>
+									</div>
+
+									<h3>@directory.Name</h3>
+
+									<div class="centered-content">
+										<custom-svg class="card-a-marker"></custom-svg>
+									</div>
+								</div>
+							</a>
+						</div>
+					}
+
+					foreach (var file in Model.Files)
+					{
+						<div class="card card-a-container shadow-2">
+							<div class="card grid-1fr-auto card-padding">
+								<div class="centered-content">
+									<h3>@file.Name</h3>
+								</div>
+
+								<div class="flex">
+									@{
+										if (Model.CanBrowserDisplayFile(file))
+										{
+											<a class="button-a shadow-2" href="@Model.BuildFileQuery(file.Name)">Open</a>
+										}
+
+										<a class="button-a shadow-2" href="@Model.BuildFileQuery(file.Name)" download="@file.Name">Download</a>
+										<button onclick="showDeleteFileDialog('@file.Name')">Delete</button>
+									}
+								</div>
+							</div>
+						</div>
+					}
+				}
+				else
+				{
+					<h2 class="lesser">Directory empty</h2>
+				}
+			}
+			else
+			{
+				<h2 class="lesser">Unknown Directory</h2>
+			}
+		}
+		else
+		{
+			<h2 class="lesser">No Media attached</h2>
+		}
+	}
+</div>

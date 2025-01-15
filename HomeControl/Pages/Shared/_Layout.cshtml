@@ -47,7 +47,7 @@
 
 							foreach (var menuItem in MenuPageModel.MenuItems)
 							{
-								string menuItemClasses = "menu-item padded";
+								string menuItemClasses = "menu-item grid";
 
 								if (selectedMenuItemName != null && menuItem.Name == selectedMenuItemName)
 								{
@@ -55,7 +55,7 @@
 								}
 
 								<div class="@menuItemClasses">
-									<a class="menu-item-a" href="@menuItem.Url">
+									<a class="menu-item-a padded" href="@menuItem.Url">
 										<h3>@menuItem.Name</h3>
 									</a>
 								</div>

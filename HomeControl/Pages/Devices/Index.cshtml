@@ -7,9 +7,9 @@
 
 @section Dialogs {
 	<dialog id="ChangaDisplayNameDialog" onclose="changeDisplayNameDialogClosed()">
-		<form method="post" class="grid padded" asp-page-handler="Rename">
+		<form method="post" class="grid card-padding" asp-page-handler="Rename">
 			<input id="DeviceId" type="hidden" name="DeviceId" />
-			<div class="grid" style="gap: 0">
+			<div class="grid">
 				<label for="DisplayName">Name</label>
 				<input id="DisplayName" name="DisplayName" />
 			</div>
