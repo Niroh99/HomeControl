@@ -1,5 +1,6 @@
 using HomeControl.Integrations;
 using HomeControl.Models;
+using HomeControl.Sql;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
@@ -12,7 +13,7 @@ namespace HomeControl.Pages.Devices
 
         public IndexModel() : base(MenuItem)
         {
-            
+
         }
 
         public List<IDevice> Devices { get; } = new List<IDevice>();
@@ -20,9 +21,10 @@ namespace HomeControl.Pages.Devices
         public override IActionResult OnGet()
         {
             base.OnGet();
-
-            Devices.AddRange(CreateDevices(Device.SelectAll()).OrderBy(x => x.DisplayName));
-
+            Database.Connect(() =>
+            {
+                Devices.AddRange(CreateDevices(Device.SelectAll()).OrderBy(x => x.DisplayName));
+            });
             return null;
         }
 
@@ -37,26 +39,32 @@ namespace HomeControl.Pages.Devices
 
         public IActionResult OnPostExecuteFeature(int deviceId, string featureName)
         {
-            var device = Device.Select(deviceId);
+            return Database.Connect(() =>
+            {
+                var device = Device.Select(deviceId);
 
-            var integrationDevice = device.Create();
+                var integrationDevice = device.Create();
 
-            var feature = integrationDevice.GetExecutableFeatures().FirstOrDefault(x => x.Name == featureName);
+                var feature = integrationDevice.GetExecutableFeatures().FirstOrDefault(x => x.Name == featureName);
 
-            if (feature != null) feature.Execute.Invoke();
-            
-            return RedirectToPage();
+                if (feature != null) feature.Execute.Invoke();
+
+                return RedirectToPage();
+            });
         }
 
         public IActionResult OnPostRename(int deviceId, string displayName)
         {
-            var device = Device.Select(deviceId);
+            return Database.Connect(() =>
+            {
+                var device = Device.Select(deviceId);
 
-            var integrationDevice = device.Create();
+                var integrationDevice = device.Create();
 
-            integrationDevice.Rename(displayName);
+                integrationDevice.Rename(displayName);
 
-            return RedirectToPage();
+                return RedirectToPage();
+            });
         }
 
         private IEnumerable<IDevice> CreateDevices(List<Device> deviceList)

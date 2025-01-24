@@ -52,148 +52,143 @@ namespace HomeControl.Models
 
         protected static T Select<T>(object id) where T : SqLiteModel
         {
-            return Database.Connect((sqlConnection) =>
+            var sqlConnection = Database.GeRunningConnection();
+
+            var modelType = typeof(T);
+
+            var modelMetadata = ModelMetadatas[modelType];
+
+            var instance = Activator.CreateInstance(modelType) as T;
+
+            using (var command = sqlConnection.CreateCommand())
             {
-                var modelType = typeof(T);
+                var commandStringBuilder = BuildSelect(modelMetadata);
 
-                var modelMetadata = ModelMetadatas[modelType];
+                var primaryKey = GetPrimaryKey(modelMetadata);
 
-                var instance = Activator.CreateInstance(modelType) as T;
-
-                using (var command = sqlConnection.CreateCommand())
+                if (primaryKey != null && id != null)
                 {
-                    var commandStringBuilder = BuildSelect(modelMetadata);
+                    commandStringBuilder.Append($" WHERE [{primaryKey.ColumnName}] = $Id");
 
-                    var primaryKey = GetPrimaryKey(modelMetadata);
+                    var parameter = command.CreateParameter();
+                    parameter.ParameterName = "$Id";
+                    parameter.Value = id;
 
-                    if (primaryKey != null && id != null)
-                    {
-                        commandStringBuilder.Append($" WHERE [{primaryKey.ColumnName}] = $Id");
-
-                        var parameter = command.CreateParameter();
-                        parameter.ParameterName = "$Id";
-                        parameter.Value = id;
-
-                        command.Parameters.Add(parameter);
-                    }
-
-                    command.CommandText = commandStringBuilder.ToString();
-
-                    using (var reader = command.ExecuteReader())
-                    {
-                        if (reader.Read())
-                        {
-                            ApplyFields(instance, reader);
-
-                            return instance;
-                        }
-                        else return null;
-                    }
+                    command.Parameters.Add(parameter);
                 }
-            });
+
+                command.CommandText = commandStringBuilder.ToString();
+
+                using (var reader = command.ExecuteReader())
+                {
+                    if (reader.Read())
+                    {
+                        ApplyFields(instance, reader);
+
+                        return instance;
+                    }
+                    else return null;
+                }
+            }
         }
 
         protected static List<T> SelectAll<T>() where T : SqLiteModel
         {
-            return Database.Connect((sqlConnection) =>
+            var sqlConnection = Database.GeRunningConnection();
+            var modelType = typeof(T);
+
+            var modelMetadata = ModelMetadatas[modelType];
+
+            using (var command = sqlConnection.CreateCommand())
             {
-                var modelType = typeof(T);
+                var commandStringBuilder = BuildSelect(modelMetadata);
 
-                var modelMetadata = ModelMetadatas[modelType];
+                command.CommandText = commandStringBuilder.ToString();
 
-                using (var command = sqlConnection.CreateCommand())
+                using (var reader = command.ExecuteReader())
                 {
-                    var commandStringBuilder = BuildSelect(modelMetadata);
+                    var result = new List<T>();
 
-                    command.CommandText = commandStringBuilder.ToString();
-
-                    using (var reader = command.ExecuteReader())
+                    while (reader.Read())
                     {
-                        var result = new List<T>();
+                        var instance = Activator.CreateInstance(modelType) as T;
 
-                        while (reader.Read())
-                        {
-                            var instance = Activator.CreateInstance(modelType) as T;
+                        ApplyFields(instance, reader);
 
-                            ApplyFields(instance, reader);
-
-                            result.Add(instance);
-                        }
-
-                        return result;
+                        result.Add(instance);
                     }
+
+                    return result;
                 }
-            });
+            }
         }
 
         protected static void Insert<T>(T instance) where T : SqLiteModel
         {
-            Database.Connect((sqlConnection) =>
+            var sqlConnection = Database.GeRunningConnection();
+
+            var modelType = typeof(T);
+
+            var modelMetadata = ModelMetadatas[modelType];
+
+            using (var command = sqlConnection.CreateCommand())
             {
-                var modelType = typeof(T);
+                var commandStringBuilder = new StringBuilder("INSERT INTO ")
+                    .Append($"[{modelMetadata.TableName}]")
+                    .Append('(');
 
-                var modelMetadata = ModelMetadatas[modelType];
+                commandStringBuilder.Append(string.Join(", ", modelMetadata.Fields.Where(x => !IsIdentity(x)).Select(x => $"[{x.ColumnName}]")));
 
-                using (var command = sqlConnection.CreateCommand())
+                commandStringBuilder.Append(')');
+
+                commandStringBuilder.Append(" VALUES")
+                    .Append('(');
+
+                commandStringBuilder.Append(string.Join(", ", modelMetadata.Fields.Where(x => !IsIdentity(x)).Select(x => InsertField(x, instance, command))));
+
+                commandStringBuilder.Append(')');
+
+                var primaryKey = GetPrimaryKey(modelMetadata);
+
+                var isIdentity = primaryKey != null && primaryKey.IsIdentity;
+
+                if (isIdentity) commandStringBuilder.Append("; SELECT LAST_INSERT_ROWID()");
+
+                command.CommandText = commandStringBuilder.ToString();
+
+                if (isIdentity)
                 {
-                    var commandStringBuilder = new StringBuilder("INSERT INTO ")
-                        .Append($"[{modelMetadata.TableName}]")
-                        .Append('(');
+                    var id = command.ExecuteScalar();
 
-                    commandStringBuilder.Append(string.Join(", ", modelMetadata.Fields.Where(x => !IsIdentity(x)).Select(x => $"[{x.ColumnName}]")));
-
-                    commandStringBuilder.Append(')');
-
-                    commandStringBuilder.Append(" VALUES")
-                        .Append('(');
-
-                    commandStringBuilder.Append(string.Join(", ", modelMetadata.Fields.Where(x => !IsIdentity(x)).Select(x => InsertField(x, instance, command))));
-
-                    commandStringBuilder.Append(')');
-
-                    var primaryKey = GetPrimaryKey(modelMetadata);
-
-                    var isIdentity = primaryKey != null && primaryKey.IsIdentity;
-
-                    if (isIdentity) commandStringBuilder.Append("; SELECT LAST_INSERT_ROWID()");
-
-                    command.CommandText = commandStringBuilder.ToString();
-
-                    if (isIdentity)
-                    {
-                        var id = command.ExecuteScalar();
-
-                        instance.Set(id, primaryKey.Name);
-                    }
-                    else command.ExecuteNonQuery();
+                    instance.Set(id, primaryKey.Name);
                 }
-            });
+                else command.ExecuteNonQuery();
+            }
         }
 
         public void Delete()
         {
-            Database.Connect((sqlConnection) =>
+            var sqlConnection = Database.GeRunningConnection();
+
+            var modelType = GetType();
+
+            var modelMetadata = ModelMetadatas[modelType];
+
+            using (var command = sqlConnection.CreateCommand())
             {
-                var modelType = GetType();
+                var commandStringBuilder = new StringBuilder("DELETE FROM ")
+                    .Append($"[{modelMetadata.TableName}]")
+                    .Append(" WHERE ");
 
-                var modelMetadata = ModelMetadatas[modelType];
+                var primaryKey = GetPrimaryKey(modelMetadata);
 
-                using (var command = sqlConnection.CreateCommand())
-                {
-                    var commandStringBuilder = new StringBuilder("DELETE FROM ")
-                        .Append($"[{modelMetadata.TableName}]")
-                        .Append(" WHERE ");
+                if (primaryKey != null && primaryKey.IsIdentity) commandStringBuilder.Append(DeleteField(primaryKey, command));
+                else commandStringBuilder.Append(string.Join(" AND ", modelMetadata.Fields.Select(x => DeleteField(x, command))));
 
-                    var primaryKey = GetPrimaryKey(modelMetadata);
+                command.CommandText = commandStringBuilder.ToString();
 
-                    if (primaryKey != null && primaryKey.IsIdentity) commandStringBuilder.Append(DeleteField(primaryKey, command));
-                    else commandStringBuilder.Append(string.Join(" AND ", modelMetadata.Fields.Select(x => DeleteField(x, command))));
-
-                    command.CommandText = commandStringBuilder.ToString();
-
-                    command.ExecuteNonQuery();
-                }
-            });
+                command.ExecuteNonQuery();
+            }
         }
 
         private static PrimaryKeyField GetPrimaryKey(ModelMetadata<SqlField> modelMetadata)
@@ -246,7 +241,7 @@ namespace HomeControl.Models
 
             command.Parameters.AddWithValue(parameterName, Get<object>(field.Name));
 
-            return $"[{field.ColumnName}] = {parameterName}" ;
+            return $"[{field.ColumnName}] = {parameterName}";
         }
     }
 }

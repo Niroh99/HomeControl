@@ -9,29 +9,44 @@ namespace HomeControl.Sql
 
         public static string ConnectionString { get; set; }
 
-        public static void Connect(Action<SqliteConnection> execute)
+        private static SqliteConnection _connection = null;
+
+        public static void Connect(Action action)
         {
-            _ = Connect<object>((connection) =>
+            _ = Connect<object>((sqlConnection) =>
             {
-                execute(connection);
+                action();
                 return null;
-            });
+            }); 
         }
 
-        public static T Connect<T>(Func<SqliteConnection, T> execute)
+        public static T Connect<T>(Func<T> function)
         {
-            if (ConnectionString == null) throw new Exception("ConnectionString not specified.");
+            return Connect((sqlConnection) => function());
+        }
 
-            using (var sqlConnection = new SqliteConnection(ConnectionString))
+        public static T Connect<T>(Func<SqliteConnection, T> function)
+        {
+            using (_connection = new SqliteConnection(ConnectionString))
             {
-                sqlConnection.Open();
+                _connection.Open();
 
-                var result = execute(sqlConnection);
+                var result = function(_connection);
 
-                sqlConnection.Close();
+                _connection.Close();
+
+                _connection = null;
 
                 return result;
             }
+        }
+
+        public static SqliteConnection GeRunningConnection()
+        {
+            if (ConnectionString == null) throw new Exception("ConnectionString not specified.");
+            if (_connection == null) throw new Exception("Not Database Connection.");
+
+            return _connection;
         }
     }
 }

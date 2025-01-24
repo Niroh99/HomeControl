@@ -2,15 +2,3 @@
 @model HomeControl.Pages.TestModel
 @{
 }
-
-<form action="/FileUpload/UploadLargeFile" method="post" enctype="multipart/form-data" class="grid card-padding">
-	@* <input type="hidden" value="@Model.GetDirectoryPath()" name="directoryPath"/> *@
-	<div class="grid">
-		<label for="File">File</label>
-		<input type="file" id="file" name="file" />
-	</div>
-	<div class="flex" style="justify-content: right">
-		<button class="shadow-2">Upload</button>
-		<button class="shadow-2" type="button" onclick="closeUploadFileDialog()">Cancel</button>
-	</div>
-</form>

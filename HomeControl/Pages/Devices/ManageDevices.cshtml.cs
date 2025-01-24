@@ -1,4 +1,5 @@
 using HomeControl.Models;
+using HomeControl.Sql;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
@@ -13,24 +14,27 @@ namespace HomeControl.Pages.Devices
 
         public IActionResult OnPostDiscoverDevices()
         {
-            foreach (var device in Device.SelectAll())
+            return Database.Connect(() =>
             {
-                device.Delete();
-            }
-
-            var devices = Integrations.TPLink.Discovery.Discover();
-
-            foreach (var device in devices)
-            {
-                Device.Insert(new Device()
+                foreach (var device in Device.SelectAll())
                 {
-                    Type = device.DeviceType,
-                    Hostname = device.Hostname,
-                    Port = device.Port,
-                });
-            }
+                    device.Delete();
+                }
 
-            return Redirect("/Devices");
+                var devices = Integrations.TPLink.Discovery.Discover();
+
+                foreach (var device in devices)
+                {
+                    Device.Insert(new Device()
+                    {
+                        Type = device.DeviceType,
+                        Hostname = device.Hostname,
+                        Port = device.Port,
+                    });
+                }
+
+                return Redirect("/Devices");
+            });
         }
     }
 }

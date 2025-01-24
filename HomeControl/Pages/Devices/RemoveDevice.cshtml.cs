@@ -1,5 +1,6 @@
 using HomeControl.Integrations;
 using HomeControl.Models;
+using HomeControl.Sql;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HomeControl.Pages.Devices
@@ -16,18 +17,24 @@ namespace HomeControl.Pages.Devices
         {
             base.OnGet();
 
-            Devices.AddRange(CreateDevices(Device.SelectAll()).OrderBy(x => x.DisplayName));
+            Database.Connect(() =>
+            {
+                Devices.AddRange(CreateDevices(Device.SelectAll()).OrderBy(x => x.DisplayName));
+            });
 
             return null;
         }
 
         public IActionResult OnPostRemoveDevice(int deviceId)
         {
-            var device = Device.Select(deviceId);
+            return Database.Connect(() =>
+            {
+                var device = Device.Select(deviceId);
 
-            device.Delete();
+                device.Delete();
 
-            return Redirect("/Devices");
+                return Redirect("/Devices");
+            });
         }
 
         private IEnumerable<IDevice> CreateDevices(List<Device> deviceList)

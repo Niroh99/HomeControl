@@ -10,10 +10,12 @@ var builder = WebApplication.CreateBuilder(args);
 HomeControl.Sql.Database.ConnectionString = builder.Configuration.GetConnectionString("FW_HomeControl");
 AppDomain.CurrentDomain.SetData("DataDirectory", Directory.GetCurrentDirectory());
 
-builder.WebHost.ConfigureKestrel(serverOptions =>
-{
-    serverOptions.Listen(IPAddress.Any, 5000);
-});
+//builder.WebHost.ConfigureKestrel(serverOptions =>
+//{
+//    serverOptions.Listen(IPAddress.Any, 5000);
+//});
+
+builder.WebHost.UseIIS();
 
 builder.Services.AddControllers();
 
