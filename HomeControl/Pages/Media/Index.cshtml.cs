@@ -1,11 +1,7 @@
 using HomeControl.Helpers;
-using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.StaticFiles;
-using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.FileProviders;
-using Microsoft.Net.Http.Headers;
 
 namespace HomeControl.Pages.Media
 {
@@ -98,7 +94,7 @@ namespace HomeControl.Pages.Media
             {
                 directoryPath = Path.Combine(directoryPath, Request.Query[NavigateDirectoryRouteDataKey]);
 
-                return Redirect($"{PageUrl}?{DirectoryPathRouteDataKey}={directoryPath}");
+                return Redirect($"{PageUrl}?{DirectoryPathRouteDataKey}={System.Net.WebUtility.UrlEncode(directoryPath)}");
             }
 
             foreach (var directoryContent in _fileProvider.GetDirectoryContents(directoryPath).OrderBy(x => x.IsDirectory))
