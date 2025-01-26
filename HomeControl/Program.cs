@@ -1,4 +1,5 @@
 using HomeControl.Helpers;
+using HomeControl.Sql;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.AspNetCore.StaticFiles;
@@ -7,15 +8,13 @@ using System.Net;
 
 var builder = WebApplication.CreateBuilder(args);
 
-HomeControl.Sql.Database.ConnectionString = builder.Configuration.GetConnectionString("FW_HomeControl");
+var connectionString = builder.Configuration.GetConnectionString("FW_HomeControl");
 AppDomain.CurrentDomain.SetData("DataDirectory", Directory.GetCurrentDirectory());
 
-//builder.WebHost.ConfigureKestrel(serverOptions =>
-//{
-//    serverOptions.Listen(IPAddress.Any, 5000);
-//});
-
-builder.WebHost.UseIIS();
+builder.WebHost.ConfigureKestrel(serverOptions =>
+{
+    serverOptions.Listen(IPAddress.Any, 5000);
+});
 
 builder.Services.AddControllers();
 
@@ -29,6 +28,8 @@ builder.Services.AddSession(options =>
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
+
+builder.Services.AddScoped<IDatabaseConnection>((serviceProvider) => new DatabaseConnection(connectionString));
 
 builder.Services.AddSingleton<IFileProvider>(new PhysicalFileProvider(HomeControl.Pages.Media.IndexModel.BasePath));
 

@@ -12,10 +12,12 @@ namespace HomeControl.Integrations
 
         bool SupportsRename { get; }
 
+        Task InitializeAsync();
+
         IEnumerable<Feature> GetExecutableFeatures();
 
         IEnumerable<IProperty> GetProperties();
 
-        void Rename(string name);
+        Task RenameAsync(string name);
     }
 }

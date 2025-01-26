@@ -37,18 +37,18 @@ namespace HomeControl.Integrations.TPLink
 
         public int? TurnedOnSince { get => SysInfo.OnTime; }
 
-        public void SetPoweredOn()
+        public async Task SetPoweredOn()
         {
             var message = new ProtocolMessage(ProtocolMessageSystem, SetRelayStateCommand, SetRelayStateCommandArgument, 1);
 
-            message.Execute(Hostname, Port);
+            await message.ExecuteAsync(Hostname, Port);
         }
 
-        public void SetPoweredOff()
+        public async Task SetPoweredOff()
         {
             var message = new ProtocolMessage(ProtocolMessageSystem, SetRelayStateCommand, SetRelayStateCommandArgument, 0);
 
-            message.Execute(Hostname, Port);
+            await message.ExecuteAsync(Hostname, Port);
         }
 
         public override IEnumerable<Feature> GetExecutableFeatures()

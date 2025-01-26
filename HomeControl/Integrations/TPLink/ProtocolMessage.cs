@@ -55,27 +55,27 @@ namespace HomeControl.Integrations.TPLink
             Command = command;
         }
 
-        public T Execute<T>(string hostname, int port) where T : Response
+        public async Task<T> ExecuteAsync<T>(string hostname, int port) where T : Response
         {
-            return (T)Execute(hostname, port, typeof(T));
+            return (T) await ExecuteAsync(hostname, port, typeof(T));
         }
 
-        public Response Execute(string hostname, int port)
+        public async Task<Response> ExecuteAsync(string hostname, int port)
         {
-            return Execute(hostname, port, typeof(Response));
+            return await ExecuteAsync(hostname, port, typeof(Response));
         }
 
-        public Response Execute(string hostname, int port, Type responseType)
+        public async Task<Response> ExecuteAsync(string hostname, int port, Type responseType)
         {
             byte[] messageToSend = ProtocolEncoder.Encrypt(Message ?? JSON);
 
             using (var client = new TcpClient())
             {
-                client.Connect(hostname, port);
+                await client.ConnectAsync(hostname, port);
 
                 using NetworkStream stream = client.GetStream();
 
-                stream.Write(messageToSend, 0, messageToSend.Length);
+                await stream.WriteAsync(messageToSend, 0, messageToSend.Length);
 
                 int targetSize = 0;
 
@@ -85,7 +85,7 @@ namespace HomeControl.Integrations.TPLink
                 {
                     byte[] chunk = new byte[1024];
 
-                    int count = stream.Read(chunk, 0, chunk.Length);
+                    int count = await stream.ReadAsync(chunk, 0, chunk.Length);
 
                     if (!buffer.Any())
                     {

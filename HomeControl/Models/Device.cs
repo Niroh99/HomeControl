@@ -8,13 +8,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace HomeControl.Models
 {
     [Table(nameof(Device))]
-    public class Device : KeyedGenericSqLiteModel<Device, int>
+    public class Device : IdentityKeyModel
     {
-        [Key]
-        [Identity]
-        [Column(Database.RowIdColumnName)]
-        public int Id { get => Get<int>(); set => Set(value); }
-
         [Column]
         public DeviceType Type { get => Get<DeviceType>(); set => Set(value); }
 

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using HomeControl.Sql;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace HomeControl.Pages
@@ -22,12 +23,10 @@ namespace HomeControl.Pages
 
         private readonly string _menuItem;
 
-        public virtual IActionResult OnGet()
+        protected void Initialize()
         {
             ViewData[ShowMenuKey] = true;
             ViewData[MenuItemKey] = _menuItem;
-
-            return null;
         }
     }
 

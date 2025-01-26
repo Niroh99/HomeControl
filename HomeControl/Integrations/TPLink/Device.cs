@@ -3,7 +3,7 @@ using HomeControl.Models;
 
 namespace HomeControl.Integrations.TPLink
 {
-    public abstract class Device : IDevice
+    public abstract class Device(string hostname, int port = 9999) : IDevice
     {
         public const string ProtocolMessageSystem = "system";
 
@@ -12,20 +12,13 @@ namespace HomeControl.Integrations.TPLink
         public const string SetDeviceAliasCommand = "set_dev_alias";
         public const string SetDeviceAliasArgument = "alias";
 
-        public Device(string hostname, int port = 9999)
-        {
-            Hostname = hostname;
-            Port = port;
-            Refresh();
-        }
-
         public abstract Models.Device Owner { get; }
 
         public abstract DeviceType DeviceType { get; }
 
-        public string Hostname { get; }
+        public string Hostname { get; } = hostname;
 
-        public int Port { get; }
+        public int Port { get; } = port;
 
         protected SysInfo _sysInfo;
 
@@ -63,11 +56,11 @@ namespace HomeControl.Integrations.TPLink
 
         public bool SupportsRename { get => true; }
 
-        public void Refresh()
+        public async Task InitializeAsync()
         {
             var message = new ProtocolMessage(ProtocolMessageSystem, GetSysInfoCommand, null, null);
 
-            _sysInfo = (SysInfo)message.Execute(Hostname, Port, SysInfoType);
+            _sysInfo = (SysInfo) await message.ExecuteAsync(Hostname, Port, SysInfoType);
         }
 
         public IEnumerable<Property> GetBaseProperties()
@@ -96,15 +89,11 @@ namespace HomeControl.Integrations.TPLink
 
         public abstract IEnumerable<IProperty> GetProperties();
 
-        public void Rename(string name)
+        public async Task RenameAsync(string name)
         {
-            //var tplinkDevice = new TPLinkSmartDevices.Devices.TPLinkSmartPlug(Hostname, Port);
-
-            //tplinkDevice.SetAlias(name);
-
             var message = new ProtocolMessage(ProtocolMessageSystem, SetDeviceAliasCommand, SetDeviceAliasArgument, name);
 
-            message.Execute(Hostname, Port);
+            await message.ExecuteAsync(Hostname, Port);
         }
     }
 }

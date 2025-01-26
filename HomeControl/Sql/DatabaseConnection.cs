@@ -1,23 +1,37 @@
-﻿using HomeControl.Sql;
+﻿using HomeControl.Modeling;
+using HomeControl.Models;
 using Microsoft.Data.Sqlite;
-using System.Text;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Reflection;
-using HomeControl.Modeling;
+using System.Text;
 
-namespace HomeControl.Models
+namespace HomeControl.Sql
 {
-    public abstract class SqLiteModel : Model
+    public interface IDatabaseConnection
     {
-        static SqLiteModel()
-        {
-            var modelTypes = new List<Type>
-            {
-                typeof(Device)
-            };
+        Task<T> SelectAsync<T>(int id) where T : IdentityKeyModel;
 
-            foreach (var modelType in modelTypes)
+        Task<T> SelectAsync<T>(string id) where T : StringKeyModel;
+
+        Task<List<T>> SelectAllAsync<T>() where T : Model;
+
+        Task InsertAsync<T>(T instance) where T : Model;
+
+        Task DeleteAsync<T>(T instance) where T : Model;
+
+        Task CommitTransactionAsync();
+    }
+
+    public class DatabaseConnection : IDatabaseConnection, IDisposable
+    {
+        public const string RowIdColumnName = "ROWID";
+
+        static DatabaseConnection()
+        {
+            var assembly = Assembly.GetExecutingAssembly();
+
+            foreach (var modelType in assembly.DefinedTypes.Where(x => x.IsAssignableTo(typeof(Model))))
             {
                 var metadata = new ModelMetadata<SqlField>();
 
@@ -37,10 +51,8 @@ namespace HomeControl.Models
                     if (keyAttribute == null) metadata.Fields.Add(new SqlField(property.Name, columnAttribute.Name));
                     else
                     {
-                        var identityAttribute = property.GetCustomAttribute(typeof(IdentityAttribute));
-
-                        if (identityAttribute == null) metadata.Fields.Add(new PrimaryKeyField(property.Name, false, columnAttribute.Name));
-                        else metadata.Fields.Add(new PrimaryKeyField(property.Name, true, columnAttribute.Name));
+                        if (modelType.IsAssignableTo(typeof(IdentityKeyModel))) metadata.Fields.Add(new PrimaryKeyField(property.Name, true, columnAttribute.Name));
+                        else metadata.Fields.Add(new PrimaryKeyField(property.Name, false, columnAttribute.Name));
                     }
                 }
 
@@ -48,19 +60,40 @@ namespace HomeControl.Models
             }
         }
 
+        public SqliteConnection SqlConnection { get; }
+
+        private SqliteTransaction _sqlTransaction;
+
+        public DatabaseConnection(string connectionString)
+        {
+            SqlConnection = new SqliteConnection(connectionString);
+
+            SqlConnection.Open();
+
+            _sqlTransaction = SqlConnection.BeginTransaction();
+        }
+
         private static Dictionary<Type, ModelMetadata<SqlField>> ModelMetadatas { get; } = new Dictionary<Type, ModelMetadata<SqlField>>();
 
-        protected static T Select<T>(object id) where T : SqLiteModel
+        public async Task<T> SelectAsync<T>(string id) where T : StringKeyModel
         {
-            var sqlConnection = Database.GeRunningConnection();
+            return await SelectAsyncCore<T, string>(id);
+        }
 
+        public async Task<T> SelectAsync<T>(int id) where T : IdentityKeyModel
+        {
+            return await SelectAsyncCore<T, int>(id);
+        }
+
+        private async Task<T> SelectAsyncCore<T, TKey>(TKey id) where T : Model
+        {
             var modelType = typeof(T);
 
             var modelMetadata = ModelMetadatas[modelType];
 
             var instance = Activator.CreateInstance(modelType) as T;
 
-            using (var command = sqlConnection.CreateCommand())
+            using (var command = SqlConnection.CreateCommand())
             {
                 var commandStringBuilder = BuildSelect(modelMetadata);
 
@@ -79,9 +112,9 @@ namespace HomeControl.Models
 
                 command.CommandText = commandStringBuilder.ToString();
 
-                using (var reader = command.ExecuteReader())
+                using (var reader = await command.ExecuteReaderAsync())
                 {
-                    if (reader.Read())
+                    if (await reader.ReadAsync())
                     {
                         ApplyFields(instance, reader);
 
@@ -92,24 +125,23 @@ namespace HomeControl.Models
             }
         }
 
-        protected static List<T> SelectAll<T>() where T : SqLiteModel
+        public async Task<List<T>> SelectAllAsync<T>() where T : Model
         {
-            var sqlConnection = Database.GeRunningConnection();
             var modelType = typeof(T);
 
             var modelMetadata = ModelMetadatas[modelType];
 
-            using (var command = sqlConnection.CreateCommand())
+            using (var command = SqlConnection.CreateCommand())
             {
                 var commandStringBuilder = BuildSelect(modelMetadata);
 
                 command.CommandText = commandStringBuilder.ToString();
 
-                using (var reader = command.ExecuteReader())
+                using (var reader = await command.ExecuteReaderAsync())
                 {
                     var result = new List<T>();
 
-                    while (reader.Read())
+                    while (await reader.ReadAsync())
                     {
                         var instance = Activator.CreateInstance(modelType) as T;
 
@@ -123,15 +155,13 @@ namespace HomeControl.Models
             }
         }
 
-        protected static void Insert<T>(T instance) where T : SqLiteModel
+        public async Task InsertAsync<T>(T instance) where T : Model
         {
-            var sqlConnection = Database.GeRunningConnection();
-
             var modelType = typeof(T);
 
             var modelMetadata = ModelMetadatas[modelType];
 
-            using (var command = sqlConnection.CreateCommand())
+            using (var command = SqlConnection.CreateCommand())
             {
                 var commandStringBuilder = new StringBuilder("INSERT INTO ")
                     .Append($"[{modelMetadata.TableName}]")
@@ -158,23 +188,21 @@ namespace HomeControl.Models
 
                 if (isIdentity)
                 {
-                    var id = command.ExecuteScalar();
+                    var id = await command.ExecuteScalarAsync();
 
                     instance.Set(id, primaryKey.Name);
                 }
-                else command.ExecuteNonQuery();
+                else await command.ExecuteNonQueryAsync();
             }
         }
 
-        public void Delete()
+        public async Task DeleteAsync<T>(T instance) where T : Model
         {
-            var sqlConnection = Database.GeRunningConnection();
-
-            var modelType = GetType();
+            var modelType = typeof(T);
 
             var modelMetadata = ModelMetadatas[modelType];
 
-            using (var command = sqlConnection.CreateCommand())
+            using (var command = SqlConnection.CreateCommand())
             {
                 var commandStringBuilder = new StringBuilder("DELETE FROM ")
                     .Append($"[{modelMetadata.TableName}]")
@@ -182,13 +210,20 @@ namespace HomeControl.Models
 
                 var primaryKey = GetPrimaryKey(modelMetadata);
 
-                if (primaryKey != null && primaryKey.IsIdentity) commandStringBuilder.Append(DeleteField(primaryKey, command));
-                else commandStringBuilder.Append(string.Join(" AND ", modelMetadata.Fields.Select(x => DeleteField(x, command))));
+                if (primaryKey != null && primaryKey.IsIdentity) commandStringBuilder.Append(DeleteField(primaryKey, instance, command));
+                else commandStringBuilder.Append(string.Join(" AND ", modelMetadata.Fields.Select(x => DeleteField(x, instance, command))));
 
                 command.CommandText = commandStringBuilder.ToString();
 
-                command.ExecuteNonQuery();
+                await command.ExecuteNonQueryAsync();
             }
+        }
+
+        public async Task CommitTransactionAsync()
+        {
+            await _sqlTransaction.CommitAsync();
+
+            _sqlTransaction = SqlConnection.BeginTransaction();
         }
 
         private static PrimaryKeyField GetPrimaryKey(ModelMetadata<SqlField> modelMetadata)
@@ -215,7 +250,7 @@ namespace HomeControl.Models
             return commandStringBuilder.Append(" FROM ").Append($"[{modelMetadata.TableName}]");
         }
 
-        private static void ApplyFields<T>(T instance, SqliteDataReader reader) where T : SqLiteModel
+        private static void ApplyFields<T>(T instance, SqliteDataReader reader) where T : Model
         {
             for (int i = 0; i < reader.FieldCount; i++)
             {
@@ -226,7 +261,7 @@ namespace HomeControl.Models
             }
         }
 
-        private static string InsertField<T>(SqlField field, T instance, SqliteCommand command) where T : SqLiteModel
+        private static string InsertField<T>(SqlField field, T instance, SqliteCommand command) where T : Model
         {
             var parameterName = $"${field.Name}";
 
@@ -235,13 +270,22 @@ namespace HomeControl.Models
             return parameterName;
         }
 
-        private string DeleteField(SqlField field, SqliteCommand command)
+        private static string DeleteField<T>(SqlField field, T instance, SqliteCommand command) where T : Model
         {
             var parameterName = $"${field.Name}";
 
-            command.Parameters.AddWithValue(parameterName, Get<object>(field.Name));
+            command.Parameters.AddWithValue(parameterName, instance.Get<object>(field.Name));
 
             return $"[{field.ColumnName}] = {parameterName}";
+        }
+
+        public async void Dispose()
+        {
+            await _sqlTransaction.CommitAsync();
+
+            await SqlConnection.CloseAsync();
+            await SqlConnection.DisposeAsync();
+            GC.SuppressFinalize(this);
         }
     }
 }

@@ -5,43 +5,39 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace HomeControl.Pages.Devices
 {
-    public class RemoveDeviceModel : MenuPageModel
+    public class RemoveDeviceModel(IDatabaseConnection db) : MenuPageModel(IndexModel.MenuItem)
     {
-        public RemoveDeviceModel() : base(IndexModel.MenuItem)
-        {
-        }
-
         public List<IDevice> Devices { get; } = new List<IDevice>();
 
-        public override IActionResult OnGet()
+        public async Task<IActionResult> OnGet()
         {
-            base.OnGet();
+            Initialize();
 
-            Database.Connect(() =>
-            {
-                Devices.AddRange(CreateDevices(Device.SelectAll()).OrderBy(x => x.DisplayName));
-            });
+            await PopulateDevicesAsync(await db.SelectAllAsync<Device>());
 
             return null;
         }
 
         public IActionResult OnPostRemoveDevice(int deviceId)
         {
-            return Database.Connect(() =>
-            {
-                var device = Device.Select(deviceId);
+            var device = db.SelectAsync<Device>(deviceId).Result;
 
-                device.Delete();
+            db.DeleteAsync(device).Wait();
 
-                return Redirect("/Devices");
-            });
+            return Redirect("/Devices");
         }
 
-        private IEnumerable<IDevice> CreateDevices(List<Device> deviceList)
+        private async Task PopulateDevicesAsync(List<Device> deviceList)
         {
-            foreach (var device in deviceList)
+            for (int i = 0; i < deviceList.Count; i++)
             {
-                yield return device.Create();
+                var device = deviceList[i];
+
+                var integrationDevice = device.Create();
+
+                Devices.Add(integrationDevice);
+
+                await integrationDevice.InitializeAsync();
             }
         }
     }

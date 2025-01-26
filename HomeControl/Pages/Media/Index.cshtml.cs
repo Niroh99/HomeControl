@@ -86,9 +86,9 @@ namespace HomeControl.Pages.Media
             _fileProvider = fileProvider;
         }
 
-        public override IActionResult OnGet()
+        public IActionResult OnGet()
         {
-            base.OnGet();
+            Initialize();
 
             if (!BasePathExists) return null;
 

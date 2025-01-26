@@ -4,7 +4,7 @@
     {
         protected Dictionary<string, object> _properties = new Dictionary<string, object>();
 
-        protected T Get<T>([System.Runtime.CompilerServices.CallerMemberName] string propertyName = null)
+        public T Get<T>([System.Runtime.CompilerServices.CallerMemberName] string propertyName = null)
         {
             if (_properties.TryGetValue(propertyName, out object value))
             {
@@ -29,7 +29,7 @@
             return default;
         }
 
-        protected void Set<T>(T value, [System.Runtime.CompilerServices.CallerMemberName] string propertyName = null)
+        public void Set<T>(T value, [System.Runtime.CompilerServices.CallerMemberName] string propertyName = null)
         {
             SetCore(value, propertyName);
         }

@@ -6,25 +6,19 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace HomeControl.Pages.Devices
 {
-    public class IndexModel : MenuPageModel
+    public class IndexModel(IDatabaseConnection db) : MenuPageModel(MenuItem)
     {
         public const string MenuItem = "Devices";
         public const string MenuItemUrl = "/Devices";
 
-        public IndexModel() : base(MenuItem)
-        {
-
-        }
-
         public List<IDevice> Devices { get; } = new List<IDevice>();
 
-        public override IActionResult OnGet()
+        public async Task<IActionResult> OnGet()
         {
-            base.OnGet();
-            Database.Connect(() =>
-            {
-                Devices.AddRange(CreateDevices(Device.SelectAll()).OrderBy(x => x.DisplayName));
-            });
+            Initialize();
+
+            await PopulateDevicesAsync(await db.SelectAllAsync<Device>());
+
             return null;
         }
 
@@ -37,41 +31,41 @@ namespace HomeControl.Pages.Devices
             };
         }
 
-        public IActionResult OnPostExecuteFeature(int deviceId, string featureName)
+        public async Task<IActionResult> OnPostExecuteFeature(int deviceId, string featureName)
         {
-            return Database.Connect(() =>
+            var device = await db.SelectAsync<Device>(deviceId);
+
+            var integrationDevice = device.Create();
+
+            var feature = integrationDevice.GetExecutableFeatures().FirstOrDefault(x => x.Name == featureName);
+
+            if (feature != null) await feature.Execute.Invoke();
+
+            return RedirectToPage();
+        }
+
+        public async Task<IActionResult> OnPostRename(int deviceId, string displayName)
+        {
+            var device = await db.SelectAsync<Device>(deviceId);
+
+            var integrationDevice = device.Create();
+
+            await integrationDevice.RenameAsync(displayName);
+
+            return RedirectToPage();
+        }
+
+        private async Task PopulateDevicesAsync(List<Device> deviceList)
+        {
+            for (int i = 0; i < deviceList.Count; i++)
             {
-                var device = Device.Select(deviceId);
+                var device = deviceList[i];
 
                 var integrationDevice = device.Create();
 
-                var feature = integrationDevice.GetExecutableFeatures().FirstOrDefault(x => x.Name == featureName);
+                Devices.Add(integrationDevice);
 
-                if (feature != null) feature.Execute.Invoke();
-
-                return RedirectToPage();
-            });
-        }
-
-        public IActionResult OnPostRename(int deviceId, string displayName)
-        {
-            return Database.Connect(() =>
-            {
-                var device = Device.Select(deviceId);
-
-                var integrationDevice = device.Create();
-
-                integrationDevice.Rename(displayName);
-
-                return RedirectToPage();
-            });
-        }
-
-        private IEnumerable<IDevice> CreateDevices(List<Device> deviceList)
-        {
-            foreach (var device in deviceList)
-            {
-                yield return device.Create();
+                await integrationDevice.InitializeAsync();
             }
         }
     }

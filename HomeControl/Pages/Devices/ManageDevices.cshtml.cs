@@ -1,40 +1,36 @@
 using HomeControl.Models;
 using HomeControl.Sql;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace HomeControl.Pages.Devices
 {
-    public class ManageDevicesModel : MenuPageModel
+    public class ManageDevicesModel(IDatabaseConnection db) : MenuPageModel(IndexModel.MenuItem)
     {
-        public ManageDevicesModel() : base(IndexModel.MenuItem)
+        public void OnGet()
         {
-
+            Initialize();
         }
 
-        public IActionResult OnPostDiscoverDevices()
+        public async Task<IActionResult> OnPostDiscoverDevices()
         {
-            return Database.Connect(() =>
+            foreach (var device in await db.SelectAllAsync<Device>())
             {
-                foreach (var device in Device.SelectAll())
+                await db.DeleteAsync(device);
+            }
+
+            var devices = Integrations.TPLink.Discovery.Discover();
+
+            foreach (var device in devices)
+            {
+                await db.InsertAsync(new Device()
                 {
-                    device.Delete();
-                }
+                    Type = device.DeviceType,
+                    Hostname = device.Hostname,
+                    Port = device.Port,
+                });
+            }
 
-                var devices = Integrations.TPLink.Discovery.Discover();
-
-                foreach (var device in devices)
-                {
-                    Device.Insert(new Device()
-                    {
-                        Type = device.DeviceType,
-                        Hostname = device.Hostname,
-                        Port = device.Port,
-                    });
-                }
-
-                return Redirect("/Devices");
-            });
+            return Redirect("/Devices");
         }
     }
 }

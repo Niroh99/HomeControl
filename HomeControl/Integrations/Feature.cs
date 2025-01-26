@@ -2,7 +2,7 @@
 {
     public class Feature
     {
-        public Feature(string name, Action execute)
+        public Feature(string name, Func<Task> execute)
         {
             Name = name;
             Execute = execute;
@@ -10,6 +10,6 @@
 
         public string Name { get; }
 
-        public Action Execute { get; }
+        public Func<Task> Execute { get; }
     }
 }

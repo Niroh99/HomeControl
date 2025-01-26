@@ -52,7 +52,7 @@
 		<a class="card-a" asp-page="ManageDevices">
 			<div class="grid-1fr-auto card-padding">
 				<div class="centered-content">
-					<h3>Manage Devices</h3>
+					<b>Manage Devices</b>
 				</div>
 
 				<div class="centered-content">
@@ -72,7 +72,7 @@
 					<summary>
 						<div class="grid card-padding medium-gap" style="grid-template-columns: 1fr auto auto">
 							<div class="centered-content">
-								<h3>@device.DisplayName</h3>
+								<b>@device.DisplayName</b>
 							</div>
 
 							<div class="flex">
@@ -135,9 +135,9 @@
 										<div></div>
 										break;
 									case SingleProperty singleProperty:
-										<div>
+										<div style="overflow: hidden; text-overflow: ellipsis">
 											<span class="field-label">@singleProperty.Label</span>
-											<span style="word-break: break-all">@singleProperty.Value</span>
+											<span>@singleProperty.Value</span>
 										</div>
 
 										break;

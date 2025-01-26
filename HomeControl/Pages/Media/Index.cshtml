@@ -74,21 +74,21 @@
 			<script>
 				function submitUploadFileForm() {
 
-					closeDialogById('UploadFileDialog')
+				closeDialogById('UploadFileDialog')
 
-					BusyWithMessage("Uploading File...");
+				BusyWithMessage("Uploading File...");
 
-					let uploadFileForm = document.getElementById("UploadFileForm");
+				let uploadFileForm = document.getElementById("UploadFileForm");
 
-					uploadFileForm.submit();
+				uploadFileForm.submit();
 				}
 
 				function showDeleteFileDialog(filename) {
-					let fileToDeleteField = document.getElementById("FileToDelete");
+				let fileToDeleteField = document.getElementById("FileToDelete");
 
-					fileToDeleteField.value = filename;
+				fileToDeleteField.value = filename;
 
-					showDialogById("DeleteFileDialog");
+				showDialogById("DeleteFileDialog");
 				}
 			</script>
 		}
@@ -134,7 +134,7 @@
 									<div class="grid card-padding" style="grid-template-columns: auto 1fr auto">
 										<custom-svg style="width: 18px; height: 16px; --path: directory; align-content: center"></custom-svg>
 
-										<h3>@directory.Name</h3>
+										<b>@directory.Name</b>
 
 										<div class="centered-content">
 											<custom-svg class="card-a-marker"></custom-svg>
@@ -151,25 +151,56 @@
 
 						foreach (var file in Model.Files)
 						{
-							<div class="card card-a-container shadow-2">
-								<div class="card grid-1fr-auto card-padding">
-									<div class="centered-content" style="text-overflow: ellipsis">
-										<h3>@file.Name</h3>
-										<span class="lesser" style="font-size: 12px; line-height: 12px">@Model.FileSizeDisplay(file.Length)</span>
-									</div>
+							var canBrowserDisplayFile = Model.CanBrowserDisplayFile(file);
 
-									<div class="flex centered-content">
-										@{
-											if (Model.CanBrowserDisplayFile(file))
-											{
-												<a class="button-a shadow-2" href="@Model.BuildFileQuery(file.Name)">Open</a>
-											}
+							<div class="card shadow-2">
+								<details>
+									<summary>
+										<div class="card grid card-padding" style="grid-template-columns: 1fr auto auto">
+											<div class="centered-content">
+												<div style="display: grid; grid-template-columns: auto auto 1fr">
+													<b style="text-overflow: ellipsis; overflow: hidden">@System.IO.Path.GetFileNameWithoutExtension(file.Name)</b>
+													<b>@System.IO.Path.GetExtension(file.Name)</b>
+												</div>
+												<span class="lesser" style="font-size: 12px">@Model.FileSizeDisplay(file.Length)</span>
+											</div>
 
-											<a class="button-a shadow-2" href="@Model.BuildFileQuery(file.Name)" download="@file.Name">Download</a>
-											<button class="shadow-2" onclick="showDeleteFileDialog('@file.Name')">Delete</button>
+											<div class="flex centered-content">
+												@{
+													if (canBrowserDisplayFile)
+													{
+														<a class="button-a shadow-2" href="@Model.BuildFileQuery(file.Name)">Open</a>
+													}
+													else
+													{
+														<a class="button-a shadow-2" href="@Model.BuildFileQuery(file.Name)" download="@file.Name">Download</a>
+													}
+												}
+											</div>
+											<div class="centered-content">
+												<custom-svg class="summary-marker"></custom-svg>
+												<custom-svg class="summary-marker summary-marker-open"></custom-svg>
+											</div>
+										</div>
+									</summary>
+									@{
+										if (canBrowserDisplayFile)
+										{
+											<div class="card-element grid-1fr-auto card-padding">
+												<div class="centered-content">
+													<span>Download</span>
+												</div>
+												<a class="button-a shadow-2" href="@Model.BuildFileQuery(file.Name)" download="@file.Name">Download</a>
+											</div>
 										}
+									}
+									<div class="card-element grid-1fr-auto card-padding">
+										<div class="centered-content">
+											<span>Delete</span>
+										</div>
+										<button class="shadow-2" onclick="showDeleteFileDialog('@file.Name')">Delete</button>
 									</div>
-								</div>
+								</details>
 							</div>
 						}
 					}
