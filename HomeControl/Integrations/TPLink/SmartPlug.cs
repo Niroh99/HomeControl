@@ -9,6 +9,9 @@ namespace HomeControl.Integrations.TPLink
         private const string SetRelayStateCommand = "set_relay_state";
         private const string SetRelayStateCommandArgument = "state";
 
+        private const string TurnOnFeatureName = "Turn On";
+        private const string TurnOffFeatureName = "Turn Off";
+
         public class SmartPlugSysInfo : SysInfo
         {
             [JsonPropertyName("on_time")]
@@ -18,15 +21,20 @@ namespace HomeControl.Integrations.TPLink
             public int RelayState { get; set; }
         }
 
-        public SmartPlug(string hostname, int port = 9999) : base(hostname, port)
+        public SmartPlug(string hostname, int port = 9999) : this(null, hostname, port)
         {
-
+            
         }
 
         public SmartPlug(Models.Device owner, string hostname, int port = 9999) : base(hostname, port)
         {
             _owner = owner;
+            _turnOn = new Feature(TurnOnFeatureName, SetPoweredOn);
+            _turnOff = new Feature(TurnOffFeatureName, SetPoweredOff);
         }
+
+        private Feature _turnOn;
+        private Feature _turnOff;
 
         private Models.Device _owner;
         public override Models.Device Owner => _owner;
@@ -53,8 +61,10 @@ namespace HomeControl.Integrations.TPLink
 
         public override IEnumerable<Feature> GetExecutableFeatures()
         {
-            if (OutletPowered) yield return new Feature("Turn Off", SetPoweredOff);
-            else yield return new Feature("Turn On", SetPoweredOn);
+            if (_sysInfo == null) yield break;
+
+            if (OutletPowered) yield return _turnOff;
+            else yield return _turnOn;
         }
 
         public override IEnumerable<IProperty> GetProperties()
@@ -64,6 +74,15 @@ namespace HomeControl.Integrations.TPLink
             foreach (var baseProperty in GetBaseProperties())
             {
                 yield return baseProperty;
+            }
+        }
+
+        public override async Task ExecuteFeatureAsync(string featureName)
+        {
+            switch (featureName)
+            {
+                case TurnOnFeatureName: await _turnOn.Execute(); break;
+                case TurnOffFeatureName: await _turnOff.Execute(); break;
             }
         }
     }

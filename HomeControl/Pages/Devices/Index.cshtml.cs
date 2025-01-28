@@ -37,9 +37,7 @@ namespace HomeControl.Pages.Devices
 
             var integrationDevice = device.Create();
 
-            var feature = integrationDevice.GetExecutableFeatures().FirstOrDefault(x => x.Name == featureName);
-
-            if (feature != null) await feature.Execute.Invoke();
+            await integrationDevice.ExecuteFeatureAsync(featureName);
 
             return RedirectToPage();
         }

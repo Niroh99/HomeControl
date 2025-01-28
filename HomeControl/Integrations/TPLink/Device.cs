@@ -89,6 +89,8 @@ namespace HomeControl.Integrations.TPLink
 
         public abstract IEnumerable<IProperty> GetProperties();
 
+        public abstract Task ExecuteFeatureAsync(string featureName);
+
         public async Task RenameAsync(string name)
         {
             var message = new ProtocolMessage(ProtocolMessageSystem, SetDeviceAliasCommand, SetDeviceAliasArgument, name);

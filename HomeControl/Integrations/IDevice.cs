@@ -18,6 +18,8 @@ namespace HomeControl.Integrations
 
         IEnumerable<IProperty> GetProperties();
 
+        Task ExecuteFeatureAsync(string featureName);
+
         Task RenameAsync(string name);
     }
 }
