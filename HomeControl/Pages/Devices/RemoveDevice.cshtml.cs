@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace HomeControl.Pages.Devices
 {
+    [MenuPage(typeof(ManageDevicesModel), "Remove Device", "/Devices/ManageDevices/RemoveDevice")]
     public class RemoveDeviceModel(IDatabaseConnection db) : MenuPageModel(IndexModel.MenuItem)
     {
         public List<IDevice> Devices { get; } = new List<IDevice>();

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace HomeControl.Pages.Devices
 {
+    [MenuPage(typeof(IndexModel), "Manage Devices", "/Devices/ManageDevices")]
     public class ManageDevicesModel(IDatabaseConnection db) : MenuPageModel(IndexModel.MenuItem)
     {
         public void OnGet()

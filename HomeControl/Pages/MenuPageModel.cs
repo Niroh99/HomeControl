@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace HomeControl.Pages
 {
-    public class MenuPageModel : PageModel
+    public abstract class MenuPageModel : PageModel
     {
         public const string ShowMenuKey = "ShowMenu";
         public const string MenuItemKey = "MenuItem";

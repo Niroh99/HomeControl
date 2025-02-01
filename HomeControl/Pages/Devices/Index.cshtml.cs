@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace HomeControl.Pages.Devices
 {
+    [MenuPage(null, "Devices", "/Devices")]
     public class IndexModel(IDatabaseConnection db) : MenuPageModel(MenuItem)
     {
         public const string MenuItem = "Devices";

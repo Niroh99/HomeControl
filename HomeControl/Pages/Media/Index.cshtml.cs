@@ -1,10 +1,12 @@
 using HomeControl.Helpers;
+using HomeControl.Views.Shared;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.FileProviders;
 
 namespace HomeControl.Pages.Media
 {
+    [MenuPage(null, "Media", "/Media")]
     public class IndexModel : MenuPageModel
     {
         public const string MenuItem = "Media";
@@ -106,26 +108,28 @@ namespace HomeControl.Pages.Media
             return null;
         }
 
-        public string GetDisplayPath()
+        public IEnumerable<Breadcrumb> GetBreadcrumbs()
         {
             var directoryPath = CurrentDirectoryPath;
 
-            if (string.IsNullOrEmpty(directoryPath)) return null;
+            if (string.IsNullOrEmpty(directoryPath)) yield break;
 
             var directory = CurrentDirectory;
 
-            var directories = new List<string>();
+            bool first = true;
 
             while (true)
             {
-                directories.Insert(0, directory.Name);
+                directoryPath = Path.GetRelativePath(BasePath, directory.FullName);
+
+                yield return new Breadcrumb(directory.Name, $"{PageUrl}?{DirectoryPathRouteDataKey}={directoryPath}", !first, "h3", "breadcrumb-a");
+
+                if (first) first = false;
 
                 if (IsParentBaseDirectory(directory)) break;
 
                 directory = directory.Parent;
             }
-
-            return string.Join(" / ", directories);
         }
 
         public string BuildNavigateQuery(string directory)

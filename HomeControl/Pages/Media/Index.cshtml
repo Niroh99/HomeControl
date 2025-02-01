@@ -1,4 +1,5 @@
 ﻿@page
+@using HomeControl.Views.Shared
 @model HomeControl.Pages.Media.IndexModel
 @{
 	ViewData["Title"] = "Media";
@@ -95,13 +96,26 @@
 	}
 }
 
+<style>
+	.breadcrumb-a {
+		color: var(--foreground);
+	}
+</style>
+
 <div class="body-content grid">
 	@{
 		if (Model.BasePathExists)
 		{
 			if (Model.MediaSelected)
 			{
-				<h3 class="lesser">@Model.GetDisplayPath()</h3>
+				var breadcrumbModel = new BreadcrumbModel("MediaBreadcrumb", "/", ["lesser", "h3"]);
+
+				foreach (var breadcrumb in Model.GetBreadcrumbs().Reverse())
+				{
+					breadcrumbModel.Breadcrumbs.Add(breadcrumb);
+				}
+
+				@await Html.PartialAsync("Breadcrumb", breadcrumbModel)
 
 				<div class="flex">
 					<button class="shadow-2" onclick="showDialogById('UploadFileDialog')">Upload File</button>
@@ -132,12 +146,13 @@
 							<div class="card card-a-container shadow-2">
 								<a class="card-a" href="@Model.BuildNavigateQuery(directory.Name)">
 									<div class="grid card-padding" style="grid-template-columns: auto 1fr auto">
-										<custom-svg style="width: 18px; height: 16px; --path: directory; align-content: center"></custom-svg>
-
+										<div class="centered-content">
+											<img src="~/svg/directory.svg" />
+										</div>
 										<b>@directory.Name</b>
 
 										<div class="centered-content">
-											<custom-svg class="card-a-marker"></custom-svg>
+											<img src="~/svg/arrow-right.svg" />
 										</div>
 									</div>
 								</a>
@@ -178,8 +193,8 @@
 												}
 											</div>
 											<div class="centered-content">
-												<custom-svg class="summary-marker"></custom-svg>
-												<custom-svg class="summary-marker summary-marker-open"></custom-svg>
+												<img class="summary-marker" src="~/svg/arrow-down.svg" />
+												<img class="summary-marker-open" src="~/svg/arrow-up.svg" />
 											</div>
 										</div>
 									</summary>

@@ -1,11 +1,15 @@
-﻿<!DOCTYPE html>
+﻿@using System.Reflection;
+@using HomeControl.Views.Shared
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
 	<meta charset="utf-8" />
 	<title>@ViewData["Title"] - HomeControl</title>
 	<link rel="stylesheet" href="~/css/BaseResources.css" asp-append-version="true" />
 	<link rel="stylesheet" href="~/css/DarkTheme.css" asp-append-version="true" />
-	<link rel="stylesheet" href="~/css/site.css" asp-append-version="true" async/>
+	<link rel="stylesheet" href="~/css/site.css" asp-append-version="true"/>
+	<link rel="stylesheet" href="~/css/Breadcrumb.css" asp-append-version="true"/>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 </head>
 <body>
@@ -16,7 +20,7 @@
 				{
 					<div class="title-displacer centered-content">
 						<button id="main-menu-button" class="shadow-2" onclick="ToggleMainMenu()">
-							<custom-svg style="width: 12px; height: 12px; --path: hamburger" />
+							<img src="~/svg/hamburger.svg"/>
 						</button>
 					</div>
 				}
@@ -27,7 +31,45 @@
 			}
 			<div class="padded-medium">
 				<div class="title-container">
-					<h1 class="lesser">@ViewData["Title"]</h1>
+					@{
+						var pageModelType = (Type)Model.GetType();
+
+						var menuPageAttribute = pageModelType.GetCustomAttribute<MenuPageAttribute>();
+
+						if (menuPageAttribute != null)
+						{
+							var breadcrumbs = new List<Breadcrumb>()
+							{
+								new Breadcrumb(menuPageAttribute.MenuItem, menuPageAttribute.Url, false, "h1", "lesser")
+							};
+
+							if (menuPageAttribute.ParentPageType != null)
+							{
+								menuPageAttribute = menuPageAttribute.ParentPageType.GetCustomAttribute<MenuPageAttribute>();
+
+								if (menuPageAttribute != null)
+								{
+									do
+									{
+										breadcrumbs.Insert(0, new Breadcrumb(menuPageAttribute.MenuItem, menuPageAttribute.Url, "h1", "lesser", "breadcrumb-a"));
+
+										menuPageAttribute = menuPageAttribute.ParentPageType?.GetCustomAttribute<MenuPageAttribute>();
+									}
+									while (menuPageAttribute != null);
+								}
+							}
+
+							var breadcrumbModel = new BreadcrumbModel("TitleBreadcrumb", ">", ["h1", "lesser"]);
+
+							breadcrumbModel.Breadcrumbs.AddRange(breadcrumbs);
+
+							@await Html.PartialAsync("Breadcrumb", breadcrumbModel)
+						}
+						else
+						{
+							<h1 class="lesser">@ViewData["Title"]</h1>
+						}
+					}
 				</div>
 			</div>
 		</div>
@@ -73,9 +115,6 @@
 		}
 	</main>
 
-	<!--<footer>
-	</footer>-->
-
 	<div id="busy-overlay" class="overlay background40 grid hidden">
 		<div class="card padded shadow-2 centered-content" style="margin: auto; min-width: 100px">
 			<span id="BusyMessage"></span>
@@ -93,8 +132,8 @@
 	<script src="~/js/site.js" asp-append-version="true"></script>
 	<script src="~/js/mainMenu.js" asp-append-version="true"></script>
 	<script src="~/js/dialog.js" asp-append-version="true"></script>
-	<script src="~/js/customSvg.js" asp-append-version="true"></script>
 	<script src="~/js/busy.js" asp-append-version="true"></script>
+	<script src="~/js/Breadcrumb.js"></script>
 
 	@await RenderSectionAsync("Scripts", required: false)
 </body>

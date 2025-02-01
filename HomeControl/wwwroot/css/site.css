@@ -50,6 +50,16 @@ h5 {
     margin: 0px;
 }
 
+.h1 {
+    font-size: 2em;
+    font-weight: bold;
+}
+
+.h3 {
+    font-size: 1.17em;
+    font-weight: bold;
+}
+
 hr {
     margin: 0px;
     padding: 0px;
@@ -95,6 +105,11 @@ button {
         color: var(--highlightedForeground);
     }
 
+    button.empty {
+        background: transparent;
+        padding: 0 var(--smallGap);
+    }
+
 custom-svg {
     color: inherit;
 }
@@ -103,12 +118,11 @@ details[open] > summary {
     border-bottom: 1px solid var(--background);
 }
 
-    details[open] > summary custom-svg.summary-marker {
+    details[open] > summary .summary-marker {
         display: none;
-        height: 0;
     }
 
-    details[open] > summary custom-svg.summary-marker-open {
+    details[open] > summary .summary-marker-open {
         display: block;
     }
 
@@ -120,15 +134,12 @@ summary {
         display: none;
     }
 
-custom-svg.summary-marker {
-    width: 10px;
-    height: 8px;
-    --path: arrow-down;
+.summary-marker {
+
 }
 
-custom-svg.summary-marker-open {
+.summary-marker-open {
     display: none;
-    --path: arrow-up;
 }
 
 dialog {
@@ -178,10 +189,6 @@ input {
     background: var(--background40);
 }
 
-.lesser {
-    color: var(--foreground80);
-}
-
 .shadow-2 {
     box-shadow: var(--shadow2);
 }
@@ -202,10 +209,6 @@ input {
     min-height: 64px;
     text-overflow: ellipsis;
     white-space: nowrap;
-}
-
-.card h3 {
-    line-height: 1em;
 }
 
 .card-element {
@@ -238,6 +241,10 @@ input {
 
 .bordered {
     border-color: var(--borders);
+}
+
+a.breadcrumb-a {
+    color: var(--foreground);
 }
 
 a.card-a {
@@ -290,10 +297,8 @@ a.button-a {
         color: var(--foreground);
     }
 
-custom-svg.card-a-marker {
-    width: 6px;
-    height: 10px;
-    --path: arrow-right;
+.lesser {
+    color: var(--foreground80);
 }
 
 .menu-item {
