@@ -1,5 +1,5 @@
-﻿using HomeControl.Integrations.TPLink.JSON;
-using HomeControl.Models;
+﻿using HomeControl.DatabaseModels;
+using HomeControl.Integrations.TPLink.JSON;
 
 namespace HomeControl.Integrations.TPLink
 {
@@ -12,7 +12,7 @@ namespace HomeControl.Integrations.TPLink
         public const string SetDeviceAliasCommand = "set_dev_alias";
         public const string SetDeviceAliasArgument = "alias";
 
-        public abstract Models.Device Owner { get; }
+        public abstract DatabaseModels.Device Owner { get; }
 
         public abstract DeviceType DeviceType { get; }
 

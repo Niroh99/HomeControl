@@ -1,0 +1,118 @@
+﻿@using System.Reflection;
+@using HomeControl.Views.Shared
+@model MenuPageModel;
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<title>@ViewData["Title"] - HomeControl</title>
+	<link rel="stylesheet" href="~/css/BaseResources.css" asp-append-version="true" />
+	<link rel="stylesheet" href="~/css/DarkTheme.css" asp-append-version="true" />
+	<link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+	<link rel="stylesheet" href="~/css/Breadcrumb.css" asp-append-version="true" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+</head>
+<body>
+	<header class="shadow-4 centered-content">
+		<div class="centered-content" style="display: grid; grid-template-columns: auto 1fr">
+			<div class="title-displacer">
+				<button id="main-menu-button" class="empty" onclick="ToggleMainMenu()">
+					<img src="~/svg/TitleHamburger.svg" />
+				</button>
+			</div>
+			<div class="padded-medium" style="grid-column: 2">
+				<div class="title-container">
+					@{
+						var pageModelType = (Type)Model.GetType();
+
+						var menuPageAttribute = pageModelType.GetCustomAttribute<MenuPageAttribute>();
+
+						if (menuPageAttribute != null)
+						{
+							List<Breadcrumb> breadcrumbs = [new Breadcrumb(menuPageAttribute.MenuItem, menuPageAttribute.Url, false, "h1", "lesser")];
+
+							if (menuPageAttribute.ParentPageType != null)
+							{
+								menuPageAttribute = menuPageAttribute.ParentPageType.GetCustomAttribute<MenuPageAttribute>();
+
+								if (menuPageAttribute != null)
+								{
+									do
+									{
+										breadcrumbs.Insert(0, new Breadcrumb(menuPageAttribute.MenuItem, menuPageAttribute.Url, "h1", "lesser", "breadcrumb-a"));
+
+										menuPageAttribute = menuPageAttribute.ParentPageType?.GetCustomAttribute<MenuPageAttribute>();
+									}
+									while (menuPageAttribute != null);
+								}
+							}
+
+							var breadcrumbModel = new BreadcrumbModel("TitleBreadcrumb", ">", ["h1", "lesser"]);
+
+							breadcrumbModel.Breadcrumbs.AddRange(breadcrumbs);
+
+							@await Html.PartialAsync("Breadcrumb", breadcrumbModel)
+						}
+						else
+						{
+							<h1 class="lesser">@ViewData["Title"]</h1>
+						}
+					}
+				</div>
+			</div>
+		</div>
+	</header>
+	<main role="main">
+		<div id="main-menu-container">
+			<div id="body-container">
+				@RenderBody()
+			</div>
+			<button id="main-menu-overlay" class="main-menu-component overlay-button hidden" onclick="ToggleMainMenu()"></button>
+			<div id="main-menu" class="main-menu-component flex flex-vertical hidden">
+				@{
+					var selectedMenuItemName = (string)ViewData[MenuPageModel.MenuItemKey];
+
+					foreach (var menuItem in MenuPageModel.MenuItems)
+					{
+						string menuItemClasses = "menu-item grid";
+
+						if (selectedMenuItemName != null && menuItem.Name == selectedMenuItemName)
+						{
+							menuItemClasses += " highlighted-menu-item shadow-2";
+						}
+
+						<div class="@menuItemClasses">
+							<a class="menu-item-a padded" href="@menuItem.Url">
+								<h3>@menuItem.Name</h3>
+							</a>
+						</div>
+					}
+				}
+			</div>
+		</div>
+	</main>
+
+	<div id="busy-overlay" class="overlay background40 grid hidden">
+		<div class="card padded shadow-2 centered-content" style="margin: auto; min-width: 100px">
+			<span id="BusyMessage"></span>
+		</div>
+	</div>
+
+	<div id="dialog-overlay" class="overlay grid hidden">
+		<button class="overlay-button" onclick="closeAllDialogs()" style="grid-column: 1; grid-row: 1;"></button>
+
+		@RenderSection("Dialogs", false)
+	</div>
+
+	<script src="~/lib/jquery/dist/jquery.min.js"></script>
+	<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+	<script src="~/js/site.js" asp-append-version="true"></script>
+	<script src="~/js/mainMenu.js" asp-append-version="true"></script>
+	<script src="~/js/dialog.js" asp-append-version="true"></script>
+	<script src="~/js/busy.js" asp-append-version="true"></script>
+	<script src="~/js/Breadcrumb.js"></script>
+
+	@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

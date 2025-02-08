@@ -1,6 +1,6 @@
-﻿namespace HomeControl.Sql
+﻿namespace HomeControl.Database
 {
-    public class PrimaryKeyField : SqlField
+    public class PrimaryKeyField : DatabaseField
     {
         public PrimaryKeyField(string name, bool isIdentity, string columnName = null) : base(name, columnName)
         {

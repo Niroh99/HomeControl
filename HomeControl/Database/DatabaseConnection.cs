@@ -1,12 +1,11 @@
 ﻿using HomeControl.Modeling;
-using HomeControl.Models;
 using Microsoft.Data.Sqlite;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Reflection;
 using System.Text;
 
-namespace HomeControl.Sql
+namespace HomeControl.Database
 {
     public interface IDatabaseConnection
     {
@@ -33,7 +32,7 @@ namespace HomeControl.Sql
 
             foreach (var modelType in assembly.DefinedTypes.Where(x => x.IsAssignableTo(typeof(Model))))
             {
-                var metadata = new ModelMetadata<SqlField>();
+                var metadata = new ModelMetadata<DatabaseField>();
 
                 var tableAttribute = modelType.GetCustomAttribute(typeof(TableAttribute)) as TableAttribute;
 
@@ -48,7 +47,7 @@ namespace HomeControl.Sql
 
                     var keyAttribute = property.GetCustomAttribute(typeof(KeyAttribute));
 
-                    if (keyAttribute == null) metadata.Fields.Add(new SqlField(property.Name, columnAttribute.Name));
+                    if (keyAttribute == null) metadata.Fields.Add(new DatabaseField(property.Name, columnAttribute.Name));
                     else
                     {
                         if (modelType.IsAssignableTo(typeof(IdentityKeyModel))) metadata.Fields.Add(new PrimaryKeyField(property.Name, true, columnAttribute.Name));
@@ -73,7 +72,7 @@ namespace HomeControl.Sql
             _sqlTransaction = SqlConnection.BeginTransaction();
         }
 
-        private static Dictionary<Type, ModelMetadata<SqlField>> ModelMetadatas { get; } = new Dictionary<Type, ModelMetadata<SqlField>>();
+        private static Dictionary<Type, ModelMetadata<DatabaseField>> ModelMetadatas { get; } = new Dictionary<Type, ModelMetadata<DatabaseField>>();
 
         public async Task<T> SelectAsync<T>(string id) where T : StringKeyModel
         {
@@ -226,22 +225,22 @@ namespace HomeControl.Sql
             _sqlTransaction = SqlConnection.BeginTransaction();
         }
 
-        private static PrimaryKeyField GetPrimaryKey(ModelMetadata<SqlField> modelMetadata)
+        private static PrimaryKeyField GetPrimaryKey(ModelMetadata<DatabaseField> modelMetadata)
         {
             return modelMetadata?.Fields.OfType<PrimaryKeyField>().FirstOrDefault();
         }
 
-        private static bool IsIdentity(SqlField field)
+        private static bool IsIdentity(DatabaseField field)
         {
             return field is PrimaryKeyField primaryKeyField && primaryKeyField.IsIdentity;
         }
 
-        private static string SelectField(SqlField field)
+        private static string SelectField(DatabaseField field)
         {
             return $"[{field.ColumnName}] AS [{field.Name}]";
         }
 
-        private static StringBuilder BuildSelect(ModelMetadata<SqlField> modelMetadata)
+        private static StringBuilder BuildSelect(ModelMetadata<DatabaseField> modelMetadata)
         {
             var commandStringBuilder = new StringBuilder("SELECT ");
 
@@ -261,7 +260,7 @@ namespace HomeControl.Sql
             }
         }
 
-        private static string InsertField<T>(SqlField field, T instance, SqliteCommand command) where T : Model
+        private static string InsertField<T>(DatabaseField field, T instance, SqliteCommand command) where T : Model
         {
             var parameterName = $"${field.Name}";
 
@@ -270,7 +269,7 @@ namespace HomeControl.Sql
             return parameterName;
         }
 
-        private static string DeleteField<T>(SqlField field, T instance, SqliteCommand command) where T : Model
+        private static string DeleteField<T>(DatabaseField field, T instance, SqliteCommand command) where T : Model
         {
             var parameterName = $"${field.Name}";
 

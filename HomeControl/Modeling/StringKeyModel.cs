@@ -1,9 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace HomeControl.Models
+namespace HomeControl.Modeling
 {
-    public class StringKeyModel : Model
+    public abstract class StringKeyModel : Model
     {
         [Key]
         [Column()]

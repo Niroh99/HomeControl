@@ -1,11 +1,12 @@
 ﻿using HomeControl.Integrations;
 using HomeControl.Integrations.TPLink;
 using HomeControl.Modeling;
-using HomeControl.Sql;
+using HomeControl.Database;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using HomeControl.Modeling;
 
-namespace HomeControl.Models
+namespace HomeControl.DatabaseModels
 {
     [Table(nameof(Device))]
     public class Device : IdentityKeyModel

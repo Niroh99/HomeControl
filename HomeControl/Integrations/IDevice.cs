@@ -1,4 +1,4 @@
-﻿using HomeControl.Models;
+﻿using HomeControl.DatabaseModels;
 
 namespace HomeControl.Integrations
 {

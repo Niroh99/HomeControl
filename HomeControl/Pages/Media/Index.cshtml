@@ -2,6 +2,7 @@
 @using HomeControl.Views.Shared
 @model HomeControl.Pages.Media.IndexModel
 @{
+	Layout = "MenuPage_Layout";
 	ViewData["Title"] = "Media";
 }
 
@@ -103,136 +104,134 @@
 </style>
 
 <div class="body-content grid">
-	@{
-		if (Model.BasePathExists)
+	@if (Model.BasePathExists)
+	{
+		if (Model.MediaSelected)
 		{
-			if (Model.MediaSelected)
-			{
-				var breadcrumbModel = new BreadcrumbModel("MediaBreadcrumb", "/", ["lesser", "h3"]);
+			<div class="flex">
+				<button class="shadow-2" onclick="showDialogById('UploadFileDialog')">Upload File</button>
+				<button class="shadow-2" onclick="showDialogById('CreateDirectoryDialog')">Create Directory</button>
 
-				foreach (var breadcrumb in Model.GetBreadcrumbs().Reverse())
-				{
-					breadcrumbModel.Breadcrumbs.Add(breadcrumb);
-				}
-
-				@await Html.PartialAsync("Breadcrumb", breadcrumbModel)
-
-				<div class="flex">
-					<button class="shadow-2" onclick="showDialogById('UploadFileDialog')">Upload File</button>
-					<button class="shadow-2" onclick="showDialogById('CreateDirectoryDialog')">Create Directory</button>
-
-					@{
-						if (Model.DirectorySelected)
-						{
-							<button class="shadow-2" onclick="showDialogById('RenameDirectoryDialog')">Rename Directory</button>
-						}
+				@{
+					if (Model.DirectorySelected)
+					{
+						<button class="shadow-2" onclick="showDialogById('RenameDirectoryDialog')">Rename Directory</button>
 					}
-				</div>
+				}
+			</div>
+
+			var breadcrumbModel = new BreadcrumbModel("MediaBreadcrumb", "/", ["lesser", "h3"]);
+
+			foreach (var breadcrumb in Model.GetBreadcrumbs().Reverse())
+			{
+				breadcrumbModel.Breadcrumbs.Add(breadcrumb);
 			}
 
-			if (Model.CurrentDirectoryExists)
+			@await Html.PartialAsync("Breadcrumb", breadcrumbModel)
+		}
+
+		if (Model.CurrentDirectoryExists)
+		{
+			if (Model.HasMedia)
 			{
-				if (Model.HasMedia)
+				if (Model.Directories.Any())
 				{
-					if (Model.Directories.Any())
+					if (Model.MediaSelected)
 					{
-						if (Model.MediaSelected)
-						{
-							<h4>Directories</h4>
-						}
-
-						foreach (var directory in Model.Directories)
-						{
-							<div class="card card-a-container shadow-2">
-								<a class="card-a" href="@Model.BuildNavigateQuery(directory.Name)">
-									<div class="grid card-padding" style="grid-template-columns: auto 1fr auto">
-										<div class="centered-content">
-											<img src="~/svg/directory.svg" />
-										</div>
-										<b>@directory.Name</b>
-
-										<div class="centered-content">
-											<img src="~/svg/arrow-right.svg" />
-										</div>
-									</div>
-								</a>
-							</div>
-						}
+						<h4>Directories</h4>
 					}
 
-					if (Model.Files.Any())
+					foreach (var directory in Model.Directories)
 					{
-						<h4>Files (@(Model.Files.Count)) - @(Model.FileSizeDisplay(Model.Files.Sum(x => x.Length)))</h4>
-
-						foreach (var file in Model.Files)
-						{
-							var canBrowserDisplayFile = Model.CanBrowserDisplayFile(file);
-
-							<div class="card shadow-2">
-								<details>
-									<summary>
-										<div class="card grid card-padding" style="grid-template-columns: 1fr auto auto">
-											<div class="centered-content">
-												<div style="display: grid; grid-template-columns: auto auto 1fr">
-													<b style="text-overflow: ellipsis; overflow: hidden">@System.IO.Path.GetFileNameWithoutExtension(file.Name)</b>
-													<b>@System.IO.Path.GetExtension(file.Name)</b>
-												</div>
-												<span class="lesser" style="font-size: 12px">@Model.FileSizeDisplay(file.Length)</span>
-											</div>
-
-											<div class="flex centered-content">
-												@{
-													if (canBrowserDisplayFile)
-													{
-														<a class="button-a shadow-2" href="@Model.BuildFileQuery(file.Name)">Open</a>
-													}
-													else
-													{
-														<a class="button-a shadow-2" href="@Model.BuildFileQuery(file.Name)" download="@file.Name">Download</a>
-													}
-												}
-											</div>
-											<div class="centered-content">
-												<img class="summary-marker" src="~/svg/arrow-down.svg" />
-												<img class="summary-marker-open" src="~/svg/arrow-up.svg" />
-											</div>
-										</div>
-									</summary>
-									@{
-										if (canBrowserDisplayFile)
-										{
-											<div class="card-element grid-1fr-auto card-padding">
-												<div class="centered-content">
-													<span>Download</span>
-												</div>
-												<a class="button-a shadow-2" href="@Model.BuildFileQuery(file.Name)" download="@file.Name">Download</a>
-											</div>
-										}
-									}
-									<div class="card-element grid-1fr-auto card-padding">
-										<div class="centered-content">
-											<span>Delete</span>
-										</div>
-										<button class="shadow-2" onclick="showDeleteFileDialog('@file.Name')">Delete</button>
+						<div class="card card-a-container shadow-2">
+							<a class="card-a" href="@Model.BuildNavigateQuery(directory.Name)">
+								<div class="grid card-padding" style="grid-template-columns: auto 1fr auto">
+									<div class="centered-content">
+										<img src="~/svg/directory.svg" />
 									</div>
-								</details>
-							</div>
-						}
+									<b>@directory.Name</b>
+
+									<div class="centered-content">
+										<img src="~/svg/arrow-right.svg" />
+									</div>
+								</div>
+							</a>
+						</div>
 					}
 				}
-				else
+
+				if (Model.Files.Any())
 				{
-					<h2 class="lesser">Directory empty</h2>
+					<h4>Files (@(Model.Files.Count)) - @(Model.FileSizeDisplay(Model.Files.Sum(x => x.Length)))</h4>
+
+					foreach (var file in Model.Files)
+					{
+						var canBrowserDisplayFile = Model.CanBrowserDisplayFile(file);
+
+						<div class="card shadow-2">
+							<details>
+								<summary>
+									<div class="card grid card-padding" style="grid-template-columns: 1fr auto auto">
+										<div class="centered-content">
+											<div style="display: grid; grid-template-columns: auto auto 1fr">
+												<b style="text-overflow: ellipsis; overflow: hidden">@System.IO.Path.GetFileNameWithoutExtension(file.Name)</b>
+												<b>@System.IO.Path.GetExtension(file.Name)</b>
+											</div>
+											<span class="lesser" style="font-size: 12px">@Model.FileSizeDisplay(file.Length)</span>
+										</div>
+
+										<div class="flex centered-content">
+											@{
+												if (canBrowserDisplayFile)
+												{
+													<a class="button-a shadow-2" href="@Model.BuildFileQuery(file.Name)">Open</a>
+												}
+												else
+												{
+													<a class="button-a shadow-2" href="@Model.BuildFileQuery(file.Name)" download="@file.Name">Download</a>
+												}
+											}
+										</div>
+										<div class="centered-content">
+											<img class="summary-marker" src="~/svg/arrow-down.svg" />
+											<img class="summary-marker-open" src="~/svg/arrow-up.svg" />
+										</div>
+									</div>
+								</summary>
+								@{
+									if (canBrowserDisplayFile)
+									{
+										<div class="card-element grid-1fr-auto card-padding">
+											<div class="centered-content">
+												<span>Download</span>
+											</div>
+											<a class="button-a shadow-2" href="@Model.BuildFileQuery(file.Name)" download="@file.Name">Download</a>
+										</div>
+									}
+								}
+								<div class="card-element grid-1fr-auto card-padding">
+									<div class="centered-content">
+										<span>Delete</span>
+									</div>
+									<button class="shadow-2" onclick="showDeleteFileDialog('@file.Name')">Delete</button>
+								</div>
+							</details>
+						</div>
+					}
 				}
 			}
 			else
 			{
-				<h2 class="lesser">Unknown Directory</h2>
+				<h2 class="lesser">Directory empty</h2>
 			}
 		}
 		else
 		{
-			<h2 class="lesser">No Media attached</h2>
+			<h2 class="lesser">Unknown Directory</h2>
 		}
+	}
+	else
+	{
+		<h2 class="lesser">No Media attached</h2>
 	}
 </div>

@@ -1,7 +1,7 @@
 using HomeControl.Integrations;
-using HomeControl.Models;
-using HomeControl.Sql;
+using HomeControl.Database;
 using Microsoft.AspNetCore.Mvc;
+using HomeControl.DatabaseModels;
 
 namespace HomeControl.Pages.Devices
 {

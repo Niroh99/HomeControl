@@ -1,4 +1,4 @@
-﻿namespace HomeControl.Models
+﻿namespace HomeControl.Modeling
 {
     public abstract class Model
     {

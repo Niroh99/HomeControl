@@ -1,10 +1,10 @@
-﻿using HomeControl.Sql;
+﻿using HomeControl.Database;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace HomeControl.Models
+namespace HomeControl.Modeling
 {
-    public class IdentityKeyModel : Model
+    public abstract class IdentityKeyModel : Model
     {
         [Key]
         [Column(DatabaseConnection.RowIdColumnName)]

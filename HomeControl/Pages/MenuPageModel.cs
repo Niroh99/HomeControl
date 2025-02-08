@@ -1,4 +1,4 @@
-﻿using HomeControl.Sql;
+﻿using HomeControl.Database;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 

@@ -1,50 +1,48 @@
-﻿@using HomeControl.Views.Shared
+﻿@model BreadcrumbModel
+@using HomeControl.Views.Shared
 
-@if (Model is BreadcrumbModel breadcrumbModel)
-{
-	<div name="Breadcrumb" id="@breadcrumbModel.Id" class="grid" style="grid-template-columns: auto 1fr">
-		<button class="breadcrumb-dropdown-button empty hidden h3">...</button>
+<div name="Breadcrumb" id="@Model.Id" class="grid" style="grid-template-columns: auto 1fr">
+	<button class="breadcrumb-dropdown-button empty hidden h3">...</button>
 
-		<div>
-			@for (int i = 0; i < breadcrumbModel.Breadcrumbs.Count; i++)
+	<div>
+		@for (int i = 0; i < Model.Breadcrumbs.Count; i++)
+		{
+			var breadcrumb = Model.Breadcrumbs[i];
+
+			if (i > 0)
 			{
-				var breadcrumb = breadcrumbModel.Breadcrumbs[i];
-
-				if (i > 0)
+				if (Model.SeparatorClasses.Count > 0)
 				{
-					if (breadcrumbModel.SeparatorClasses.Count > 0)
-					{
-						<span style="white-space: nowrap" class="@string.Join(' ', breadcrumbModel.SeparatorClasses)">@breadcrumbModel.Separator</span>
-					}
-					else
-					{
-						<span style="white-space: nowrap">@breadcrumbModel.Separator</span>
-					}
-				}
-
-				if (breadcrumb.IsEnabled)
-				{
-					if (breadcrumb.Classes.Count > 0)
-					{
-						<a href="@breadcrumb.Uri" style="white-space: nowrap" class="@string.Join(' ', breadcrumb.Classes)">@breadcrumb.Name</a>
-					}
-					else
-					{
-						<a href="@breadcrumb.Uri" style="white-space: nowrap">@breadcrumb.Name</a>
-					}
+					<span style="white-space: nowrap" class="@string.Join(' ', Model.SeparatorClasses)">@Model.Separator</span>
 				}
 				else
 				{
-					if (breadcrumb.Classes.Count > 0)
-					{
-						<span style="white-space: nowrap" class="@string.Join(' ', breadcrumb.Classes)">@breadcrumb.Name</span>
-					}
-					else
-					{
-						<span style="white-space: nowrap">@breadcrumb.Name</span>
-					}
+					<span style="white-space: nowrap">@Model.Separator</span>
 				}
 			}
-		</div>
+
+			if (breadcrumb.IsEnabled)
+			{
+				if (breadcrumb.Classes.Count > 0)
+				{
+					<a href="@breadcrumb.Uri" style="white-space: nowrap" class="@string.Join(' ', breadcrumb.Classes)">@breadcrumb.Name</a>
+				}
+				else
+				{
+					<a href="@breadcrumb.Uri" style="white-space: nowrap">@breadcrumb.Name</a>
+				}
+			}
+			else
+			{
+				if (breadcrumb.Classes.Count > 0)
+				{
+					<span style="white-space: nowrap" class="@string.Join(' ', breadcrumb.Classes)">@breadcrumb.Name</span>
+				}
+				else
+				{
+					<span style="white-space: nowrap">@breadcrumb.Name</span>
+				}
+			}
+		}
 	</div>
-}
+</div>

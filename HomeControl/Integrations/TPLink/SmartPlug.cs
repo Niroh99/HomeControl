@@ -1,5 +1,5 @@
-﻿using HomeControl.Integrations.TPLink.JSON;
-using HomeControl.Models;
+﻿using HomeControl.DatabaseModels;
+using HomeControl.Integrations.TPLink.JSON;
 using System.Text.Json.Serialization;
 
 namespace HomeControl.Integrations.TPLink
@@ -26,7 +26,7 @@ namespace HomeControl.Integrations.TPLink
             
         }
 
-        public SmartPlug(Models.Device owner, string hostname, int port = 9999) : base(hostname, port)
+        public SmartPlug(DatabaseModels.Device owner, string hostname, int port = 9999) : base(hostname, port)
         {
             _owner = owner;
             _turnOn = new Feature(TurnOnFeatureName, SetPoweredOn);
@@ -36,8 +36,8 @@ namespace HomeControl.Integrations.TPLink
         private Feature _turnOn;
         private Feature _turnOff;
 
-        private Models.Device _owner;
-        public override Models.Device Owner => _owner;
+        private DatabaseModels.Device _owner;
+        public override DatabaseModels.Device Owner => _owner;
 
         public override DeviceType DeviceType => DeviceType.TPLinkSmartPlug;
 

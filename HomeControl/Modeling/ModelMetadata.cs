@@ -1,6 +1,4 @@
-﻿using HomeControl.Sql;
-
-namespace HomeControl.Modeling
+﻿namespace HomeControl.Modeling
 {
     public class ModelMetadata<T> where T : FieldMetadata
     {

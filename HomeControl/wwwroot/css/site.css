@@ -28,6 +28,7 @@ header {
     top: 0;
     position: sticky;
     background: var(--caption);
+    min-height: 64px;
 }
 
 h1 {
@@ -110,6 +111,10 @@ button {
         padding: 0 var(--smallGap);
     }
 
+        button.empty:active {
+            background: var(--highlights);
+        }
+
 custom-svg {
     color: inherit;
 }
@@ -128,6 +133,7 @@ details[open] > summary {
 
 summary {
     display: block;
+    border-radius: var(--smallBorderRadius);
 }
 
     summary::-webkit-details-marker {
@@ -397,6 +403,8 @@ a.button-a {
 }
 
 #main-menu-button {
+    height: 40px;
+    width: 40px;
 }
 
 #main-menu-overlay {

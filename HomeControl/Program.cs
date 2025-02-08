@@ -1,5 +1,5 @@
 using HomeControl.Helpers;
-using HomeControl.Sql;
+using HomeControl.Database;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.AspNetCore.StaticFiles;
