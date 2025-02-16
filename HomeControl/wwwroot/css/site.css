@@ -115,21 +115,6 @@
         background: none;
     }
 
-.title-displacer {
-    padding: var(--mediumGap) 0 var(--mediumGap) var(--mediumGap);
-}
-
-.title-container {
-    margin-left: auto;
-    margin-right: auto;
-    max-width: 1000px;
-}
-
-.main-menu-component {
-    grid-column: 1;
-    grid-row: 1;
-}
-
 .grid {
     display: grid;
     gap: var(--smallGap);
@@ -183,38 +168,11 @@
     grid-template-rows: 1fr;
 }
 
-#main-menu-button {
-    height: 40px;
-    width: 40px;
-}
-
-#main-menu-overlay {
-    top: calc(var(--headerHeight) + var(--scrollY));
-    height: calc(100vh - var(--headerHeight));
-}
-
-#main-menu-container {
-    display: grid;
-}
-
 #body-container {
     grid-column: 1;
     grid-row: 1;
     padding: var(--mediumGap);
     min-height: calc(100vh - var(--headerHeight));
-}
-
-#main-menu {
-    position: sticky;
-    top: var(--headerHeight);
-    left: 0;
-    gap: var(--smallGap);
-    padding: var(--mediumGap);
-    background: var(--background);
-    box-shadow: var(--shadow4);
-    width: var(--mainMenuWidh);
-    height: calc(100vh - var(--headerHeight));
-    overflow: auto;
 }
 
 #small-display-commands-section {
@@ -237,52 +195,14 @@
     }
 
     .small-display {
-        display: block;
-    }
-    
-    .title-displacer {
-        width: var(--mainMenuWidh);
-    }
-
-    .title-container {
-        max-width: 1000px;
+        display: none;
     }
 
     .grid-1-2 {
         grid-template-columns: 1fr 1fr;
     }
 
-    #main-menu-container {
-        grid-template-columns: auto 1fr;
-    }
-
-    #main-menu {
-        display: flex;
-        border-right: 1px solid var(--borders);
-        box-shadow: none;
-        background: none;
-        padding: var(--mediumGap);
-    }
-
-    #main-menu-overlay {
-        display: none;
-    }
-
-    #body-container {
-        grid-column: 2;
-    }
-
-    #main-menu-button {
-        display: none;
-    }
-
     #small-display-commands-section {
         display: none;
-    }
-}
-
-@media (min-width: 1324px) {
-    :root {
-        --mainMenuWidh: 300px;
     }
 }
