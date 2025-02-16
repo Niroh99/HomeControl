@@ -1,6 +1,6 @@
-﻿namespace HomeControl.Pages
+﻿namespace HomeControl.Attributes
 {
-    [AttributeUsage(AttributeTargets.Class)]
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
     public class MenuPageAttribute : Attribute
     {
         public MenuPageAttribute(Type parentPageType, string menuItem, string url)

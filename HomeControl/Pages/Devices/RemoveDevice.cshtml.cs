@@ -2,18 +2,18 @@ using HomeControl.Integrations;
 using HomeControl.Database;
 using Microsoft.AspNetCore.Mvc;
 using HomeControl.DatabaseModels;
+using HomeControl.Attributes;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace HomeControl.Pages.Devices
 {
     [MenuPage(typeof(ManageDevicesModel), "Remove Device", "/Devices/ManageDevices/RemoveDevice")]
-    public class RemoveDeviceModel(IDatabaseConnection db) : MenuPageModel(IndexModel.MenuItem)
+    public class RemoveDeviceModel(IDatabaseConnection db) : PageModel
     {
         public List<IDevice> Devices { get; } = new List<IDevice>();
 
         public async Task<IActionResult> OnGet()
         {
-            Initialize();
-
             await PopulateDevicesAsync(await db.SelectAllAsync<Device>());
 
             return null;

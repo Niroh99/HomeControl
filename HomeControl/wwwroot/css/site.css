@@ -2,185 +2,6 @@
     --mainMenuWidh: 200px;
 }
 
-* {
-    font-family: Segoe UI, Carlito;
-    box-sizing: border-box;
-}
-
-html {
-    font-size: 14px;
-    position: relative;
-    min-height: 100%;
-    background: var(--background);
-    color: var(--foreground);
-}
-
-body {
-    margin: 0px;
-}
-
-main {
-    grid-column: 1;
-    grid-row: 1;
-}
-
-header {
-    top: 0;
-    position: sticky;
-    background: var(--caption);
-    min-height: 64px;
-}
-
-h1 {
-    margin: 0px;
-}
-
-h2 {
-    margin: 0px;
-}
-
-h3 {
-    margin: 0px;
-}
-
-h4 {
-    margin: 0px;
-}
-
-h5 {
-    margin: 0px;
-}
-
-.h1 {
-    font-size: 2em;
-    font-weight: bold;
-}
-
-.h3 {
-    font-size: 1.17em;
-    font-weight: bold;
-}
-
-hr {
-    margin: 0px;
-    padding: 0px;
-    border: 1px solid var(--background);
-}
-
-button {
-    background: var(--controls);
-    border: none;
-    color: var(--foreground);
-    border-radius: var(--smallBorderRadius);
-    padding: var(--mediumGap);
-    width: 100%;
-    font-size: inherit;
-    line-height: 1em;
-}
-
-    button:active {
-        background: var(--highlights);
-        color: var(--highlightedForeground);
-    }
-
-    button:focus-visible {
-        display: none;
-    }
-
-    button.overlay-button {
-        border-radius: 0;
-        padding: 0;
-        position: absolute;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: var(--background40);
-    }
-
-        button.overlay-button:active {
-            background: var(--background40);
-        }
-
-    button.toggled {
-        background: var(--highlights);
-        color: var(--highlightedForeground);
-    }
-
-    button.empty {
-        background: transparent;
-        padding: 0 var(--smallGap);
-    }
-
-        button.empty:active {
-            background: var(--highlights);
-        }
-
-custom-svg {
-    color: inherit;
-}
-
-details[open] > summary {
-    border-bottom: 1px solid var(--background);
-}
-
-    details[open] > summary .summary-marker {
-        display: none;
-    }
-
-    details[open] > summary .summary-marker-open {
-        display: block;
-    }
-
-summary {
-    display: block;
-    border-radius: var(--smallBorderRadius);
-}
-
-    summary::-webkit-details-marker {
-        display: none;
-    }
-
-.summary-marker {
-
-}
-
-.summary-marker-open {
-    display: none;
-}
-
-dialog {
-    position: sticky;
-    padding: 0;
-    border: none;
-    background: var(--elevatedBackground);
-    color: inherit;
-    box-shadow: var(--shadow4);
-    border-radius: var(--smallBorderRadius);
-    min-width: 200px;
-    margin: auto;
-}
-
-.dialog-buttons-container {
-    background: var(--caption);
-    border-radius: 0 0 var(--smallBorderRadius) var(--smallBorderRadius);
-    border-top: 1px solid var(--borders);
-}
-
-input {
-    border: 1px solid var(--borders);
-    border-bottom-width: 2px;
-    background: var(--background);
-    color: var(--foreground);
-    padding: var(--smallGap) var(--mediumGap) var(--smallGap) var(--mediumGap);
-    border-radius: var(--smallBorderRadius);
-}
-
-    input:focus {
-        outline: none;
-        border-bottom-width: 2px;
-        border-bottom-color: var(--highlights);
-    }
-
 .overlay {
     border-radius: 0;
     padding: 0;
@@ -207,6 +28,7 @@ input {
     max-width: 1000px;
     margin-left: auto;
     margin-right: auto;
+    margin-bottom: 120px;
 }
 
 .card {
@@ -249,62 +71,21 @@ input {
     border-color: var(--borders);
 }
 
-a.breadcrumb-a {
-    color: var(--foreground);
-}
-
-a.card-a {
-    color: var(--foreground);
-    text-decoration: none;
-    display: block;
-    min-height: 64px;
-    align-content: center;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-    a.card-a:link {
-        color: var(--foreground);
-    }
-
-    a.card-a:visited {
-        color: var(--foreground);
-    }
-
-a.button-a {
-    text-decoration: none;
-    cursor: default;
-    background: var(--controls);
-    border: none;
-    color: var(--foreground);
-    border-radius: var(--smallBorderRadius);
-    padding: var(--mediumGap);
-    width: 100%;
-    font-size: inherit;
-    line-height: 1em;
-    align-content: center;
-}
-
-    a.button-a:active {
-        background: var(--highlights);
-        color: var(--highlightedForeground);
-        cursor: default;
-    }
-
-    a.button-a:hover {
-        cursor: default;
-    }
-
-    a.button-a:link {
-        color: var(--foreground);
-    }
-
-    a.button-a:visited {
-        color: var(--foreground);
-    }
-
 .lesser {
     color: var(--foreground80);
+}
+
+.medium-to-large-display {
+    display: none;
+}
+
+.small-display {
+
+}
+
+.grid-layer-item {
+    grid-row: 1;
+    grid-column: 1;
 }
 
 .menu-item {
@@ -420,6 +201,7 @@ a.button-a {
     grid-column: 1;
     grid-row: 1;
     padding: var(--mediumGap);
+    min-height: calc(100vh - var(--headerHeight));
 }
 
 #main-menu {
@@ -435,11 +217,29 @@ a.button-a {
     overflow: auto;
 }
 
+#small-display-commands-section {
+    position: sticky;
+    margin: auto 16px 16px auto;
+    padding: var(--mediumGap);
+    bottom: 0;
+}
+
+#small-display-commands-toggle-button {
+    width: 96px;
+    height: 96px;
+    border-radius: 48px;
+    align-self: self-end;
+}
+
 @media (min-width: 768px) {
-    html {
-        font-size: 16px;
+    .medium-to-large-display {
+        display: block;
     }
 
+    .small-display {
+        display: block;
+    }
+    
     .title-displacer {
         width: var(--mainMenuWidh);
     }
@@ -473,6 +273,10 @@ a.button-a {
     }
 
     #main-menu-button {
+        display: none;
+    }
+
+    #small-display-commands-section {
         display: none;
     }
 }

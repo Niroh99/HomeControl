@@ -1,15 +1,17 @@
 using HomeControl.Database;
 using Microsoft.AspNetCore.Mvc;
 using HomeControl.DatabaseModels;
+using HomeControl.Attributes;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace HomeControl.Pages.Devices
 {
     [MenuPage(typeof(IndexModel), "Manage Devices", "/Devices/ManageDevices")]
-    public class ManageDevicesModel(IDatabaseConnection db) : MenuPageModel(IndexModel.MenuItem)
+    public class ManageDevicesModel(IDatabaseConnection db) : PageModel
     {
         public void OnGet()
         {
-            Initialize();
+            
         }
 
         public async Task<IActionResult> OnPostDiscoverDevices()

@@ -1,13 +1,14 @@
 using HomeControl.Integrations;
 using HomeControl.Database;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using HomeControl.DatabaseModels;
+using HomeControl.Attributes;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace HomeControl.Pages.Devices
 {
     [MenuPage(null, "Devices", "/Devices")]
-    public class IndexModel(IDatabaseConnection db) : MenuPageModel(MenuItem)
+    public class IndexModel(IDatabaseConnection db) : PageModel
     {
         public const string MenuItem = "Devices";
         public const string MenuItemUrl = "/Devices";
@@ -16,8 +17,6 @@ namespace HomeControl.Pages.Devices
 
         public async Task<IActionResult> OnGet()
         {
-            Initialize();
-
             await PopulateDevicesAsync(await db.SelectAllAsync<Device>());
 
             return null;

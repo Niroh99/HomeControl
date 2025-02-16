@@ -4,6 +4,25 @@
 @{
 	Layout = "MenuPage_Layout";
 	ViewData["Title"] = "Media";
+
+	void RenderCommands(bool vertically)
+	{
+		List<string> containerClasses = ["flex"];
+
+		if (vertically) containerClasses.Add("flex-vertical");
+
+		<div class="@string.Join(' ', containerClasses)">
+			<button class="shadow-2" onclick="showDialogById('UploadFileDialog')">Upload File</button>
+			<button class="shadow-2" onclick="showDialogById('CreateDirectoryDialog')">Create Directory</button>
+
+			@{
+				if (Model.DirectorySelected)
+				{
+					<button class="shadow-2" onclick="showDialogById('RenameDirectoryDialog')">Rename Directory</button>
+				}
+			}
+		</div>
+	}
 }
 
 @section Dialogs {
@@ -97,9 +116,15 @@
 	}
 }
 
+@section Commands {
+	@{
+		RenderCommands(true);
+	}
+}
+
 <style>
 	.breadcrumb-a {
-		color: var(--foreground);
+	color: var(--foreground);
 	}
 </style>
 
@@ -108,15 +133,9 @@
 	{
 		if (Model.MediaSelected)
 		{
-			<div class="flex">
-				<button class="shadow-2" onclick="showDialogById('UploadFileDialog')">Upload File</button>
-				<button class="shadow-2" onclick="showDialogById('CreateDirectoryDialog')">Create Directory</button>
-
+			<div class="medium-to-large-display">
 				@{
-					if (Model.DirectorySelected)
-					{
-						<button class="shadow-2" onclick="showDialogById('RenameDirectoryDialog')">Rename Directory</button>
-					}
+					RenderCommands(false);
 				}
 			</div>
 

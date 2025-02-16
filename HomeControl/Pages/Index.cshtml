@@ -7,7 +7,7 @@
 
 <div class="grid body-content">
 	@{
-		foreach (var menuItem in MenuPageModel.MenuItems)
+		foreach (var menuItem in Helpers.MainMenuHelper.MenuItems)
 		{
 			if (menuItem.Name == "Home") continue;
 

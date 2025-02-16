@@ -1,12 +1,7 @@
 ﻿namespace HomeControl.Modeling
 {
-    public class FieldMetadata
+    public class FieldMetadata(string name)
     {
-        public FieldMetadata(string name)
-        {
-            Name = name;
-        }
-
-        public string Name { get; }
+        public string Name { get; } = name;
     }
 }

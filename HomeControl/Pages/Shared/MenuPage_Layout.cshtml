@@ -1,6 +1,11 @@
-﻿@using System.Reflection;
+﻿@using HomeControl.Attributes
 @using HomeControl.Views.Shared
-@model MenuPageModel;
+@using System.Reflection
+@using Microsoft.AspNetCore.Mvc.RazorPages
+@model PageModel
+@{
+	var pageModelType = (Type)Model.GetType();
+}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -9,6 +14,7 @@
 	<title>@ViewData["Title"] - HomeControl</title>
 	<link rel="stylesheet" href="~/css/BaseResources.css" asp-append-version="true" />
 	<link rel="stylesheet" href="~/css/DarkTheme.css" asp-append-version="true" />
+	<link rel="stylesheet" href="~/css/HtmlTags.css" asp-append-version="true" />
 	<link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 	<link rel="stylesheet" href="~/css/Breadcrumb.css" asp-append-version="true" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -24,8 +30,6 @@
 			<div class="padded-medium" style="grid-column: 2">
 				<div class="title-container">
 					@{
-						var pageModelType = (Type)Model.GetType();
-
 						var menuPageAttribute = pageModelType.GetCustomAttribute<MenuPageAttribute>();
 
 						if (menuPageAttribute != null)
@@ -68,19 +72,24 @@
 			<div id="body-container">
 				@RenderBody()
 			</div>
+			<div id="small-display-commands-section" class="grid-layer-item">
+				<div class="flex flex-vertical" style="justify-content: space-between">
+					<div id="small-display-commands-container" class="hidden">
+						@await RenderSectionAsync("Commands", false)
+					</div>
+					<button id="small-display-commands-toggle-button" class="shadow-4" onclick="toggleSmallCommandsDisplay()">...</button>
+				</div>
+			</div>
 			<button id="main-menu-overlay" class="main-menu-component overlay-button hidden" onclick="ToggleMainMenu()"></button>
 			<div id="main-menu" class="main-menu-component flex flex-vertical hidden">
 				@{
-					var selectedMenuItemName = (string)ViewData[MenuPageModel.MenuItemKey];
+					Helpers.MainMenuHelper.TryGetRootMenuItem(pageModelType, out var selectedRootMenuItem);
 
-					foreach (var menuItem in MenuPageModel.MenuItems)
+					foreach (var menuItem in Helpers.MainMenuHelper.MenuItems)
 					{
 						string menuItemClasses = "menu-item grid";
 
-						if (selectedMenuItemName != null && menuItem.Name == selectedMenuItemName)
-						{
-							menuItemClasses += " highlighted-menu-item shadow-2";
-						}
+						if (menuItem == selectedRootMenuItem) menuItemClasses += " highlighted-menu-item shadow-2";
 
 						<div class="@menuItemClasses">
 							<a class="menu-item-a padded" href="@menuItem.Url">
@@ -102,7 +111,7 @@
 	<div id="dialog-overlay" class="overlay grid hidden">
 		<button class="overlay-button" onclick="closeAllDialogs()" style="grid-column: 1; grid-row: 1;"></button>
 
-		@RenderSection("Dialogs", false)
+		@await RenderSectionAsync("Dialogs", false)
 	</div>
 
 	<script src="~/lib/jquery/dist/jquery.min.js"></script>
@@ -112,6 +121,7 @@
 	<script src="~/js/dialog.js" asp-append-version="true"></script>
 	<script src="~/js/busy.js" asp-append-version="true"></script>
 	<script src="~/js/Breadcrumb.js"></script>
+	<script src="~/js/commands.js"></script>
 
 	@await RenderSectionAsync("Scripts", required: false)
 </body>

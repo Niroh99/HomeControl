@@ -1,13 +1,15 @@
+using HomeControl.Attributes;
 using HomeControl.Helpers;
 using HomeControl.Views.Shared;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.FileProviders;
 
 namespace HomeControl.Pages.Media
 {
     [MenuPage(null, "Media", "/Media")]
-    public class IndexModel : MenuPageModel
+    public class IndexModel : PageModel
     {
         public const string MenuItem = "Media";
         public const string PageUrl = "/Media";
@@ -79,15 +81,13 @@ namespace HomeControl.Pages.Media
         private static readonly string[] DisplayableMimeTypes = ["application/pdf"];
         private static readonly string[] NonDisplayableMimeTypes = ["text/x-uuencode"];
 
-        public IndexModel(IFileProvider fileProvider) : base(MenuItem)
+        public IndexModel(IFileProvider fileProvider)
         {
             _fileProvider = fileProvider;
         }
 
         public IActionResult OnGet()
         {
-            Initialize();
-
             if (!BasePathExists) return null;
 
             var directoryPath = CurrentDirectoryPath;

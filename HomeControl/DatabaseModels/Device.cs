@@ -4,7 +4,6 @@ using HomeControl.Modeling;
 using HomeControl.Database;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using HomeControl.Modeling;
 
 namespace HomeControl.DatabaseModels
 {
