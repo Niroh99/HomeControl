@@ -45,7 +45,7 @@
 								{
 									do
 									{
-										breadcrumbs.Insert(0, new Breadcrumb(menuPageAttribute.MenuItem, menuPageAttribute.Url, "h1", "lesser", "breadcrumb-a"));
+										breadcrumbs.Insert(0, new Breadcrumb(menuPageAttribute.MenuItem, menuPageAttribute.Url, "h1", "lesser"));
 
 										menuPageAttribute = menuPageAttribute.ParentPageType?.GetCustomAttribute<MenuPageAttribute>();
 									}
@@ -73,12 +73,15 @@
 			<div id="body-container">
 				@RenderBody()
 			</div>
-			<div id="small-display-commands-section" class="grid-layer-item">
+			<button id="small-display-commands-overlay-button" class="overlay-button hidden" onclick="toggleSmallCommandsDisplay()"></button>
+			<div id="small-display-commands-section" class="grid-layer-item fade-in">
 				<div class="flex flex-vertical" style="justify-content: space-between">
 					<div id="small-display-commands-container" class="hidden">
 						@await RenderSectionAsync("Commands", false)
 					</div>
-					<button id="small-display-commands-toggle-button" class="shadow-4" onclick="toggleSmallCommandsDisplay()">...</button>
+					<button id="small-display-commands-toggle-button" class="shadow-4" onclick="toggleSmallCommandsDisplay()">
+						<img src="~/svg/Plus.svg" />
+					</button>
 				</div>
 			</div>
 			<button id="main-menu-overlay" class="main-menu-component overlay-button hidden" onclick="ToggleMainMenu()"></button>
@@ -88,7 +91,7 @@
 
 					foreach (var menuItem in Helpers.MainMenuHelper.MenuItems)
 					{
-						string menuItemClasses = "menu-item grid";
+						string menuItemClasses = "menu-item grid fade-in";
 
 						if (menuItem == selectedRootMenuItem) menuItemClasses += " highlighted-menu-item shadow-2";
 

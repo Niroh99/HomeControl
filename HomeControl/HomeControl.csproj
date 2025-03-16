@@ -17,4 +17,11 @@
     <PackageReference Include="tplink-smartdevices" Version="2.0.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Update="wwwroot\svg\Plus.svg">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
+
 </Project>

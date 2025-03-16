@@ -159,6 +159,10 @@
     gap: var(--largeGap);
 }
 
+.fade-in {
+    animation: fadein 0.3s;
+}
+
 .hidden {
     display: none;
 }
@@ -189,6 +193,10 @@
     align-self: self-end;
 }
 
+#small-display-commands-overlay-button {
+
+}
+
 @media (min-width: 768px) {
     .medium-to-large-display {
         display: block;
@@ -204,5 +212,15 @@
 
     #small-display-commands-section {
         display: none;
+    }
+}
+
+@keyframes fadein {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
     }
 }

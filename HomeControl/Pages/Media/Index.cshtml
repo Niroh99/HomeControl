@@ -15,11 +15,9 @@
 			<button class="shadow-2" onclick="showDialogById('UploadFileDialog')">Upload File</button>
 			<button class="shadow-2" onclick="showDialogById('CreateDirectoryDialog')">Create Directory</button>
 
-			@{
-				if (Model.DirectorySelected)
-				{
-					<button class="shadow-2" onclick="showDialogById('RenameDirectoryDialog')">Rename Directory</button>
-				}
+			@if (Model.DirectorySelected)
+			{
+				<button class="shadow-2" onclick="showDialogById('RenameDirectoryDialog')">Rename Directory</button>
 			}
 		</div>
 	}
@@ -122,12 +120,6 @@
 	}
 }
 
-<style>
-	.breadcrumb-a {
-	color: var(--foreground);
-	}
-</style>
-
 <div class="body-content grid">
 	@if (Model.BasePathExists)
 	{
@@ -139,7 +131,7 @@
 				}
 			</div>
 
-			var breadcrumbModel = new BreadcrumbModel("MediaBreadcrumb", "/", ["lesser", "h3"]);
+			var breadcrumbModel = new BreadcrumbModel("MediaBreadcrumb", "/", ["h3"]);
 
 			foreach (var breadcrumb in Model.GetBreadcrumbs().Reverse())
 			{
