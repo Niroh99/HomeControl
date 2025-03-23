@@ -8,22 +8,20 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 namespace HomeControl.Pages.Devices
 {
     [MenuPage(typeof(ManageDevicesModel), "Remove Device", "/Devices/ManageDevices/RemoveDevice")]
-    public class RemoveDeviceModel(IDatabaseConnection db) : PageModel
+    public class RemoveDeviceModel(IDatabaseConnection db, IDeviceService deviceService) : PageModel
     {
-        public List<IDevice> Devices { get; } = new List<IDevice>();
+        public List<IIntegrationDevice> Devices { get; } = new List<IIntegrationDevice>();
 
-        public async Task<IActionResult> OnGet()
+        public async Task OnGet()
         {
             await PopulateDevicesAsync(await db.SelectAllAsync<Device>());
-
-            return null;
         }
 
-        public IActionResult OnPostRemoveDevice(int deviceId)
+        public async Task<IActionResult> OnPostRemoveDevice(int deviceId)
         {
-            var device = db.SelectAsync<Device>(deviceId).Result;
+            var device = await db.SelectAsync<Device>(deviceId);
 
-            db.DeleteAsync(device).Wait();
+            await db.DeleteAsync(device);
 
             return Redirect("/Devices");
         }
@@ -34,7 +32,7 @@ namespace HomeControl.Pages.Devices
             {
                 var device = deviceList[i];
 
-                var integrationDevice = device.Create();
+                var integrationDevice = deviceService.CreateIntegrationDevice(device);
 
                 Devices.Add(integrationDevice);
 

@@ -9,8 +9,8 @@ namespace HomeControl.Integrations.TPLink
         private const string SetRelayStateCommand = "set_relay_state";
         private const string SetRelayStateCommandArgument = "state";
 
-        private const string TurnOnFeatureName = "Turn On";
-        private const string TurnOffFeatureName = "Turn Off";
+        public const string TurnOnFeatureName = "Turn On";
+        public const string TurnOffFeatureName = "Turn Off";
 
         public class SmartPlugSysInfo : SysInfo
         {
@@ -71,7 +71,7 @@ namespace HomeControl.Integrations.TPLink
         {
             if (OutletPowered) yield return new SingleProperty("Turned on since:", $"{TurnedOnSince} s");
 
-            foreach (var baseProperty in GetBaseProperties())
+            foreach (var baseProperty in base.GetProperties())
             {
                 yield return baseProperty;
             }

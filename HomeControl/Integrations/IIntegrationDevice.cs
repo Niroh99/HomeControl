@@ -2,7 +2,7 @@
 
 namespace HomeControl.Integrations
 {
-    public interface IDevice
+    public interface IIntegrationDevice
     {
         Device Owner { get; }
 

@@ -155,7 +155,7 @@
 					foreach (var directory in Model.Directories)
 					{
 						<div class="card card-a-container shadow-2">
-							<a class="card-a" href="@Model.BuildNavigateQuery(directory.Name)">
+							<a class="card-a" asp-route-MediaDirectoryPath="@Model.CurrentDirectoryPath" asp-route-MediaNavigateDirectory="@directory.Name">
 								<div class="grid card-padding" style="grid-template-columns: auto 1fr auto">
 									<div class="centered-content">
 										<img src="~/svg/directory.svg" />

@@ -18,15 +18,6 @@ namespace HomeControl.DatabaseModels
 
         [Column]
         public int Port { get => Get<int>(); set => Set(value); }
-
-        public IDevice Create()
-        {
-            switch (Type)
-            {
-                case DeviceType.TPLinkSmartPlug: return new SmartPlug(this, Hostname, Port);
-                default: throw new NotImplementedException();
-            }
-        }
     }
 
     public enum DeviceType

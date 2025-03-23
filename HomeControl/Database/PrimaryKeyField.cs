@@ -2,7 +2,7 @@
 {
     public class PrimaryKeyField : DatabaseField
     {
-        public PrimaryKeyField(string name, bool isIdentity, string columnName = null) : base(name, columnName)
+        public PrimaryKeyField(string name, bool isIdentity, string columnName = null) : base(name, isIdentity ? typeof(int) : typeof(string), columnName)
         {
             IsIdentity = isIdentity;
         }

@@ -7,7 +7,7 @@ namespace HomeControl.Modeling
     public abstract class IdentityKeyModel : Model
     {
         [Key]
-        [Column(DatabaseConnection.RowIdColumnName)]
+        [Column]
         public int Id { get => Get<int>(); set => Set(value); }
     }
 }

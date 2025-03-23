@@ -8,7 +8,7 @@ using Microsoft.Extensions.FileProviders;
 
 namespace HomeControl.Pages.Media
 {
-    [MenuPage(null, "Media", "/Media")]
+    [MenuPage(null, "Media", "/Media/Index")]
     public class IndexModel : PageModel
     {
         public const string MenuItem = "Media";
@@ -130,13 +130,6 @@ namespace HomeControl.Pages.Media
 
                 directory = directory.Parent;
             }
-        }
-
-        public string BuildNavigateQuery(string directory)
-        {
-            var directoryPath = CurrentDirectoryPath;
-
-            return $"{PageUrl}?{DirectoryPathRouteDataKey}={directoryPath}&{NavigateDirectoryRouteDataKey}={directory}";
         }
 
         public bool CanBrowserDisplayFile(FileInfo file)

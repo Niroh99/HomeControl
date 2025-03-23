@@ -7,37 +7,33 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace HomeControl.Pages.Devices
 {
-    [MenuPage(null, "Devices", "/Devices")]
-    public class IndexModel(IDatabaseConnection db) : PageModel
+    [MenuPage(null, "Devices", "/Devices/Index")]
+    public class IndexModel(IDatabaseConnection db, IDeviceService deviceService) : PageModel
     {
-        public const string MenuItem = "Devices";
-        public const string MenuItemUrl = "/Devices";
-
-        public List<IDevice> Devices { get; } = new List<IDevice>();
-
-        public async Task<IActionResult> OnGet()
+        public class DeviceInfo(IIntegrationDevice device, IEnumerable<DeviceOption> options)
         {
-            await PopulateDevicesAsync(await db.SelectAllAsync<Device>());
+            public IIntegrationDevice Device { get; } = device;
 
-            return null;
+            public IEnumerable<DeviceOption> Options { get; } = options;
         }
 
-        public Dictionary<string, string> GetDeviceFeatureRouteData(IDevice device, Feature feature)
+        public List<DeviceInfo> Devices { get; } = [];
+
+        public async Task OnGet()
         {
-            return new Dictionary<string, string>
-            {
-                { "deviceId", device.Owner.Id.ToString() },
-                { "featureName", feature.Name },
-            };
+            await PopulateDevicesAsync(await db.SelectAllAsync<Device>());
         }
 
         public async Task<IActionResult> OnPostExecuteFeature(int deviceId, string featureName)
         {
-            var device = await db.SelectAsync<Device>(deviceId);
+            await deviceService.ExecuteFeatureAsync(deviceId, featureName);
 
-            var integrationDevice = device.Create();
+            return RedirectToPage();
+        }
 
-            await integrationDevice.ExecuteFeatureAsync(featureName);
+        public async Task<IActionResult> OnPostExecuteOption(int optionId)
+        {
+            await deviceService.ExecuteDeviceOptionAsync(optionId);
 
             return RedirectToPage();
         }
@@ -46,22 +42,24 @@ namespace HomeControl.Pages.Devices
         {
             var device = await db.SelectAsync<Device>(deviceId);
 
-            var integrationDevice = device.Create();
+            var integrationDevice = deviceService.CreateIntegrationDevice(device);
 
             await integrationDevice.RenameAsync(displayName);
 
             return RedirectToPage();
         }
 
-        private async Task PopulateDevicesAsync(List<Device> deviceList)
+        private async Task PopulateDevicesAsync(List<Device> databaseDevices)
         {
-            for (int i = 0; i < deviceList.Count; i++)
+            var deviceOptions = await db.SelectAllAsync<DeviceOption>();
+
+            for (int i = 0; i < databaseDevices.Count; i++)
             {
-                var device = deviceList[i];
+                var databaseDevice = databaseDevices[i];
 
-                var integrationDevice = device.Create();
+                var integrationDevice = deviceService.CreateIntegrationDevice(databaseDevice);
 
-                Devices.Add(integrationDevice);
+                Devices.Add(new DeviceInfo(integrationDevice, deviceOptions.Where(option => option.DeviceId == databaseDevice.Id)));
 
                 await integrationDevice.InitializeAsync();
             }

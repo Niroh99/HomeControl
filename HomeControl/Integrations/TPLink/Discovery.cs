@@ -8,15 +8,15 @@ namespace HomeControl.Integrations.TPLink
 {
     public static class Discovery
     {
-        private static bool _discoryRunning = false;
+        private static bool _discoveryRunning = false;
 
-        public static bool DiscoveryRunning { get => _discoryRunning; }
+        public static bool DiscoveryRunning { get => _discoveryRunning; }
 
         public static List<Device> Discover(int port = 9999, int timeout = 5000, string target = "255.255.255.255")
         {
             if (DiscoveryRunning) throw new InvalidOperationException("Discovery is already running.");
 
-            _discoryRunning = true;
+            _discoveryRunning = true;
 
             SendDiscoveryRequest(target, port);
             using (var udp = new UdpClient(port)
@@ -29,7 +29,7 @@ namespace HomeControl.Integrations.TPLink
                 Task.WhenAny(Task.Run(() =>
                 {
                     Thread.Sleep(timeout);
-                    _discoryRunning = false;
+                    _discoveryRunning = false;
                 }), Receive(udp, port, devices)).Wait();
 
                 udp.Close();
@@ -40,7 +40,7 @@ namespace HomeControl.Integrations.TPLink
 
         private static async Task Receive(UdpClient udp, int port, List<Device> devices)
         {
-            while (_discoryRunning)
+            while (_discoveryRunning)
             {
                 UdpReceiveResult udpReceiveResult = await udp.ReceiveAsync();
 

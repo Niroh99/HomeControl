@@ -6,7 +6,7 @@ using HomeControl.Attributes;
 
 namespace HomeControl.Pages
 {
-    [MenuPage(null, "Home", "/")]
+    [MenuPage(null, "Home", "/Index")]
     public class IndexModel : PageModel
     {
         

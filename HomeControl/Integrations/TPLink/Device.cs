@@ -3,7 +3,7 @@ using HomeControl.Integrations.TPLink.JSON;
 
 namespace HomeControl.Integrations.TPLink
 {
-    public abstract class Device(string hostname, int port = 9999) : IDevice
+    public abstract class Device(string hostname, int port = 9999) : IIntegrationDevice
     {
         public const string ProtocolMessageSystem = "system";
 
@@ -60,10 +60,10 @@ namespace HomeControl.Integrations.TPLink
         {
             var message = new ProtocolMessage(ProtocolMessageSystem, GetSysInfoCommand, null, null);
 
-            _sysInfo = (SysInfo) await message.ExecuteAsync(Hostname, Port, SysInfoType);
+            _sysInfo = (SysInfo)await message.ExecuteAsync(Hostname, Port, SysInfoType);
         }
 
-        public IEnumerable<Property> GetBaseProperties()
+        public virtual IEnumerable<IProperty> GetProperties()
         {
             yield return new SingleProperty("Hostname:", Hostname);
             yield return new SingleProperty("Port:", Port.ToString());
@@ -78,16 +78,14 @@ namespace HomeControl.Integrations.TPLink
             yield return new SingleProperty("Device Id", DeviceId);
             yield return new SingleProperty("OEM Id:", OemId);
             yield return new SingleProperty("RSSI:", RSSI.ToString());
-            yield return new MultiProperty("Location:", new List<IProperty>
-            {
+            yield return new MultiProperty("Location:",
+            [
                 new SingleProperty("Latitude", Latitude.ToString()),
                 new SingleProperty("Longitude", Longitude.ToString())
-            });
+            ]);
         }
 
         public abstract IEnumerable<Feature> GetExecutableFeatures();
-
-        public abstract IEnumerable<IProperty> GetProperties();
 
         public abstract Task ExecuteFeatureAsync(string featureName);
 

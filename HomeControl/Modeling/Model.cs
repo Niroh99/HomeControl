@@ -2,31 +2,14 @@
 {
     public abstract class Model
     {
-        protected Dictionary<string, object> _properties = new Dictionary<string, object>();
+        private readonly Dictionary<string, object> _properties = [];
+        private readonly Dictionary<string, object> _modifiedProperties = [];
 
         public T Get<T>([System.Runtime.CompilerServices.CallerMemberName] string propertyName = null)
         {
-            if (_properties.TryGetValue(propertyName, out object value))
-            {
-                var type = typeof(T);
+            if (TryGetModifiedPropertyValue<T>(propertyName, out var modifiedValue)) return modifiedValue;
 
-                if (type.IsEnum && value is string stringValue)
-                {
-                    value = Enum.Parse(type, stringValue);
-
-                    _properties[propertyName] = value;
-                }
-                else if (type == typeof(int) && value is long longValue)
-                {
-                    value = (int)longValue;
-
-                    _properties[propertyName] = value;
-                }
-
-                return (T)value;
-            }
-
-            return default;
+            return GetPropertyValue<T>(propertyName);
         }
 
         public void Set<T>(T value, [System.Runtime.CompilerServices.CallerMemberName] string propertyName = null)
@@ -34,9 +17,45 @@
             SetCore(value, propertyName);
         }
 
-        protected void SetCore(object value, [System.Runtime.CompilerServices.CallerMemberName] string propertyName = null)
+        public void ApplyChanges()
         {
-            _properties[propertyName] = value;
+            foreach (var property in _modifiedProperties) _properties[property.Key] = property.Value;
+
+            _modifiedProperties.Clear();
+        }
+
+        public void Reset()
+        {
+            _modifiedProperties.Clear();
+        }
+
+        public string[] GetModifiedProperties()
+        {
+            return _modifiedProperties.Keys.ToArray();
+        }
+
+        private T GetPropertyValue<T>(string propertyName)
+        {
+            if (_properties.TryGetValue(propertyName, out var value)) return (T)value;
+
+            return default;
+        }
+
+        private bool TryGetModifiedPropertyValue<T>(string propertyName, out T modifiedValue)
+        {
+            if (_modifiedProperties.TryGetValue(propertyName, out var modifiedPropertyValue))
+            {
+                modifiedValue = (T)modifiedPropertyValue;
+                return true;
+            }
+
+            modifiedValue = default;
+            return false;
+        }
+
+        private void SetCore(object value, [System.Runtime.CompilerServices.CallerMemberName] string propertyName = null)
+        {
+            _modifiedProperties[propertyName] = value;
         }
     }
 }

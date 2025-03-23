@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.FileProviders;
 using System.Net;
+using HomeControl.Events;
+using HomeControl.Integrations;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,9 +31,11 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
-builder.Services.AddScoped<IDatabaseConnection>((serviceProvider) => new DatabaseConnection(connectionString));
-
 builder.Services.AddSingleton<IFileProvider>(new PhysicalFileProvider(HomeControl.Pages.Media.IndexModel.BasePath));
+builder.Services.AddSingleton<IEventService, EventService>();
+
+builder.Services.AddScoped<IDatabaseConnection>((serviceProvider) => new DatabaseConnection(connectionString));
+builder.Services.AddScoped<IDeviceService, DeviceService>();
 
 var app = builder.Build();
 

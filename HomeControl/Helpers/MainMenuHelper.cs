@@ -18,38 +18,6 @@ namespace HomeControl.Helpers
             {
                 TryAddMenuItem(pageModelType, out _);
             }
-
-            //PopulateMenuItemsOld();
-        }
-
-        private static void PopulateMenuItemsOld()
-        {
-            var assembly = Assembly.GetExecutingAssembly();
-
-            var typeMenuItems = new Dictionary<Type, (MenuItem, MenuPageAttribute)>();
-
-            foreach (var pageModelType in assembly.DefinedTypes.Where(x => x.IsAssignableTo(typeof(PageModel))))
-            {
-                AddMenuPageModelType(pageModelType, typeMenuItems);
-            }
-
-            foreach (var typeMenuItem in typeMenuItems)
-            {
-                (var menuItem, var menuPageAttribute) = typeMenuItem.Value;
-
-                if (menuPageAttribute.ParentPageType == null)
-                {
-                    _menuItems.Add(menuItem);
-                    continue;
-                }
-
-                if (typeMenuItems.TryGetValue(menuPageAttribute.ParentPageType, out var parent))
-                {
-                    (var parentMenuItem, var parentMenuPageAttribute) = parent;
-
-                    parentMenuItem.Add(menuItem);
-                }
-            }
         }
 
         private static readonly Dictionary<Type, MenuItem> _pageModelTypeMenutItems = [];

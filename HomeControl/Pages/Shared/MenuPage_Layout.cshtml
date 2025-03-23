@@ -96,7 +96,7 @@
 						if (menuItem == selectedRootMenuItem) menuItemClasses += " highlighted-menu-item shadow-2";
 
 						<div class="@menuItemClasses">
-							<a class="menu-item-a padded" href="@menuItem.Url">
+							<a class="menu-item-a padded" asp-area="" asp-page="@menuItem.Url">
 								<h3>@menuItem.Name</h3>
 							</a>
 						</div>

@@ -12,7 +12,7 @@
 			if (menuItem.Name == "Home") continue;
 
 			<div class="card shadow-2 card-a-container">
-				<a class="card-a" href="@menuItem.Url">
+				<a class="card-a" asp-area="" asp-page="@menuItem.Url">
 					<div class="grid-1fr-auto card-padding">
 						<b>@menuItem.Name</b>
 						<div class="centered-content">
