@@ -14,10 +14,13 @@ namespace HomeControl.Events
     public class EventService : IEventService
     {
         private readonly IServiceScopeFactory _serviceScopeFactory;
+        private System.Timers.Timer _timer;
 
         private static readonly Dictionary<Type, Type> _eventHandlers = [];
-
-        private readonly System.Timers.Timer _timer;
+        private static readonly Dictionary<EventType, Type> _eventTypeEventDataType = new Dictionary<EventType, Type>
+        {
+            { EventType.ExecuteDeviceFeature, typeof(ExecuteDeviceFeatureEventData) },
+        };
 
         static EventService()
         {
@@ -41,20 +44,14 @@ namespace HomeControl.Events
         {
             _serviceScopeFactory = serviceScopeFactory;
 
-            _timer = new System.Timers.Timer(TimeSpan.FromSeconds(2));
-            _timer.Elapsed += ExecuteScheduledEventAsync;
-            _timer.Start();
+            StartEventTimer();
         }
 
         public async Task<Event> ScheduleEventAsync(IDatabaseConnection db, EventType eventType, EventData eventData, DateTime plannedExecution)
         {
-            switch (eventType)
-            {
-                case EventType.ExecuteDeviceFeature:
-                    if (eventData is not ExecuteDeviceFeatureEventData) throw new ArgumentException("Invalid EventData", nameof(eventData));
-                    break;
-                default: throw new NotImplementedException();
-            }
+            if (!_eventTypeEventDataType.TryGetValue(eventType, out var eventDataType)) throw new NotImplementedException();
+
+            if (!eventData.GetType().IsAssignableTo(eventDataType)) throw new ArgumentException("Invalid EventData", nameof(eventData));
 
             if (plannedExecution < DateTime.Now) throw new ArgumentException("plannedExecution cannot be in the past.", nameof(plannedExecution));
 
@@ -70,20 +67,38 @@ namespace HomeControl.Events
             return newEvent;
         }
 
+        public void ExecuteEvent(IServiceProvider serviceProvider, Event eventToExecute)
+        {
+            if (!_eventTypeEventDataType.TryGetValue(eventToExecute.Type, out var eventDataType)) throw new NotImplementedException();
+
+            EventData eventData = (EventData)System.Text.Json.JsonSerializer.Deserialize(eventToExecute.Data, eventDataType);
+
+            if (!_eventHandlers.TryGetValue(eventDataType, out var eventHandlerType)) return;
+
+            var eventHandler = Activator.CreateInstance(eventHandlerType);
+
+            var handleEventMethod = eventHandlerType.GetMethod(nameof(EventHandler<EventData>.HandleEvent));
+
+            handleEventMethod.Invoke(eventHandler, [serviceProvider, eventData]);
+        }
+
+        private void StartEventTimer()
+        {
+            if (Environment.GetCommandLineArgs().Contains("-disableEventTick")) return;
+
+            _timer = new System.Timers.Timer(TimeSpan.FromSeconds(2));
+            _timer.Elapsed += ExecuteScheduledEventAsync;
+            _timer.Start();
+        }
+
         private async void ExecuteScheduledEventAsync(object sender, ElapsedEventArgs e)
         {
             using var serviceScope = _serviceScopeFactory.CreateScope();
 
             var db = serviceScope.ServiceProvider.GetService<IDatabaseConnection>();
 
-            var allEvents = await db.SelectAllAsync<Event>();
-
-            if (allEvents.Count == 0) return;
-
-            foreach (var eventToExecute in allEvents.Where(e => !e.Handled))
+            foreach (var eventToExecute in await db.SelectAsync(WhereBuilder.Where<Event>().Compare(@event => @event.Handled, ComparisonOperator.Equals, false)))
             {
-                // TODO: Events nicht mehr löschen, sondern Handled auf true setzen
-
                 if (DateTime.Now < eventToExecute.PlannedExecution) continue;
 
                 try
@@ -107,29 +122,6 @@ namespace HomeControl.Events
 
                 await db.UpdateAsync(eventToExecute);
             }
-        }
-
-        public void ExecuteEvent(IServiceProvider serviceProvider, Event eventToExecute)
-        {
-            EventData eventData;
-
-            switch (eventToExecute.Type)
-            {
-                case EventType.ExecuteDeviceFeature:
-                    eventData = System.Text.Json.JsonSerializer.Deserialize<ExecuteDeviceFeatureEventData>(eventToExecute.Data);
-                    break;
-                default: throw new NotImplementedException();
-            }
-
-            var eventDataType = eventData.GetType();
-
-            if (!_eventHandlers.TryGetValue(eventDataType, out var eventHandlerType)) return;
-
-            var eventHandler = Activator.CreateInstance(eventHandlerType);
-
-            var handleEventMethod = eventHandlerType.GetMethod(nameof(EventHandler<EventData>.HandleEvent));
-
-            handleEventMethod.Invoke(eventHandler, [serviceProvider, eventData]);
         }
     }
 }

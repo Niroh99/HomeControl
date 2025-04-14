@@ -1,0 +1,103 @@
+﻿@page "{DeviceId}"
+@using HomeControl.Views.Shared
+@model HomeControl.Pages.Devices.EditDeviceModel
+@{
+	Layout = "MenuPage_Layout";
+	ViewData["Title"] = "EditDevice";
+}
+
+@section Dialogs {
+	<dialog id="ChangaDisplayNameDialog" onclose="changeDisplayNameDialogClosed()">
+		<form method="post" class="grid card-padding" asp-page-handler="Rename">
+			<input id="DeviceId" type="hidden" name="DeviceId" />
+			<div class="grid">
+				<label for="DisplayName">Name</label>
+				<input id="DisplayName" name="DisplayName" />
+			</div>
+			<div class="flex" style="justify-content: right">
+				<button class="shadow-2">Rename</button>
+				<button class="shadow-2" type="button" onclick="closeChangeDisplayNameDialog()">Cancel</button>
+			</div>
+		</form>
+	</dialog>
+}
+
+@section Scripts {
+	<script>
+		var changeDisplayNameDialog = document.getElementById("ChangaDisplayNameDialog");
+
+		var deviceIdInput = document.getElementById("DeviceId");
+
+		var displayNameInput = document.getElementById("DisplayName");
+
+		function openChangeDisplayNameDialog(deviceId, displayName)
+		{
+			deviceIdInput.value = deviceId;
+			displayNameInput.value = displayName;
+
+			showDialog(changeDisplayNameDialog);
+		}
+
+		function closeChangeDisplayNameDialog()
+		{
+			closeDialog(changeDisplayNameDialog);
+		}
+
+		function changeDisplayNameDialogClosed()
+		{
+			deviceIdInput.value = null;
+			displayNameInput.value = null;
+		}
+	</script>
+}
+
+<div class="grid body-content">
+	@if (Model.Device == null)
+	{
+		<h2 class="lesser">Unknown Device</h2>
+	}
+	else
+	{
+		<h2 class="lesser">@Model.IntegrationDevice.DisplayName</h2>
+
+		<div class="card shadow-2">
+			@if (Model.IntegrationDevice.SupportsRename)
+			{
+				<div class="card-element grid-1fr-auto card-padding">
+					<div class="centered-content">
+						<span class="field-label">Name:</span>
+						<span>@Model.IntegrationDevice.DisplayName</span>
+					</div>
+					<button class="shadow-2" type="button" onclick="openChangeDisplayNameDialog(@Json.Serialize(Model.Device.Id), '@Model.IntegrationDevice.DisplayName')">Rename</button>
+				</div>
+			}
+
+			<a class="card-a card-element" asp-page="/Devices/DeviceOptions" asp-route-DeviceId="@Model.Device.Id">
+				<div class="grid-1fr-auto card-padding">
+					<div class="centered-content">
+						<span>Options</span>
+					</div>
+
+					<div class="centered-content">
+						<img src="~/svg/arrow-right.svg" />
+					</div>
+				</div>
+			</a>
+			<a class="card-a card-element" asp-page="/Devices/DeviceRoutines">
+				<div class="grid-1fr-auto card-padding">
+					<div class="centered-content">
+						<span>Routines</span>
+					</div>
+
+					<div class="centered-content">
+						<img src="~/svg/arrow-right.svg" />
+					</div>
+				</div>
+			</a>
+
+			<div class="card-element grid-1-2 card-padding">
+				@await Html.PartialAsync("DeviceInformation", new DeviceInformationModel(Model.IntegrationDevice))
+			</div>
+		</div>
+	}
+</div>

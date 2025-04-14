@@ -11,9 +11,11 @@ namespace HomeControl.Database
     {
         Task InsertAsync<T>(T instance) where T : Model;
 
-        Task<T> SelectAsync<T>(int id) where T : IdentityKeyModel;
+        Task<T> SelectSingleAsync<T>(int id) where T : IdentityKeyModel;
 
-        Task<T> SelectAsync<T>(string id) where T : StringKeyModel;
+        Task<T> SelectSingleAsync<T>(string id) where T : StringKeyModel;
+
+        Task<List<T>> SelectAsync<T>(WhereBuilder.WhereElement<T> where) where T : Model;
 
         Task<List<T>> SelectAllAsync<T>() where T : Model;
 
@@ -120,25 +122,23 @@ namespace HomeControl.Database
             else await command.ExecuteNonQueryAsync();
         }
 
-        public async Task<T> SelectAsync<T>(string id) where T : StringKeyModel
+        public async Task<T> SelectSingleAsync<T>(string id) where T : StringKeyModel
         {
-            return await SelectAsyncCore<T, string>(id);
+            return await SelectSingleCoreAsync<T, string>(id);
         }
 
-        public async Task<T> SelectAsync<T>(int id) where T : IdentityKeyModel
+        public async Task<T> SelectSingleAsync<T>(int id) where T : IdentityKeyModel
         {
-            return await SelectAsyncCore<T, int>(id);
+            return await SelectSingleCoreAsync<T, int>(id);
         }
 
-        private async Task<T> SelectAsyncCore<T, TKey>(TKey id) where T : Model
+        private async Task<T> SelectSingleCoreAsync<T, TKey>(TKey id) where T : Model
         {
             ArgumentNullException.ThrowIfNull(id, nameof(id));
 
             var modelType = typeof(T);
 
             var modelMetadata = ModelMetadatas[modelType];
-
-            var instance = Activator.CreateInstance(modelType) as T;
 
             using var command = SqlConnection.CreateCommand();
 
@@ -150,17 +150,26 @@ namespace HomeControl.Database
 
             command.CommandText = commandStringBuilder.ToString();
 
-            using var reader = await command.ExecuteReaderAsync();
+            return await ReadSingle<T>(modelType, modelMetadata, command);
+        }
 
-            if (await reader.ReadAsync())
-            {
-                ApplyFields(instance, modelMetadata, reader);
+        public async Task<List<T>> SelectAsync<T>(WhereBuilder.WhereElement<T> where) where T : Model
+        {
+            var modelType = typeof(T);
 
-                instance.ApplyChanges();
+            var modelMetadata = ModelMetadatas[modelType];
 
-                return instance;
-            }
-            else return null;
+            using var command = SqlConnection.CreateCommand();
+
+            var commandStringBuilder = BuildSelect(modelMetadata);
+
+            commandStringBuilder.Append($" WHERE {where.BuildWhere(out var parameterValues)}");
+
+            command.CommandText = commandStringBuilder.ToString();
+
+            foreach (var parameterValue in parameterValues) command.Parameters.AddWithValue(parameterValue.Key, parameterValue.Value);
+
+            return await ReadMany<T>(modelType, modelMetadata, command);
         }
 
         public async Task<List<T>> SelectAllAsync<T>() where T : Model
@@ -175,23 +184,7 @@ namespace HomeControl.Database
 
                 command.CommandText = commandStringBuilder.ToString();
 
-                using (var reader = await command.ExecuteReaderAsync())
-                {
-                    var result = new List<T>();
-
-                    while (await reader.ReadAsync())
-                    {
-                        var instance = Activator.CreateInstance(modelType) as T;
-
-                        ApplyFields(instance, modelMetadata, reader);
-
-                        instance.ApplyChanges();
-
-                        result.Add(instance);
-                    }
-
-                    return result;
-                }
+                return await ReadMany<T>(modelType, modelMetadata, command);
             }
         }
 
@@ -353,6 +346,43 @@ namespace HomeControl.Database
             }
 
             throw new InvalidOperationException("Unable to Convert Database Type.");
+        }
+
+        private async Task<T> ReadSingle<T>(Type modelType, ModelMetadata<DatabaseField> modelMetadata, SqliteCommand command) where T : Model
+        {
+            using var reader = await command.ExecuteReaderAsync();
+
+            var instance = Activator.CreateInstance(modelType) as T;
+
+            if (await reader.ReadAsync())
+            {
+                ApplyFields(instance, modelMetadata, reader);
+
+                instance.ApplyChanges();
+
+                return instance;
+            }
+            else return null;
+        }
+
+        private async Task<List<T>> ReadMany<T>(Type modelType, ModelMetadata<DatabaseField> modelMetadata, SqliteCommand command) where T : Model
+        {
+            using var reader = await command.ExecuteReaderAsync();
+
+            var result = new List<T>();
+
+            while (await reader.ReadAsync())
+            {
+                var instance = Activator.CreateInstance(modelType) as T;
+
+                ApplyFields(instance, modelMetadata, reader);
+
+                instance.ApplyChanges();
+
+                result.Add(instance);
+            }
+
+            return result;
         }
 
         public async void Dispose()

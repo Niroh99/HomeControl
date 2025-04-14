@@ -2,55 +2,32 @@ using HomeControl.Database;
 using HomeControl.DatabaseModels;
 using HomeControl.Events;
 using HomeControl.Events.EventDatas;
+using HomeControl.Modeling;
+using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace HomeControl.Pages
 {
-    public class TestModel(IEventService eventService, IDatabaseConnection db) : PageModel
+    public class TestModel(IEventService eventService, IDatabaseConnection db) : ViewModelPageModel<TestModel.TestViewModel>
     {
+        public class TestViewModel(ViewModelPageModelBase page) : PageViewModel(page)
+        {
+            public string Test { get => Get<string>(); set => Set(value); }
+        }
+
         private IEventService _eventService = eventService;
 
         public void OnGet()
         {
+            ViewModel = new TestViewModel(this) { Test = "test" };
         }
 
-        public async void OnPostTest()
+        public async Task<IActionResult> OnPostTestAjaxPost(string id)
         {
-            var deviceOption = new DeviceOption
-            {
-                DeviceId = 6,
-                Name = "20 min"
-            };
+            var test = await db.SelectAsync(WhereBuilder.Where<Device>().Compare(device => device.Id, ComparisonOperator.Equals, 2).Or().Compare(device => device.Port, ComparisonOperator.GreaterThan, 9997));
 
-            await db.InsertAsync(deviceOption);
-
-            var deviceOptionAction = new DeviceOptionAction
-            {
-                DeviceOptionId = deviceOption.Id,
-                Index = 1,
-                Type = DeviceOptionActionType.ExecuteFeature,
-                Data = System.Text.Json.JsonSerializer.Serialize(new ExecuteFeatureDeviceOptionActionData
-                {
-                    FeatureName = Integrations.TPLink.SmartPlug.TurnOnFeatureName,
-                }),
-            };
-            
-            await db.InsertAsync(deviceOptionAction);
-
-            var secondDeviceOptionAction = new DeviceOptionAction
-            {
-                DeviceOptionId = deviceOption.Id,
-                Index = 2,
-                Type = DeviceOptionActionType.ScheduleFeatureExecution,
-                Data = System.Text.Json.JsonSerializer.Serialize(new ScheduleFeatureExecutionDeviceOptionActionData
-                {
-                    FeatureName = Integrations.TPLink.SmartPlug.TurnOffFeatureName,
-                    ExecuteIn = TimeSpan.FromMinutes(20)
-                }),
-            };
-
-            await db.InsertAsync(secondDeviceOptionAction);
+            return new JsonResult(new TestViewModel(this) { Test = "test neu" });
         }
     }
 }

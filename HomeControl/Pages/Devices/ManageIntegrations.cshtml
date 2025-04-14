@@ -1,16 +1,17 @@
 ﻿@page
-@model ManageDevicesModel
+@model ManageIntegrationsModel
 @{
 	Layout = "MenuPage_Layout";
-	ViewData["Title"] = "Manage Devices";
+	ViewData["Title"] = "Manage Integrations";
 }
 
 @section Scripts {
 	<script>
-		var discoverDevicesForm = document.getElementById("DiscoverDevicesForm");
+		function discoverDevices()
+		{
+			let discoverDevicesForm = document.getElementById("DiscoverDevicesForm");
 
-		function DiscoveryDevices() {
-			BusyWithMessage("Discovering devices...");
+			BusyWithMessage("Discovering TP-Link devices...");
 
 			discoverDevicesForm.submit();
 		}
@@ -18,11 +19,12 @@
 }
 
 <div class="grid body-content">
+	<h2 class="lesser">TP-Link</h2>
 	<form id="DiscoverDevicesForm" method="post" asp-page-handler="DiscoverDevices" class="card shadow-2 grid-1fr-auto card-padding">
 		<div class="centered-content">
 			<b>Discover Devices</b>
 		</div>
-		<button type="button" class="shadow-2" onclick="DiscoveryDevices()">Discover</button>
+		<button type="button" class="shadow-2" onclick="discoverDevices()">Discover</button>
 	</form>
 	<div class="card shadow-2 card-a-container">
 		<a class="card-a" asp-page="RemoveDevice">

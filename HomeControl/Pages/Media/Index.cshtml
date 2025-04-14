@@ -24,64 +24,62 @@
 }
 
 @section Dialogs {
-	@{
-		if (Model.MediaSelected)
+	@if (Model.MediaSelected)
+	{
+		<dialog id="UploadFileDialog">
+			<form id="UploadFileForm" action="/Media/UploadFile?directoryPath=@Model.CurrentDirectoryPath" method="post" enctype="multipart/form-data" class="grid card-padding">
+				<div class="grid">
+					<label for="File">File</label>
+					<input type="file" id="File" name="file" />
+				</div>
+				<div class="flex" style="justify-content: right">
+					<button class="shadow-2" type="button" onclick="submitUploadFileForm()">Upload</button>
+					<button class="shadow-2" type="button" onclick="closeDialogById('UploadFileDialog')">Cancel</button>
+				</div>
+			</form>
+		</dialog>
+
+		<dialog id="DeleteFileDialog">
+			<form method="post" class="grid card-padding" asp-page-handler="DeleteFile">
+				<input type="hidden" id="FileToDelete" name="filename" />
+				<input type="hidden" name="directoryPath" value="@Model.CurrentDirectoryPath" />
+				<span>Delete File?</span>
+				<div class="flex" style="justify-content: right">
+					<button class="shadow-2">Delete</button>
+					<button class="shadow-2" type="button" onclick="closeDialogById('DeleteFileDialog')">Cancel</button>
+				</div>
+			</form>
+		</dialog>
+
+		<dialog id="CreateDirectoryDialog">
+			<form method="post" class="grid card-padding" asp-page-handler="CreateDirectory">
+				<input type="hidden" name="directoryPath" value="@Model.CurrentDirectoryPath" />
+				<div class="grid">
+					<label for="File">Directory</label>
+					<input id="DirectoryToCreate" name="Directory" />
+				</div>
+				<div class="flex" style="justify-content: right">
+					<button class="shadow-2">Create</button>
+					<button class="shadow-2" type="button" onclick="closeDialogById('CreateDirectoryDialog')">Cancel</button>
+				</div>
+			</form>
+		</dialog>
+
+		if (Model.DirectorySelected)
 		{
-			<dialog id="UploadFileDialog">
-				<form id="UploadFileForm" action="/Media/UploadFile?directoryPath=@Model.CurrentDirectoryPath" method="post" enctype="multipart/form-data" class="grid card-padding">
-					<div class="grid">
-						<label for="File">File</label>
-						<input type="file" id="File" name="file" />
-					</div>
-					<div class="flex" style="justify-content: right">
-						<button class="shadow-2" type="button" onclick="submitUploadFileForm()">Upload</button>
-						<button class="shadow-2" type="button" onclick="closeDialogById('UploadFileDialog')">Cancel</button>
-					</div>
-				</form>
-			</dialog>
-
-			<dialog id="DeleteFileDialog">
-				<form method="post" class="grid card-padding" asp-page-handler="DeleteFile">
-					<input type="hidden" id="FileToDelete" name="filename" />
-					<input type="hidden" name="directoryPath" value="@Model.CurrentDirectoryPath" />
-					<span>Delete File?</span>
-					<div class="flex" style="justify-content: right">
-						<button class="shadow-2">Delete</button>
-						<button class="shadow-2" type="button" onclick="closeDialogById('DeleteFileDialog')">Cancel</button>
-					</div>
-				</form>
-			</dialog>
-
-			<dialog id="CreateDirectoryDialog">
-				<form method="post" class="grid card-padding" asp-page-handler="CreateDirectory">
+			<dialog id="RenameDirectoryDialog">
+				<form method="post" class="grid card-padding" asp-page-handler="RenameDirectory">
 					<input type="hidden" name="directoryPath" value="@Model.CurrentDirectoryPath" />
 					<div class="grid">
-						<label for="File">Directory</label>
-						<input id="DirectoryToCreate" name="Directory" />
+						<label for="NewDirectoryName">Directory</label>
+						<input id="newDirectoryName" name="newDirectoryName" value="@Model.CurrentDirectory.Name" />
 					</div>
 					<div class="flex" style="justify-content: right">
-						<button class="shadow-2">Create</button>
-						<button class="shadow-2" type="button" onclick="closeDialogById('CreateDirectoryDialog')">Cancel</button>
+						<button class="shadow-2">Rename</button>
+						<button class="shadow-2" type="button" onclick="closeDialogById('RenameDirectoryDialog')">Cancel</button>
 					</div>
 				</form>
 			</dialog>
-
-			if (Model.DirectorySelected)
-			{
-				<dialog id="RenameDirectoryDialog">
-					<form method="post" class="grid card-padding" asp-page-handler="RenameDirectory">
-						<input type="hidden" name="directoryPath" value="@Model.CurrentDirectoryPath" />
-						<div class="grid">
-							<label for="NewDirectoryName">Directory</label>
-							<input id="newDirectoryName" name="newDirectoryName" value="@Model.CurrentDirectory.Name" />
-						</div>
-						<div class="flex" style="justify-content: right">
-							<button class="shadow-2">Rename</button>
-							<button class="shadow-2" type="button" onclick="closeDialogById('RenameDirectoryDialog')">Cancel</button>
-						</div>
-					</form>
-				</dialog>
-			}
 		}
 	}
 }
@@ -192,15 +190,13 @@
 										</div>
 
 										<div class="flex centered-content">
-											@{
-												if (canBrowserDisplayFile)
-												{
-													<a class="button-a shadow-2" href="@Model.BuildFileQuery(file.Name)">Open</a>
-												}
-												else
-												{
-													<a class="button-a shadow-2" href="@Model.BuildFileQuery(file.Name)" download="@file.Name">Download</a>
-												}
+											@if (canBrowserDisplayFile)
+											{
+												<a class="button-a shadow-2" href="@Model.BuildFileQuery(file.Name)">Open</a>
+											}
+											else
+											{
+												<a class="button-a shadow-2" href="@Model.BuildFileQuery(file.Name)" download="@file.Name">Download</a>
 											}
 										</div>
 										<div class="centered-content">
@@ -209,16 +205,14 @@
 										</div>
 									</div>
 								</summary>
-								@{
-									if (canBrowserDisplayFile)
-									{
-										<div class="card-element grid-1fr-auto card-padding">
-											<div class="centered-content">
-												<span>Download</span>
-											</div>
-											<a class="button-a shadow-2" href="@Model.BuildFileQuery(file.Name)" download="@file.Name">Download</a>
+								@if (canBrowserDisplayFile)
+								{
+									<div class="card-element grid-1fr-auto card-padding">
+										<div class="centered-content">
+											<span>Download</span>
 										</div>
-									}
+										<a class="button-a shadow-2" href="@Model.BuildFileQuery(file.Name)" download="@file.Name">Download</a>
+									</div>
 								}
 								<div class="card-element grid-1fr-auto card-padding">
 									<div class="centered-content">

@@ -2,9 +2,12 @@
 @using HomeControl.Views.Shared
 @using System.Reflection
 @using Microsoft.AspNetCore.Mvc.RazorPages
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
 @model PageModel
 @{
 	var pageModelType = (Type)Model.GetType();
+
+	var requestToken = Antiforgery.GetAndStoreTokens(Context).RequestToken;
 }
 
 <!DOCTYPE html>
@@ -21,6 +24,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 </head>
 <body>
+	<input id="RequestVerificationToken" type="hidden" value="@requestToken" />
 	<header class="shadow-4 centered-content">
 		<div class="centered-content" style="display: grid; grid-template-columns: auto 1fr">
 			<div class="title-displacer">
@@ -126,6 +130,15 @@
 	<script src="~/js/busy.js" asp-append-version="true"></script>
 	<script src="~/js/Breadcrumb.js"></script>
 	<script src="~/js/commands.js"></script>
+	<script src="~/js/Binding.js"></script>
+
+	@if (Model is ViewModelPageModelBase viewModelPage)
+	{
+		<script>
+			var model = @(Json.Serialize(viewModelPage.ViewModelBase))
+			rebind();
+		</script>
+	}
 
 	@await RenderSectionAsync("Scripts", required: false)
 </body>

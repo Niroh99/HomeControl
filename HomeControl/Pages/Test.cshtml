@@ -1,10 +1,13 @@
 ﻿@page
 @model HomeControl.Pages.TestModel
 @{
+	Layout = "Test_Layout";
 }
 
-<form asp-page-handler="Test">
-	<button>Test</button>
-</form>
+@section Scripts {
+	<script src="~/js/Test.js"></script>
+}
 
-<a asp-page="/Devices/Index">Link</a>
+<span class="bound" data-binding-inner="test"></span>
+
+<button data-binding-id="test" onclick="testAjaxPost(this.dataset)">Test</button>

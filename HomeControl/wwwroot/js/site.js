@@ -29,3 +29,22 @@ document.addEventListener("scroll", (e) => SetScrollY(window.scrollY));
 function SetScrollY(scrollY) {
     root.style.setProperty("--scrollY", `${scrollY}px`);
 }
+
+function executePageHandler(pageHandler, dataset) {
+    let data = {};
+
+    for ([targetName, boundPropertyValue] of iterateBoundPropertiesWithPrefix(model, Object.entries(dataset), clickBindingPrefix)) {
+        Object.defineProperty(data, targetName, { value: boundPropertyValue, enumerable: true });
+    }
+
+    $.ajax({
+        method: "POST",
+        url: model.pageInfo.url + "?handler=" + pageHandler,
+        data: data,
+        headers: { RequestVerificationToken: document.getElementById("RequestVerificationToken").value },
+        success: function (responseModel) {
+            model = responseModel;
+            rebind();
+        }
+    });
+}

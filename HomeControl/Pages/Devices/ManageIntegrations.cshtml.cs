@@ -6,8 +6,8 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace HomeControl.Pages.Devices
 {
-    [MenuPage(typeof(IndexModel), "Manage Devices", "/Devices/ManageDevices")]
-    public class ManageDevicesModel(IDatabaseConnection db) : PageModel
+    [MenuPage(typeof(IndexModel), "Manage Integrations", "/Devices/ManageIntegrations")]
+    public class ManageIntegrationsModel(IDatabaseConnection db) : PageModel
     {
         public void OnGet()
         {
@@ -18,21 +18,21 @@ namespace HomeControl.Pages.Devices
         {
             var databaseDevices = await db.SelectAllAsync<Device>();
 
-            var devices = Integrations.TPLink.Discovery.Discover();
+            var tpLinkDevices = Integrations.TPLink.Discovery.Discover();
 
             var rediscoveredDeviceIds = new List<int>();
 
-            foreach (var device in devices)
+            foreach (var tpLinkDevice in tpLinkDevices)
             {
-                var databaseDevice = databaseDevices.FirstOrDefault(databaseDevice => databaseDevice.Hostname == device.Hostname);
+                var databaseDevice = db.SelectAsync(WhereBuilder.Where<Device>().Compare(i => i.Hostname, ComparisonOperator.Equals, tpLinkDevice.Hostname));
 
                 if (databaseDevice == null)
                 {
                     await db.InsertAsync(new Device()
                     {
-                        Type = device.DeviceType,
-                        Hostname = device.Hostname,
-                        Port = device.Port,
+                        Type = tpLinkDevice.DeviceType,
+                        Hostname = tpLinkDevice.Hostname,
+                        Port = tpLinkDevice.Port,
                     });
                 }
                 else rediscoveredDeviceIds.Add(databaseDevice.Id);

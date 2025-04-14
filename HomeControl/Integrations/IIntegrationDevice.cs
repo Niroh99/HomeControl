@@ -12,6 +12,10 @@ namespace HomeControl.Integrations
 
         bool SupportsRename { get; }
 
+        DeviceInitilizationState InitilizationState { get; }
+
+        string InitializationError { get; }
+
         Task InitializeAsync();
 
         IEnumerable<Feature> GetExecutableFeatures();

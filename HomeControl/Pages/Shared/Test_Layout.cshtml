@@ -1,5 +1,12 @@
 ﻿@using System.Reflection;
 @using HomeControl.Views.Shared
+@model ViewModelPageModelBase
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
+@{
+	ViewData["Title"] = "JavaScript";
+
+	var requestToken = Antiforgery.GetAndStoreTokens(Context).RequestToken;
+}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -14,6 +21,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 </head>
 <body>
+	<input id="RequestVerificationToken" type="hidden" value="@requestToken" />
 	<header class="shadow-4 centered-content">
 		<div class="padded-medium centered-content">
 			<div style="margin-left: auto; margin-right: auto; max-width: 1000px">
@@ -46,6 +54,11 @@
 	<script src="~/js/dialog.js" asp-append-version="true"></script>
 	<script src="~/js/busy.js" asp-append-version="true"></script>
 	<script src="~/js/Breadcrumb.js"></script>
+	<script src="~/js/Binding.js"></script>
+	<script>
+		var model = @(Json.Serialize(Model.ViewModelBase))
+		rebind();
+	</script>
 
 	@await RenderSectionAsync("Scripts", required: false)
 </body>

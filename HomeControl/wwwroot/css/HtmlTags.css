@@ -113,10 +113,6 @@ button {
             background: var(--highlights);
         }
 
-details[open] > summary {
-    border-bottom: 1px solid var(--background);
-}
-
     details[open] > summary .summary-marker {
         display: none;
     }

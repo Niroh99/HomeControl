@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace HomeControl.Pages.Devices
 {
-    [MenuPage(typeof(ManageDevicesModel), "Remove Device", "/Devices/ManageDevices/RemoveDevice")]
+    [MenuPage(typeof(ManageIntegrationsModel), "Remove Device", "/Devices/ManageDevices/RemoveDevice")]
     public class RemoveDeviceModel(IDatabaseConnection db, IDeviceService deviceService) : PageModel
     {
         public List<IIntegrationDevice> Devices { get; } = new List<IIntegrationDevice>();
@@ -19,7 +19,7 @@ namespace HomeControl.Pages.Devices
 
         public async Task<IActionResult> OnPostRemoveDevice(int deviceId)
         {
-            var device = await db.SelectAsync<Device>(deviceId);
+            var device = await db.SelectSingleAsync<Device>(deviceId);
 
             await db.DeleteAsync(device);
 

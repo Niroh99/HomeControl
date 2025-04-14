@@ -11,7 +11,6 @@ namespace HomeControl.Pages.Media
     [MenuPage(null, "Media", "/Media/Index")]
     public class IndexModel : PageModel
     {
-        public const string MenuItem = "Media";
         public const string PageUrl = "/Media";
 
         public const string DirectoryPathRouteDataKey = "MediaDirectoryPath";

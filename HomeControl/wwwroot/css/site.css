@@ -2,6 +2,10 @@
     --mainMenuWidh: 200px;
 }
 
+.bound {
+
+}
+
 .overlay {
     border-radius: 0;
     padding: 0;
@@ -39,13 +43,21 @@
     white-space: nowrap;
 }
 
+    .card:nth-child(1 of .card-element) {
+        border-top: none;
+    }
+
 .card-element {
-    border-bottom: 1px solid var(--background);
+    border-top: 1px solid var(--background);
 }
 
-.card-padding {
-    padding: var(--mediumGap);
-}
+    /*.card-element:not(.card-element ~ .card-element) {
+        border-top: none;
+    }*/
+
+    .card-padding {
+        padding: var(--mediumGap);
+    }
 
 .padded {
     padding: var(--smallGap) var(--mediumGap) var(--smallGap) var(--mediumGap);

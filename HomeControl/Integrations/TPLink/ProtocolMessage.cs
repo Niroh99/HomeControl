@@ -69,44 +69,43 @@ namespace HomeControl.Integrations.TPLink
         {
             byte[] messageToSend = ProtocolEncoder.Encrypt(Message ?? JSON);
 
-            using (var client = new TcpClient())
+            using var client = new TcpClient();
+
+            await client.ConnectAsync(hostname, port);
+
+            using NetworkStream stream = client.GetStream();
+
+            await stream.WriteAsync(messageToSend, 0, messageToSend.Length);
+
+            int targetSize = 0;
+
+            List<byte> buffer = new List<byte>();
+
+            do
             {
-                await client.ConnectAsync(hostname, port);
+                byte[] chunk = new byte[1024];
 
-                using NetworkStream stream = client.GetStream();
+                int count = await stream.ReadAsync(chunk, 0, chunk.Length);
 
-                await stream.WriteAsync(messageToSend, 0, messageToSend.Length);
-
-                int targetSize = 0;
-
-                List<byte> buffer = new List<byte>();
-
-                do
+                if (!buffer.Any())
                 {
-                    byte[] chunk = new byte[1024];
+                    byte[] array = chunk.Take(4).ToArray();
 
-                    int count = await stream.ReadAsync(chunk, 0, chunk.Length);
-
-                    if (!buffer.Any())
+                    if (BitConverter.IsLittleEndian)
                     {
-                        byte[] array = chunk.Take(4).ToArray();
-
-                        if (BitConverter.IsLittleEndian)
-                        {
-                            array = array.Reverse().ToArray();
-                        }
-
-                        targetSize = (int)BitConverter.ToUInt32(array, 0);
+                        array = array.Reverse().ToArray();
                     }
 
-                    buffer.AddRange(chunk.Take(count));
+                    targetSize = (int)BitConverter.ToUInt32(array, 0);
                 }
-                while (buffer.Count != targetSize + 4);
 
-                var responseData = buffer.Skip(4).Take(targetSize).ToArray();
-
-                return ParseResponseData(responseData, System, Command, responseType);
+                buffer.AddRange(chunk.Take(count));
             }
+            while (buffer.Count != targetSize + 4);
+
+            var responseData = buffer.Skip(4).Take(targetSize).ToArray();
+
+            return ParseResponseData(responseData, System, Command, responseType);
         }
 
         public static string BuildCommandJson(string system, string command, object argument = null, object value = null)

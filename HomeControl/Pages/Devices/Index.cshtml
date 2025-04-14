@@ -1,59 +1,22 @@
 ﻿@page
 @using HomeControl.Integrations
+@using HomeControl.Views.Shared
 @model HomeControl.Pages.Devices.IndexModel
 @{
 	Layout = "MenuPage_Layout";
 	ViewData["Title"] = "Devices";
 }
 
-@section Dialogs {
-	<dialog id="ChangaDisplayNameDialog" onclose="changeDisplayNameDialogClosed()">
-		<form method="post" class="grid card-padding" asp-page-handler="Rename">
-			<input id="DeviceId" type="hidden" name="DeviceId" />
-			<div class="grid">
-				<label for="DisplayName">Name</label>
-				<input id="DisplayName" name="DisplayName" />
-			</div>
-			<div class="flex" style="justify-content: right">
-				<button class="shadow-2">Rename</button>
-				<button class="shadow-2" type="button" onclick="closeChangeDisplayNameDialog()">Cancel</button>
-			</div>
-		</form>
-	</dialog>
-}
-
 @section Scripts {
-	<script>
-		var changeDisplayNameDialog = document.getElementById("ChangaDisplayNameDialog");
-
-		var deviceIdInput = document.getElementById("DeviceId");
-
-		var displayNameInput = document.getElementById("DisplayName");
-
-		function openChangeDisplayNameDialog(deviceId, displayName) {
-		deviceIdInput.value = deviceId;
-		displayNameInput.value = displayName;
-
-		showDialog(changeDisplayNameDialog);
-		}
-
-		function closeChangeDisplayNameDialog() {
-		closeDialog(changeDisplayNameDialog);
-		}
-
-		function changeDisplayNameDialogClosed() {
-		deviceIdInput.value = null;
-		displayNameInput.value = null;
-		}
-	</script>
+	<script src="~/js/Devices/Devices.js"></script>
 }
 
 <div class="grid body-content">
 	<div class="card shadow-2 card-a-container">
-		<a class="card-a" asp-page="ManageDevices">
+		<a class="card-a" asp-page="ManageIntegrations">
 			<div class="grid-1fr-auto card-padding">
 				<div class="centered-content">
-					<b>Manage Devices</b>
+					<b>Manage Integrations</b>
 				</div>
 
 				<div class="centered-content">
@@ -65,114 +28,63 @@
 
 	<h2 class="lesser">TP-Link Devices</h2>
 
-	@foreach (var deviceInfo in Model.Devices.OrderBy(deviceInfo => deviceInfo.Device.DisplayName))
+	@for (int i = 0; i < Model.ViewModel.Devices.Count; i++)
 	{
-		var device = deviceInfo.Device;
+		var deviceInfo = Model.ViewModel.Devices[i];
 
-		<form method="post" class="card shadow-2">
-			<details>
-				<summary>
-					<div class="grid card-padding medium-gap" style="grid-template-columns: 1fr auto auto">
-						<div class="centered-content">
-							<b>@device.DisplayName</b>
-						</div>
+		<div class="card shadow-2">
+			@switch (deviceInfo.Device.InitilizationState)
+			{
+				case DeviceInitilizationState.Success:
+					<details>
+						<summary>
+							<div class="grid card-padding medium-gap" style="grid-template-columns: 1fr auto auto">
+								<div class="centered-content">
+									<b class="bound" data-binding-inner="devices[@(i)].device.displayName"></b>
+								</div>
 
-						<div class="flex">
-							@foreach (var feature in device.GetExecutableFeatures())
+								@if (deviceInfo.PrimaryOption != null)
+								{
+									<button class="bound shadow-2" type="button" data-binding-inner="devices[@(i)].primaryOption" data-clickbinding-id="devices[@(i)].device.owner.id" data-clickbinding-featureName="devices[@(i)].primaryOption" onclick="executePageHandler('ExecuteFeature', this.dataset)"></button>
+								}
+								<div class="centered-content">
+									<img class="summary-marker" src="~/svg/arrow-down.svg" />
+									<img class="summary-marker-open" src="~/svg/arrow-up.svg" />
+								</div>
+							</div>
+						</summary>
+						@{
+							var options = deviceInfo.Options.ToArray();
+
+							for (int j = 0; j < options.Length; j++)
 							{
-								<button class="shadow-2" asp-page-handler="ExecuteFeature" asp-route-deviceId="@device.Owner.Id" asp-route-featureName="@feature.Name">@feature.Name</button>
+								<div class="card-element grid-1fr-auto card-padding">
+									<div class="centered-content">
+										<span class="bound" data-binding-inner="devices[@(i)].options[@(j)].name"></span>
+									</div>
+									<button type="button" class="shadow-2" data-clickbinding-optionId="devices[@(i)].options[@(j)].id" onclick="executePageHandler('ExecuteOption', this.dataset)">Execute</button>
+								</div>
 							}
+						}
+
+						<div class="card-element grid-1fr-auto card-padding">
+							<div class="centered-content">
+								<span>Edit</span>
+							</div>
+							<a class="button-a shadow-2" asp-page="EditDevice" asp-route-DeviceId="@deviceInfo.Device.Owner.Id">Edit</a>
 						</div>
-						<div class="centered-content">
-							<img class="summary-marker" src="~/svg/arrow-down.svg" />
-							<img class="summary-marker-open" src="~/svg/arrow-up.svg" />
+						<div class="card-element grid-1-2 card-padding">
+							@await Html.PartialAsync("DeviceInformation", new DeviceInformationModel(deviceInfo.Device))
 						</div>
+					</details>
+					break;
+				case DeviceInitilizationState.Error:
+					<div class="centered-content">
+						<b class="bound" data-binding-inner="devices[@(i)].device.owner.hostname"></b>
+						<span class="lesser bound" style="font-size: 12px" data-binding-inner="devices[@(i)].device.InitializationError"></span>
 					</div>
-				</summary>
-				@{
-					foreach (var option in deviceInfo.Options)
-					{
-						<div class="card-element grid-1fr-auto card-padding">
-							<div class="centered-content">
-								<span>@option.Name</span>
-							</div>
-							<button asp-page-handler="ExecuteOption" asp-route-optionId="@option.Id" class="shadow-2">Execute</button>
-						</div>
-					}
-
-					if (device.SupportsRename)
-					{
-						<div class="card-element grid-1fr-auto card-padding">
-							<div class="centered-content">
-								<span class="field-label">Name:</span>
-								<span>@device.DisplayName</span>
-							</div>
-							<button class="shadow-2" type="button" onclick="openChangeDisplayNameDialog(@Json.Serialize(device.Owner.Id), '@device.DisplayName')">Rename</button>
-						</div>
-					}
-				}
-				<div class="grid-1-2 card-padding">
-					@{
-						void DisplayChildProperty(IProperty property)
-						{
-							switch (property)
-							{
-								case PlaceholderProperty:
-									<div></div>
-									break;
-								case SingleProperty singleProperty:
-									<span style="word-break: break-all">@singleProperty.Value</span>
-									<span class="field-label">@singleProperty.Label</span>
-
-									break;
-								case MultiProperty multiProperty:
-									<span class="field-label">@multiProperty.Label</span>
-
-									foreach (var childProperty in multiProperty.ChildProperties)
-									{
-										DisplayChildProperty(childProperty);
-									}
-
-									break;
-							}
-						}
-
-						void DisplayProperty(IProperty property)
-						{
-							switch (property)
-							{
-								case PlaceholderProperty:
-									<div></div>
-									break;
-								case SingleProperty singleProperty:
-									<div style="overflow: hidden; text-overflow: ellipsis">
-										<span class="field-label">@singleProperty.Label</span>
-										<span>@singleProperty.Value</span>
-									</div>
-
-									break;
-								case MultiProperty multiProperty:
-									<div>
-										<span class="field-label">@multiProperty.Label</span>
-										@{
-											foreach (var childProperty in multiProperty.ChildProperties)
-											{
-												DisplayChildProperty(childProperty);
-											}
-										}
-									</div>
-
-									break;
-							}
-						}
-
-						foreach (var property in device.GetProperties())
-						{
-							DisplayProperty(property);
-						}
-					}
-				</div>
-			</details>
-		</form>
+					break;
+			}
+		</div>
 	}
 </div>

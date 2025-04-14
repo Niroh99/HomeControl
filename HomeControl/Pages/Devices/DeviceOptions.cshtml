@@ -1,0 +1,35 @@
+﻿@page "{DeviceId}"
+@model HomeControl.Pages.Devices.DeviceOptionsModel
+@{
+	Layout = "MenuPage_Layout";
+	ViewData["Title"] = "Device Options";
+}
+
+<div class="grid body-content">
+	@if (Model.Device == null)
+	{
+		<h2 class="lesser">Unknown Device</h2>
+	}
+	else
+	{
+		<h2>@Model.IntegrationDevice.DisplayName</h2>
+
+		if (Model.DeviceOptions.Count == 0)
+		{
+			<h3 class="lesser">No Options</h3>
+		}
+		else
+		{
+			<div class="card shadow-2">
+				@foreach (var deviceOption in Model.DeviceOptions)
+				{
+					<div class="card-element card-padding">
+						<div class="centered-content">
+							<span>@deviceOption.Name</span>
+						</div>
+					</div>
+				}
+			</div>
+		}
+	}
+</div>

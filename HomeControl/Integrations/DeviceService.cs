@@ -29,7 +29,7 @@ namespace HomeControl.Integrations
 
         public async Task ExecuteFeatureAsync(int deviceId, string featureName)
         {
-            var device = await db.SelectAsync<Device>(deviceId);
+            var device = await db.SelectSingleAsync<Device>(deviceId);
 
             await ExecuteFeatureAsync(device, featureName);
         }
@@ -46,11 +46,11 @@ namespace HomeControl.Integrations
 
         public async Task ExecuteDeviceOptionAsync(int deviceOptionId)
         {
-            var deviceOption = await db.SelectAsync<DeviceOption>(deviceOptionId);
+            var deviceOption = await db.SelectSingleAsync<DeviceOption>(deviceOptionId);
 
             ArgumentNullException.ThrowIfNull(deviceOption, nameof(deviceOptionId));
 
-            var device = await db.SelectAsync<Device>(deviceOption.DeviceId);
+            var device = await db.SelectSingleAsync<Device>(deviceOption.DeviceId);
 
             var actions = await db.SelectAllAsync<DeviceOptionAction>();
 

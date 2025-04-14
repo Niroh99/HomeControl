@@ -16,6 +16,16 @@ namespace HomeControl.Integrations.TPLink
 
         public abstract DeviceType DeviceType { get; }
 
+        public string DisplayName => Alias;
+
+        public bool SupportsRename { get => true; }
+
+        private DeviceInitilizationState _initilizationState = DeviceInitilizationState.None;
+        public DeviceInitilizationState InitilizationState { get => _initilizationState; }
+
+        private string _initializationError = null;
+        public string InitializationError { get => _initializationError; }
+
         public string Hostname { get; } = hostname;
 
         public int Port { get; } = port;
@@ -52,15 +62,23 @@ namespace HomeControl.Integrations.TPLink
 
         protected abstract Type SysInfoType { get; }
 
-        public string DisplayName => Alias;
-
-        public bool SupportsRename { get => true; }
-
         public async Task InitializeAsync()
         {
+            _initilizationState = DeviceInitilizationState.None;
+
             var message = new ProtocolMessage(ProtocolMessageSystem, GetSysInfoCommand, null, null);
 
-            _sysInfo = (SysInfo)await message.ExecuteAsync(Hostname, Port, SysInfoType);
+            try
+            {
+                _sysInfo = (SysInfo)await message.ExecuteAsync(Hostname, Port, SysInfoType);
+
+                _initilizationState = DeviceInitilizationState.Success;
+            }
+            catch (Exception ex)
+            {
+                _initilizationState = DeviceInitilizationState.Error;
+                _initializationError = ex.Message;
+            }
         }
 
         public virtual IEnumerable<IProperty> GetProperties()
