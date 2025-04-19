@@ -5,7 +5,6 @@
     <Nullable>disable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <GenerateDocumentationFile>False</GenerateDocumentationFile>
-    <SignAssembly>False</SignAssembly>
   </PropertyGroup>
 
   <ItemGroup>
@@ -16,16 +15,4 @@
     <PackageReference Include="Microsoft.Data.Sqlite" Version="9.0.0" />
     <PackageReference Include="tplink-smartdevices" Version="2.0.1" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Content Update="wwwroot\svg\Plus.svg">
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Content>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Views\Devices\" />
-  </ItemGroup>
-
 </Project>

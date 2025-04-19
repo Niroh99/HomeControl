@@ -15,7 +15,9 @@ AppDomain.CurrentDomain.SetData("DataDirectory", Directory.GetCurrentDirectory()
 
 builder.WebHost.ConfigureKestrel(serverOptions =>
 {
-    serverOptions.Listen(IPAddress.Any, 5000);
+    //if (!System.Diagnostics.Debugger.IsAttached)
+    //    serverOptions.ListenAnyIP(5000);
+    //serverOptions.Listen(IPAddress.Any, 5000);
 });
 
 builder.Services.AddControllers();

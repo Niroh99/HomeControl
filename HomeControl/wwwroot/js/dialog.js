@@ -7,6 +7,8 @@ function showDialogById(dialogId) {
 }
 
 function showDialog(dialog) {
+    if (smallDisplayCommandsToggleButton.isChecked) toggleSmallCommandsDisplay();
+
     dialogOverlay.classList.remove("hidden");
 
     dialog.show();

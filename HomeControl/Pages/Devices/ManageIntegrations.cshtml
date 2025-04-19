@@ -9,32 +9,19 @@
 	<script>
 		function discoverDevices()
 		{
-			let discoverDevicesForm = document.getElementById("DiscoverDevicesForm");
-
 			BusyWithMessage("Discovering TP-Link devices...");
 
-			discoverDevicesForm.submit();
+			executePageHandler("DiscoverDevices").always(() => NotBusy());
 		}
 	</script>
 }
 
 <div class="grid body-content">
 	<h2 class="lesser">TP-Link</h2>
-	<form id="DiscoverDevicesForm" method="post" asp-page-handler="DiscoverDevices" class="card shadow-2 grid-1fr-auto card-padding">
+	<div method="post" asp-page-handler="DiscoverDevices" class="card shadow-2 grid-1fr-auto card-padding">
 		<div class="centered-content">
 			<b>Discover Devices</b>
 		</div>
 		<button type="button" class="shadow-2" onclick="discoverDevices()">Discover</button>
-	</form>
-	<div class="card shadow-2 card-a-container">
-		<a class="card-a" asp-page="RemoveDevice">
-			<div class="grid-1fr-auto card-padding">
-				<b>Remove Device</b>
-
-				<div class="centered-content">
-					<img src="~/svg/arrow-right.svg" />
-				</div>
-			</div>
-		</a>
 	</div>
 </div>

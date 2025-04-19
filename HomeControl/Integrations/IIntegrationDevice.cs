@@ -8,6 +8,8 @@ namespace HomeControl.Integrations
 
         DeviceType DeviceType { get; }
 
+        bool AllowCaching { get; }
+
         string DisplayName { get; }
 
         bool SupportsRename { get; }
@@ -17,6 +19,8 @@ namespace HomeControl.Integrations
         string InitializationError { get; }
 
         Task InitializeAsync();
+
+        IEnumerable<Feature> GetFeatures();
 
         IEnumerable<Feature> GetExecutableFeatures();
 

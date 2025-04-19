@@ -29,18 +29,12 @@
 
     public class Breadcrumb
     {
-        public Breadcrumb(string name, string uri, params string[] classes) : this(name, uri, true, classes)
-        {
-        }
-
-        public Breadcrumb(string name, string uri, bool isEnabled, params string[] classes)
+        public Breadcrumb(string name, string uri, params string[] classes)
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(name);
-            ArgumentException.ThrowIfNullOrWhiteSpace(uri);
 
             Name = name;
             Uri = uri;
-            IsEnabled = isEnabled;
             Classes.AddRange(classes);
         }
 
@@ -48,8 +42,8 @@
 
         public string Uri { get; set; }
 
-        public bool IsEnabled { get; set; }
+        public bool IsEnabled { get => Uri != null; }
 
-        public List<string> Classes { get; } = new List<string>();
+        public List<string> Classes { get; } = [];
     }
 }

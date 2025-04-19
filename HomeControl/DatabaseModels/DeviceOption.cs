@@ -1,4 +1,4 @@
-﻿using HomeControl.Modeling;
+﻿using HomeControl.Database;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HomeControl.DatabaseModels

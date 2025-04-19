@@ -3,101 +3,95 @@
 @model HomeControl.Pages.Devices.EditDeviceModel
 @{
 	Layout = "MenuPage_Layout";
-	ViewData["Title"] = "EditDevice";
+	ViewData["Title"] = "Edit Device";
 }
 
 @section Dialogs {
-	<dialog id="ChangaDisplayNameDialog" onclose="changeDisplayNameDialogClosed()">
+	<dialog id="ChangaDisplayNameDialog">
 		<form method="post" class="grid card-padding" asp-page-handler="Rename">
-			<input id="DeviceId" type="hidden" name="DeviceId" />
 			<div class="grid">
 				<label for="DisplayName">Name</label>
-				<input id="DisplayName" name="DisplayName" />
+				<input id="DisplayName" name="DisplayName" class="bound" data-binding-value="integrationDevice.displayName" />
 			</div>
 			<div class="flex" style="justify-content: right">
 				<button class="shadow-2">Rename</button>
-				<button class="shadow-2" type="button" onclick="closeChangeDisplayNameDialog()">Cancel</button>
+				<button class="shadow-2" type="button" onclick="closeDialogById('ChangaDisplayNameDialog')">Cancel</button>
 			</div>
 		</form>
 	</dialog>
-}
 
-@section Scripts {
-	<script>
-		var changeDisplayNameDialog = document.getElementById("ChangaDisplayNameDialog");
-
-		var deviceIdInput = document.getElementById("DeviceId");
-
-		var displayNameInput = document.getElementById("DisplayName");
-
-		function openChangeDisplayNameDialog(deviceId, displayName)
-		{
-			deviceIdInput.value = deviceId;
-			displayNameInput.value = displayName;
-
-			showDialog(changeDisplayNameDialog);
-		}
-
-		function closeChangeDisplayNameDialog()
-		{
-			closeDialog(changeDisplayNameDialog);
-		}
-
-		function changeDisplayNameDialogClosed()
-		{
-			deviceIdInput.value = null;
-			displayNameInput.value = null;
-		}
-	</script>
+	<dialog id="RemoveDeviceQuestionDialog">
+		<div class="grid padded">
+			<span>Remove Device?</span>
+			<form class="flex" style="justify-content: right" method="post" asp-page-handler="RemoveDevice" asp-route-DeviceId="@Model.ViewModel.Device?.Id">
+				<button class="shadow-2">Remove</button>
+				<button class="shadow-2" type="button" onclick="closeDialogById('RemoveDeviceQuestionDialog')">Cancel</button>
+			</form>
+		</div>
+	</dialog>
 }
 
 <div class="grid body-content">
-	@if (Model.Device == null)
+	@if (Model.ViewModel.Device == null)
 	{
 		<h2 class="lesser">Unknown Device</h2>
 	}
 	else
 	{
-		<h2 class="lesser">@Model.IntegrationDevice.DisplayName</h2>
+		<h2 class="lesser bound" data-binding-inner="integrationDevice.displayName"></h2>
 
-		<div class="card shadow-2">
-			@if (Model.IntegrationDevice.SupportsRename)
-			{
-				<div class="card-element grid-1fr-auto card-padding">
-					<div class="centered-content">
-						<span class="field-label">Name:</span>
-						<span>@Model.IntegrationDevice.DisplayName</span>
+		switch (Model.ViewModel.IntegrationDevice.InitilizationState)
+		{
+			case HomeControl.Integrations.DeviceInitilizationState.Success:
+				<div class="card shadow-2">
+					@if (Model.ViewModel.IntegrationDevice.SupportsRename)
+					{
+						<div class="card-element grid-1fr-auto card-padding">
+							<div class="centered-content">
+								<span class="field-label">Name:</span>
+								<span class="bound" data-binding-inner="integrationDevice.displayName"></span>
+							</div>
+							<button class="shadow-2" type="button" onclick="showDialogById('ChangaDisplayNameDialog')">Rename</button>
+						</div>
+					}
+					<div class="card-element card-padding grid-1fr-auto">
+						<div class="centered-content">
+							<span>Remove Device</span>
+						</div>
+						<button class="shadow-2" onclick="showDialogById('RemoveDeviceQuestionDialog')">Remove</button>
 					</div>
-					<button class="shadow-2" type="button" onclick="openChangeDisplayNameDialog(@Json.Serialize(Model.Device.Id), '@Model.IntegrationDevice.DisplayName')">Rename</button>
+
+					<a class="card-a card-element" asp-page="/Devices/DeviceOptions" asp-route-DeviceId="@Model.ViewModel.Device?.Id">
+						<div class="grid-1fr-auto card-padding">
+							<div class="centered-content">
+								<span>Options</span>
+							</div>
+
+							<div class="centered-content">
+								<img src="~/svg/arrow-right.svg" />
+							</div>
+						</div>
+					</a>
+					<a class="card-a card-element" asp-page="/Devices/DeviceRoutines">
+						<div class="grid-1fr-auto card-padding">
+							<div class="centered-content">
+								<span>Routines</span>
+							</div>
+
+							<div class="centered-content">
+								<img src="~/svg/arrow-right.svg" />
+							</div>
+						</div>
+					</a>
+					<div class="card-element grid-1-2 card-padding">
+						@await Html.PartialAsync("DeviceInformation", new DeviceInformationModel(Model.ViewModel.IntegrationDevice))
+					</div>
 				</div>
-			}
-
-			<a class="card-a card-element" asp-page="/Devices/DeviceOptions" asp-route-DeviceId="@Model.Device.Id">
-				<div class="grid-1fr-auto card-padding">
-					<div class="centered-content">
-						<span>Options</span>
-					</div>
-
-					<div class="centered-content">
-						<img src="~/svg/arrow-right.svg" />
-					</div>
-				</div>
-			</a>
-			<a class="card-a card-element" asp-page="/Devices/DeviceRoutines">
-				<div class="grid-1fr-auto card-padding">
-					<div class="centered-content">
-						<span>Routines</span>
-					</div>
-
-					<div class="centered-content">
-						<img src="~/svg/arrow-right.svg" />
-					</div>
-				</div>
-			</a>
-
-			<div class="card-element grid-1-2 card-padding">
-				@await Html.PartialAsync("DeviceInformation", new DeviceInformationModel(Model.IntegrationDevice))
-			</div>
-		</div>
+				break;
+			case Integrations.DeviceInitilizationState.Error:
+				<b class="bound" data-binding-inner="integrationDevice.initializationError" style="color: darkred"></b>
+				break;
+			default: throw new NotImplementedException();
+		}
 	}
 </div>

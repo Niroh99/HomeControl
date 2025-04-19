@@ -1,0 +1,131 @@
+﻿@page "{DeviceOptionId}"
+@using HomeControl.Views.Shared
+@model HomeControl.Pages.Devices.EditDeviceOptionModel
+@{
+	Layout = "MenuPage_Layout";
+	ViewData["Title"] = "Edit Device Option";
+
+	var newDeviceOptionDataInformation = new Dictionary<string, object>();
+
+	foreach (var deviceOptionActionType in Enum.GetValues<HomeControl.DatabaseModels.DeviceOptionActionType>())
+	{
+		newDeviceOptionDataInformation[deviceOptionActionType.ToString()] = Activator.CreateInstance(Integrations.IDeviceService.DeviceOptionActionTypeDataMap[deviceOptionActionType]);
+	}
+
+	var newDeviceOptionDataInformationJson = Json.Serialize(newDeviceOptionDataInformation);
+}
+
+@section Dialogs {
+	<dialog id="ChangeDeviceOptionNameDialog">
+		<form method="post" class="grid card-padding" asp-page-handler="Rename">
+			<div class="grid">
+				<label for="DeviceOptionName">Name</label>
+				<input id="DeviceOptionName" name="DeviceOptionName" class="bound" data-binding-value="deviceOption.name" />
+			</div>
+			<div class="flex" style="justify-content: right">
+				<button class="shadow-2">Rename</button>
+				<button class="shadow-2" type="button" onclick="closeDialogById('ChangeDeviceOptionNameDialog')">Cancel</button>
+			</div>
+		</form>
+	</dialog>
+
+	<dialog id="RemoveDeviceOptionQuestionDialog">
+		<div class="grid padded">
+			<span>Remove Device Option?</span>
+			<form class="flex" style="justify-content: right" method="post" asp-page-handler="RemoveDeviceOption">
+				<button class="shadow-2">Remove</button>
+				<button class="shadow-2" type="button" onclick="closeDialogById('RemoveDeviceOptionQuestionDialog')">Cancel</button>
+			</form>
+		</div>
+	</dialog>
+
+	<dialog id="CreateDeviceOptionActionDialog">
+		<form id="CreateDeviceOptionAction" method="post" class="grid card-padding" asp-page-handler="CreateDeviceOptionAction">
+			<input hidden id="NewDeviceOptionActionData" name="NewDeviceOptionActionData" />
+			<div class="grid">
+				<label for="DeviceOptionActionType">Name</label>
+				<div class="select-wrapper">
+					<select asp-items="Model.ViewModel.DeviceOptionActionTypes" id="DeviceOptionActionType" name="DeviceOptionActionType" onchange="deviceOptionActionTypeChanged()"></select>
+					<img class="select-marker" src="~/svg/arrow-down.svg" />
+				</div>
+				@await Html.PartialAsync("EditDeviceOptionActionData", new EditDeviceOptionActionDataModel(Model.ViewModel.Device, Model.ViewModel.IntegrationDevice, Model.ViewModel.DeviceOption, "DeviceOptionActionEditor"))
+			</div>
+			<div class="flex" style="justify-content: right">
+				<button class="shadow-2" type="button" onclick="submitCreateDeviceOptionActionForm()">Create</button>
+				<button class="shadow-2" type="button" onclick="closeDialogById('CreateDeviceOptionActionDialog')">Cancel</button>
+			</div>
+		</form>
+	</dialog>
+
+	<dialog id="RemoveDeviceOptionActionQuestionDialog">
+		<div class="grid padded">
+			<span>Remove Action?</span>
+			<form class="flex" style="justify-content: right" method="post" asp-page-handler="RemoveDeviceOptionAction">
+				<input hidden id="ActionIdToRemove" name="ActionIdToRemove" />
+				<button class="shadow-2">Remove</button>
+				<button class="shadow-2" type="button" onclick="closeDialogById('RemoveDeviceOptionActionQuestionDialog')">Cancel</button>
+			</form>
+		</div>
+	</dialog>
+}
+
+@section Commands {
+	<div class="flex-vertical">
+		<button class="shadow-2" onclick="showDialogById('CreateDeviceOptionActionDialog')">Create Action</button>
+	</div>
+}
+
+@section Scripts {
+	<script src="~/js/Devices/EditDeviceOption.js"></script>
+	<script>
+		var newDeviceOptionDataInformation = @newDeviceOptionDataInformationJson
+	</script>
+}
+
+<div class="grid body-content">
+	@if (Model.ViewModel.DeviceOption == null)
+	{
+		<h2 class="lesser">Unknown Device Option</h2>
+	}
+	else
+	{
+		<h2 class="lesser bound" data-binding-inner="deviceOption.name"></h2>
+
+		<div class="card shadow-2">
+			<div class="card-element grid-1fr-auto card-padding">
+				<div class="centered-content">
+					<span class="field-label">Name:</span>
+					<span class="bound" data-binding-inner="deviceOption.name"></span>
+				</div>
+				<button class="shadow-2" onclick="showDialogById('ChangeDeviceOptionNameDialog')">Rename</button>
+			</div>
+			<div class="card-element shadow-2 card-padding grid-1fr-auto">
+				<div class="centered-content">
+					<span>Remove</span>
+				</div>
+				<button class="shadow-2" onclick="showDialogById('RemoveDeviceOptionQuestionDialog')">Remove</button>
+			</div>
+		</div>
+
+		<h3 class="lesser">Actions</h3>
+
+		if (Model.ViewModel.DeviceOptionActions.Count == 0)
+		{
+			<h4 class="lesser">No Actions</h4>
+		}
+		else
+		{
+			<div class="card shadow-2">
+				@for (int i = 0; i < Model.ViewModel.DeviceOptionActions.Count; i++)
+				{
+					var deviceOptionAction = Model.ViewModel.DeviceOptionActions[i];
+
+					<div class="card-element grid-1fr-auto card-padding">
+						<span class="bound" style="align-self: center" data-binding-inner="deviceOptionActions[@(i)].display"></span>
+						<button class="shadow-2" onclick="openRemoveDeviceOptionActionQuestionDialog('@deviceOptionAction.Id')">Remove</button>
+					</div>
+				}
+			</div>
+		}
+	}
+</div>

@@ -4,45 +4,33 @@ using Microsoft.AspNetCore.Mvc;
 using HomeControl.DatabaseModels;
 using HomeControl.Attributes;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using HomeControl.Modeling;
 
 namespace HomeControl.Pages.Devices
 {
     [MenuPage(null, "Devices", "/Devices/Index")]
     public class IndexModel(IDatabaseConnection db, IDeviceService deviceService) : ViewModelPageModel<IndexModel.DevicesViewModel>
     {
-        public class DevicesViewModel : PageViewModel
+        public class DevicesViewModel(IndexModel page, IDatabaseConnection db, IDeviceService deviceService) : PageViewModel(page)
         {
-            private DevicesViewModel(IndexModel page, IDatabaseConnection db, IDeviceService deviceService) : base(page)
-            {
-                _db = db;
-                _deviceService = deviceService;
-            }
-
-            private readonly IDatabaseConnection _db;
-            private readonly IDeviceService _deviceService;
-
             public List<DeviceInfo> Devices { get; } = [];
 
-            public static async Task<DevicesViewModel> CreateAsync(IndexModel page, IDatabaseConnection db, IDeviceService deviceService)
+            public override async Task Initialize()
             {
-                var instance = new DevicesViewModel(page, db, deviceService);
-                await instance.PopulateDevicesAsync();
-                return instance;
+                await PopulateDevicesAsync();
             }
 
             private async Task PopulateDevicesAsync()
             {
-                var databaseDevices = await _db.SelectAllAsync<Device>();
+                var databaseDevices = await db.SelectAllAsync<Device>();
 
-                var deviceOptions = await _db.SelectAllAsync<DeviceOption>();
+                var deviceOptions = await db.SelectAllAsync<DeviceOption>();
 
                 var devices = new List<DeviceInfo>();
 
                 foreach (var databaseDevice in databaseDevices)
                 {
-                    var integrationDevice = _deviceService.CreateIntegrationDevice(databaseDevice);
-
-                    await integrationDevice.InitializeAsync();
+                    var integrationDevice = await deviceService.CreateAndInitializeIntegrationDeviceAsync(databaseDevice);
 
                     devices.Add(new DeviceInfo(integrationDevice, deviceOptions.Where(option => option.DeviceId == databaseDevice.Id)));
                 }
@@ -60,16 +48,20 @@ namespace HomeControl.Pages.Devices
             public string PrimaryOption { get; } = device.GetExecutableFeatures().FirstOrDefault()?.Name;
         }
 
-        public async Task OnGet()
+        protected override PageViewModel CreateViewModel()
         {
-            ViewModel = await DevicesViewModel.CreateAsync(this, db, deviceService);
+            return new DevicesViewModel(this, db, deviceService);
+        }
+
+        public void OnGet()
+        {
+            
         }
 
         public async Task<IActionResult> OnPostExecuteFeature(int id, string featureName)
         {
             await deviceService.ExecuteFeatureAsync(id, featureName);
 
-            ViewModel = await DevicesViewModel.CreateAsync(this, db, deviceService);
             return ViewModelResponse();
         }
 
@@ -77,19 +69,7 @@ namespace HomeControl.Pages.Devices
         {
             await deviceService.ExecuteDeviceOptionAsync(optionId);
 
-            ViewModel = await DevicesViewModel.CreateAsync(this, db, deviceService);
             return ViewModelResponse();
-        }
-
-        public async Task<IActionResult> OnPostRename(int deviceId, string displayName)
-        {
-            var device = await db.SelectSingleAsync<Device>(deviceId);
-
-            var integrationDevice = deviceService.CreateIntegrationDevice(device);
-
-            await integrationDevice.RenameAsync(displayName);
-
-            return RedirectToPage();
         }
     }
 }

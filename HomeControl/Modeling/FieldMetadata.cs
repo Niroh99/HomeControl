@@ -1,10 +1,12 @@
-﻿namespace HomeControl.Modeling
-{
-    public class FieldMetadata(string name, Type type)
-    {
-        public Type Type { get; } = type;
+﻿using System.Reflection;
 
-        public string Name { get; } = name;
+namespace HomeControl.Modeling
+{
+    public class FieldMetadata(PropertyInfo propertyInfo)
+    {
+        public PropertyInfo PropertyInfo { get; } = propertyInfo;
+
+        public string Name { get; } = propertyInfo.Name;
 
         public object Get(Model model)
         {

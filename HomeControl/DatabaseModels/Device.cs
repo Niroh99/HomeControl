@@ -1,6 +1,5 @@
 ﻿using HomeControl.Integrations;
 using HomeControl.Integrations.TPLink;
-using HomeControl.Modeling;
 using HomeControl.Database;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;

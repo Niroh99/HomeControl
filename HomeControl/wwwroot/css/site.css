@@ -156,6 +156,8 @@
 }
 
 .flex-vertical {
+    display: flex;
+    gap: var(--smallGap);
     flex-direction: column;
 }
 

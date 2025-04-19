@@ -113,13 +113,13 @@ button {
             background: var(--highlights);
         }
 
-    details[open] > summary .summary-marker {
-        display: none;
-    }
+details[open] > summary .summary-marker {
+    display: none;
+}
 
-    details[open] > summary .summary-marker-open {
-        display: block;
-    }
+details[open] > summary .summary-marker-open {
+    display: block;
+}
 
 summary {
     display: block;
@@ -156,13 +156,55 @@ input {
     color: var(--foreground);
     padding: var(--smallGap) var(--mediumGap) var(--smallGap) var(--mediumGap);
     border-radius: var(--smallBorderRadius);
+    -moz-appearance: none;
+    -webkit-appearance: none;
+    appearance: none;
 }
+
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
 
     input:focus {
         outline: none;
         border-bottom-width: 2px;
         border-bottom-color: var(--highlights);
     }
+
+    input[type=number] {
+        text-align: right;
+        -moz-appearance: textfield;
+    }
+
+select {
+    border: 1px solid var(--borders);
+    background: var(--background);
+    color: var(--foreground);
+    padding: var(--smallGap) 30px var(--smallGap) var(--mediumGap);
+    border-radius: var(--smallBorderRadius);
+    -moz-appearance: none;
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+}
+
+    select:focus {
+        outline: none;
+    }
+
+.select-wrapper {
+    position: relative;
+}
+
+.select-marker {
+    position: absolute;
+    top: calc(50% - 3px);
+    right: 10px;
+}
+
+.select-wrapper 
 
 a.breadcrumb-a {
     color: var(--foreground);

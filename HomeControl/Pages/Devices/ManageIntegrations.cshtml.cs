@@ -3,15 +3,26 @@ using Microsoft.AspNetCore.Mvc;
 using HomeControl.DatabaseModels;
 using HomeControl.Attributes;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using HomeControl.Modeling;
 
 namespace HomeControl.Pages.Devices
 {
     [MenuPage(typeof(IndexModel), "Manage Integrations", "/Devices/ManageIntegrations")]
-    public class ManageIntegrationsModel(IDatabaseConnection db) : PageModel
+    public class ManageIntegrationsModel(IDatabaseConnection db) : ViewModelPageModel<ManageIntegrationsModel.ManageIntegrationsViewModel>
     {
+        public class ManageIntegrationsViewModel(ViewModelPageModelBase page) : PageViewModel(page)
+        {
+
+        }
+
+        protected override PageViewModel CreateViewModel()
+        {
+            return new ManageIntegrationsViewModel(this);
+        }
+
         public void OnGet()
         {
-            
+
         }
 
         public async Task<IActionResult> OnPostDiscoverDevices()
@@ -24,7 +35,7 @@ namespace HomeControl.Pages.Devices
 
             foreach (var tpLinkDevice in tpLinkDevices)
             {
-                var databaseDevice = db.SelectAsync(WhereBuilder.Where<Device>().Compare(i => i.Hostname, ComparisonOperator.Equals, tpLinkDevice.Hostname));
+                var databaseDevice = (await db.SelectAsync(WhereBuilder.Where<Device>().Compare(i => i.Hostname, ComparisonOperator.Equals, tpLinkDevice.Hostname))).FirstOrDefault();
 
                 if (databaseDevice == null)
                 {
@@ -57,7 +68,7 @@ namespace HomeControl.Pages.Devices
                 await db.DeleteAsync(databaseDeviceToDelete);
             }
 
-            return Redirect("/Devices");
+            return ViewModelResponse();
         }
     }
 }

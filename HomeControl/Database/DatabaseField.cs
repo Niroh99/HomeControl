@@ -1,14 +1,17 @@
 ﻿using HomeControl.Modeling;
+using System.Reflection;
 
 namespace HomeControl.Database
 {
     public class DatabaseField : FieldMetadata
     {
-        public DatabaseField(string name, Type type, string columnName = null) : base(name, type)
+        public DatabaseField(PropertyInfo propertyInfo) : base(propertyInfo)
         {
-            ColumnName = columnName ?? Name;
+            var jsonFieldAttribute = propertyInfo.GetCustomAttribute<JsonFieldAttribute>();
+
+            IsJson = jsonFieldAttribute != null;
         }
 
-        public string ColumnName { get; }
+        public bool IsJson { get; }
     }
 }

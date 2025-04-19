@@ -1,5 +1,5 @@
-﻿using HomeControl.Events;
-using HomeControl.Modeling;
+﻿using HomeControl.Database;
+using HomeControl.Events;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HomeControl.DatabaseModels
@@ -11,7 +11,8 @@ namespace HomeControl.DatabaseModels
         public EventType Type { get => Get<EventType>(); set => Set(value); }
 
         [Column]
-        public string Data { get => Get<string>(); set => Set(value); }
+        [JsonField]
+        public EventData Data { get => Get<EventData>(); set => Set(value); }
 
         [Column]
         public DateTime PlannedExecution { get => Get<DateTime>(); set => Set(value); }

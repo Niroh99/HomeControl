@@ -1,12 +1,9 @@
-﻿namespace HomeControl.Database
-{
-    public class PrimaryKeyField : DatabaseField
-    {
-        public PrimaryKeyField(string name, bool isIdentity, string columnName = null) : base(name, isIdentity ? typeof(int) : typeof(string), columnName)
-        {
-            IsIdentity = isIdentity;
-        }
+﻿using System.Reflection;
 
-        public bool IsIdentity { get; }
+namespace HomeControl.Database
+{
+    public class PrimaryKeyField(PropertyInfo propertyInfo, string columnName = null) : DatabaseColumnField(propertyInfo, columnName)
+    {
+        public bool IsIdentity { get; } = propertyInfo.PropertyType == typeof(int);
     }
 }

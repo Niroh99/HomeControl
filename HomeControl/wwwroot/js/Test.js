@@ -6,7 +6,7 @@
         headers: { RequestVerificationToken: document.getElementById("RequestVerificationToken").value },
         success: function (responseModel) {
             model = responseModel;
-            rebind();
+            bindFromModel();
         }
     });
 }

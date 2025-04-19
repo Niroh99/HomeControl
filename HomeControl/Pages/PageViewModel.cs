@@ -3,9 +3,14 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace HomeControl.Pages
 {
-    public class PageViewModel(ViewModelPageModelBase page) : Model
+    public abstract class PageViewModel(ViewModelPageModelBase page) : Model
     {
         public PageInfo PageInfo { get; } = new PageInfo(page.Url.PageLink());
+
+        public virtual Task Initialize()
+        {
+            return Task.CompletedTask;
+        }
     }
 
     public class PageInfo(string url)

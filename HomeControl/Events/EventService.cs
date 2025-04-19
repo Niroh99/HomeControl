@@ -58,7 +58,7 @@ namespace HomeControl.Events
             var newEvent = new Event
             {
                 Type = eventType,
-                Data = System.Text.Json.JsonSerializer.Serialize((object)eventData),
+                Data = eventData,
                 PlannedExecution = plannedExecution,
             };
 
@@ -71,7 +71,7 @@ namespace HomeControl.Events
         {
             if (!_eventTypeEventDataType.TryGetValue(eventToExecute.Type, out var eventDataType)) throw new NotImplementedException();
 
-            EventData eventData = (EventData)System.Text.Json.JsonSerializer.Deserialize(eventToExecute.Data, eventDataType);
+            EventData eventData = eventToExecute.Data;
 
             if (!_eventHandlers.TryGetValue(eventDataType, out var eventHandlerType)) return;
 
@@ -84,7 +84,7 @@ namespace HomeControl.Events
 
         private void StartEventTimer()
         {
-            if (Environment.GetCommandLineArgs().Contains("-disableEventTick")) return;
+            if (Environment.GetCommandLineArgs().Contains("-disableEventTimer")) return;
 
             _timer = new System.Timers.Timer(TimeSpan.FromSeconds(2));
             _timer.Elapsed += ExecuteScheduledEventAsync;

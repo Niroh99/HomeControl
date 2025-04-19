@@ -5,28 +5,52 @@
 	ViewData["Title"] = "Device Options";
 }
 
+@section Commands {
+	<div class="flex-vertical">
+		<button class="shadow-2" onclick="showDialogById('CreateDeviceOptionDialog')">Create Option</button>
+	</div>
+}
+
+@section Dialogs {
+	<dialog id="CreateDeviceOptionDialog">
+		<form method="post" class="grid card-padding" asp-page-handler="CreateDeviceOption">
+			<div class="grid">
+				<label for="DeviceOptionName">Name</label>
+				<input id="DeviceOptionName" name="DeviceOptionName" />
+			</div>
+			<div class="flex" style="justify-content: right">
+				<button class="shadow-2">Create Option</button>
+				<button class="shadow-2" type="button" onclick="closeDialogById('CreateDeviceOptionDialog')">Cancel</button>
+			</div>
+		</form>
+	</dialog>
+}
+
 <div class="grid body-content">
-	@if (Model.Device == null)
+	@if (Model.ViewModel.Device == null)
 	{
 		<h2 class="lesser">Unknown Device</h2>
 	}
 	else
 	{
-		<h2>@Model.IntegrationDevice.DisplayName</h2>
+		<h2 class="lesser bound" data-binding-inner="integrationDevice.displayName"></h2>
 
-		if (Model.DeviceOptions.Count == 0)
+		if (Model.ViewModel.DeviceOptions.Count == 0)
 		{
 			<h3 class="lesser">No Options</h3>
 		}
 		else
 		{
 			<div class="card shadow-2">
-				@foreach (var deviceOption in Model.DeviceOptions)
+				@for (int i = 0; i < Model.ViewModel.DeviceOptions.Count; i++)
 				{
-					<div class="card-element card-padding">
+					var deviceOption = Model.ViewModel.DeviceOptions[i];
+
+					<div class="card-element card-padding grid-1fr-auto">
 						<div class="centered-content">
-							<span>@deviceOption.Name</span>
+							<span class="bound" data-binding-inner="deviceOptions[@(i)].name"></span>
 						</div>
+						<a class="button-a shadow-2" asp-page="EditDeviceOption" asp-route-DeviceOptionId="@deviceOption.Id">Edit</a>
 					</div>
 				}
 			</div>

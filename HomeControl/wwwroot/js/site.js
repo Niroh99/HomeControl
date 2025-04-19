@@ -30,21 +30,35 @@ function SetScrollY(scrollY) {
     root.style.setProperty("--scrollY", `${scrollY}px`);
 }
 
-function executePageHandler(pageHandler, dataset) {
+bindFromModel();
+
+function buildPageHandlerRequestData(dataset) {
+    if (dataset === undefined) return null;
+    if (dataset == null) return null;
+
     let data = {};
 
     for ([targetName, boundPropertyValue] of iterateBoundPropertiesWithPrefix(model, Object.entries(dataset), clickBindingPrefix)) {
         Object.defineProperty(data, targetName, { value: boundPropertyValue, enumerable: true });
     }
 
-    $.ajax({
+    return data;
+}
+
+function executePageHandler(pageHandler, dataset) {
+    let data = buildPageHandlerRequestData(dataset);
+
+    return $.ajax({
         method: "POST",
         url: model.pageInfo.url + "?handler=" + pageHandler,
         data: data,
-        headers: { RequestVerificationToken: document.getElementById("RequestVerificationToken").value },
-        success: function (responseModel) {
-            model = responseModel;
-            rebind();
-        }
+        headers: { RequestVerificationToken: document.getElementById("RequestVerificationToken").value }
+    }).done(function (responseModel) {
+        model = responseModel;
+        bindFromModel();
     });
+}
+
+function bindFromModel() {
+    bindFromSource(model, document);
 }

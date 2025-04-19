@@ -121,7 +121,7 @@ namespace HomeControl.Pages.Media
             {
                 directoryPath = Path.GetRelativePath(BasePath, directory.FullName);
 
-                yield return new Breadcrumb(directory.Name, $"{PageUrl}?{DirectoryPathRouteDataKey}={directoryPath}", !first, "h3", "breadcrumb-a");
+                yield return new Breadcrumb(directory.Name, first ? null : $"{PageUrl}?{DirectoryPathRouteDataKey}={directoryPath}", "h3", "breadcrumb-a");
 
                 if (first) first = false;
 

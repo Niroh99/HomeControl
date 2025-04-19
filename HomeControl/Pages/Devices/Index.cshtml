@@ -7,10 +7,6 @@
 	ViewData["Title"] = "Devices";
 }
 
-@section Scripts {
-	<script src="~/js/Devices/Devices.js"></script>
-}
-
 <div class="grid body-content">
 	<div class="card shadow-2 card-a-container">
 		<a class="card-a" asp-page="ManageIntegrations">
@@ -79,11 +75,14 @@
 					</details>
 					break;
 				case DeviceInitilizationState.Error:
-					<div class="centered-content">
-						<b class="bound" data-binding-inner="devices[@(i)].device.owner.hostname"></b>
-						<span class="lesser bound" style="font-size: 12px" data-binding-inner="devices[@(i)].device.InitializationError"></span>
+					<div class="card-padding">
+						<div class="centered-content">
+							<b class="bound" data-binding-inner="devices[@(i)].device.displayName"></b><br />
+							<b class="lesser bound" style="font-size: 12px; color:darkred" data-binding-inner="devices[@(i)].device.initializationError"></b>
+						</div>
 					</div>
 					break;
+				default: throw new NotImplementedException();
 			}
 		</div>
 	}

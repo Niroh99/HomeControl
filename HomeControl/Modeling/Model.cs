@@ -2,6 +2,13 @@
 {
     public abstract class Model
     {
+        public Model()
+        {
+            TypeName = GetType().FullName;
+        }
+
+        public string TypeName { get; }
+
         private readonly Dictionary<string, object> _properties = [];
         private readonly Dictionary<string, object> _modifiedProperties = [];
 

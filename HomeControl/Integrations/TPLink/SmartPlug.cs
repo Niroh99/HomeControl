@@ -33,10 +33,10 @@ namespace HomeControl.Integrations.TPLink
             _turnOff = new Feature(TurnOffFeatureName, SetPoweredOff);
         }
 
-        private Feature _turnOn;
-        private Feature _turnOff;
+        private readonly Feature _turnOn;
+        private readonly Feature _turnOff;
 
-        private DatabaseModels.Device _owner;
+        private readonly DatabaseModels.Device _owner;
         public override DatabaseModels.Device Owner => _owner;
 
         public override DeviceType DeviceType => DeviceType.TPLinkSmartPlug;
@@ -57,6 +57,12 @@ namespace HomeControl.Integrations.TPLink
             var message = new ProtocolMessage(ProtocolMessageSystem, SetRelayStateCommand, SetRelayStateCommandArgument, 0);
 
             await message.ExecuteAsync(Hostname, Port);
+        }
+
+        public override IEnumerable<Feature> GetFeatures()
+        {
+            yield return _turnOn;
+            yield return _turnOff;
         }
 
         public override IEnumerable<Feature> GetExecutableFeatures()

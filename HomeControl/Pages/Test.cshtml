@@ -6,8 +6,24 @@
 
 @section Scripts {
 	<script src="~/js/Test.js"></script>
+	<script>
+		let object = {
+			firstProperty: "propertyValue",
+			secondProperty: [
+				1,
+				2
+			],
+			thirdProperty: {
+				childProperty: "childProprtyValue"
+			}
+		}
+
+		//bindFromSource(object, document);
+	</script>
 }
 
-<span class="bound" data-binding-inner="test"></span>
+<span class="bound" data-binding-inner="firstProperty">newFirstPropertyValue</span>
 
 <button data-binding-id="test" onclick="testAjaxPost(this.dataset)">Test</button>
+
+<input class="bound" data-binding-value="test" />

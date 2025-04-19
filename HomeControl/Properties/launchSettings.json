@@ -2,12 +2,13 @@
   "profiles": {
     "http": {
       "commandName": "Project",
+      "commandLineArgs": "-disableEventTimer",
       "launchBrowser": true,
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ASPNETCORE_URLS": "http://+:5000"
       },
-      "dotnetRunMessages": true,
-      "applicationUrl": ""
+      "dotnetRunMessages": true
     },
     "IIS Express": {
       "commandName": "IISExpress",

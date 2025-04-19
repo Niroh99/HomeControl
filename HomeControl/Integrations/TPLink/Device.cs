@@ -16,7 +16,9 @@ namespace HomeControl.Integrations.TPLink
 
         public abstract DeviceType DeviceType { get; }
 
-        public string DisplayName => Alias;
+        public bool AllowCaching { get => true; }
+
+        public string DisplayName => _sysInfo == null ? Owner?.Hostname : Alias;
 
         public bool SupportsRename { get => true; }
 
@@ -25,6 +27,8 @@ namespace HomeControl.Integrations.TPLink
 
         private string _initializationError = null;
         public string InitializationError { get => _initializationError; }
+
+        public bool IsInitialized { get => InitilizationState == DeviceInitilizationState.Success; }
 
         public string Hostname { get; } = hostname;
 
@@ -64,6 +68,8 @@ namespace HomeControl.Integrations.TPLink
 
         public async Task InitializeAsync()
         {
+            if (IsInitialized) return;
+
             _initilizationState = DeviceInitilizationState.None;
 
             var message = new ProtocolMessage(ProtocolMessageSystem, GetSysInfoCommand, null, null);
@@ -83,6 +89,8 @@ namespace HomeControl.Integrations.TPLink
 
         public virtual IEnumerable<IProperty> GetProperties()
         {
+            if (!IsInitialized) yield break;
+
             yield return new SingleProperty("Hostname:", Hostname);
             yield return new SingleProperty("Port:", Port.ToString());
             yield return new SingleProperty("Software-Version:", SoftwareVersion);
@@ -102,6 +110,8 @@ namespace HomeControl.Integrations.TPLink
                 new SingleProperty("Longitude", Longitude.ToString())
             ]);
         }
+
+        public abstract IEnumerable<Feature> GetFeatures();
 
         public abstract IEnumerable<Feature> GetExecutableFeatures();
 

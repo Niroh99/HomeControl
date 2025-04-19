@@ -69,7 +69,7 @@ namespace HomeControl.Integrations.TPLink
                     //else
                     if (response.Model?.StartsWith("HS") == true)
                     {
-                        device = new SmartPlug(remoteEndPoint.Address.ToString());
+                        device = new SmartPlug(remoteEndPoint.Address.ToString(), remoteEndPoint.Port);
                     }
                     //else if (response.Model.StartsWith("KL") || response.Model.StartsWith("LB"))
                     //{

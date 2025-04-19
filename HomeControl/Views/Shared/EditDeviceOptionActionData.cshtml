@@ -1,0 +1,46 @@
+﻿@using HomeControl.Integrations
+@using HomeControl.Views.Shared
+@model EditDeviceOptionActionDataModel
+
+<div id="@Model.Identifier">
+	@foreach (var deviceOptionActionType in Enum.GetValues<HomeControl.DatabaseModels.DeviceOptionActionType>())
+	{
+		switch (deviceOptionActionType)
+		{
+			case HomeControl.DatabaseModels.DeviceOptionActionType.ExecuteFeature:
+				<div id="@deviceOptionActionType" class="grid">
+					<label for="FeatureName">Feature Name</label>
+					<div class="select-wrapper">
+						<select class="bound" name="FeatureName" data-action-value="FeatureName">
+							@foreach (var feature in Model.IntegrationDevice.GetFeatures())
+							{
+								<option value="@feature.Name">@feature.Name</option>
+							}
+						</select>
+						<img class="select-marker" src="~/svg/arrow-down.svg" />
+					</div>
+				</div>
+				break;
+
+			case HomeControl.DatabaseModels.DeviceOptionActionType.ScheduleFeatureExecution:
+				<div id="@deviceOptionActionType" class="grid">
+					<label for="@(deviceOptionActionType)FeatureName">Feature</label>
+					<div class="select-wrapper">
+						<select class="bound" data-action-value="FeatureName">
+							@foreach (var feature in Model.IntegrationDevice.GetFeatures())
+							{
+								<option value="@feature.Name">@feature.Name</option>
+							}
+						</select>
+						<img class="select-marker" src="~/svg/arrow-down.svg" />
+					</div>
+					<label for="ExecuteIn">Execute in</label>
+					<div class="grid-1fr-auto">
+						<input class="bound" name="ExecuteIn" type="number" data-action-value="ExecuteIn" />
+						<span style="align-self: center">min</span>
+					</div>
+				</div>
+				break;
+		}
+	}
+</div>
