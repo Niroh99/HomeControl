@@ -14,6 +14,8 @@ namespace HomeControl.Integrations
             { DeviceOptionActionType.ScheduleFeatureExecution, typeof(ScheduleFeatureExecutionDeviceOptionActionData) }
         };
 
+        bool TryGetDeviceCache<T>(out T cache) where T : IIntegrationDeviceCache;
+
         IIntegrationDevice CreateIntegrationDevice(Device device);
 
         Task<IIntegrationDevice> CreateAndInitializeIntegrationDeviceAsync(Device device);
@@ -37,8 +39,6 @@ namespace HomeControl.Integrations
 
                 _integrationDeviceCaches.Add((IIntegrationDeviceCache)Activator.CreateInstance(cacheType));
             }
-
-            _integrationDeviceCaches.Add(new DefaultIntegrationDeviceCache());
         }
 
         private static readonly List<IIntegrationDeviceCache> _integrationDeviceCaches = [];
@@ -46,6 +46,13 @@ namespace HomeControl.Integrations
         public static bool TryGetDeviceCache(Device device, out IIntegrationDeviceCache cache)
         {
             cache = _integrationDeviceCaches.FirstOrDefault(cache => cache.CanHandleDevice(device));
+
+            return cache != null;
+        }
+
+        public bool TryGetDeviceCache<T>(out T cache) where T : IIntegrationDeviceCache
+        {
+            cache = _integrationDeviceCaches.OfType<T>().FirstOrDefault();
 
             return cache != null;
         }

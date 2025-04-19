@@ -56,7 +56,7 @@
 							{
 								<div class="card-element grid-1fr-auto card-padding">
 									<div class="centered-content">
-										<span class="bound" data-binding-inner="devices[@(i)].options[@(j)].name"></span>
+										<b class="bound" data-binding-inner="devices[@(i)].options[@(j)].name"></b>
 									</div>
 									<button type="button" class="shadow-2" data-clickbinding-optionId="devices[@(i)].options[@(j)].id" onclick="executePageHandler('ExecuteOption', this.dataset)">Execute</button>
 								</div>
@@ -65,7 +65,7 @@
 
 						<div class="card-element grid-1fr-auto card-padding">
 							<div class="centered-content">
-								<span>Edit</span>
+								<b>Edit</b>
 							</div>
 							<a class="button-a shadow-2" asp-page="EditDevice" asp-route-DeviceId="@deviceInfo.Device.Owner.Id">Edit</a>
 						</div>

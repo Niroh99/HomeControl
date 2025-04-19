@@ -24,4 +24,10 @@
 		</div>
 		<button type="button" class="shadow-2" onclick="discoverDevices()">Discover</button>
 	</div>
+	<div method="post" asp-page-handler="DiscoverDevices" class="card shadow-2 grid-1fr-auto card-padding">
+		<div class="centered-content">
+			<b>Clear Devices Cache</b>
+		</div>
+		<button type="button" class="shadow-2" onclick="executePageHandler('ClearTPLinkDevicesCache')">Clear</button>
+	</div>
 </div>

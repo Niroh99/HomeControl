@@ -94,14 +94,20 @@
 		<div class="card shadow-2">
 			<div class="card-element grid-1fr-auto card-padding">
 				<div class="centered-content">
-					<span class="field-label">Name:</span>
-					<span class="bound" data-binding-inner="deviceOption.name"></span>
+					<b>Execute</b>
+				</div>
+				<button class="shadow-2" onclick="executePageHandler('Execute')">Execute</button>
+			</div>
+			<div class="card-element grid-1fr-auto card-padding">
+				<div class="centered-content">
+					<b class="field-label">Name:</b>
+					<b class="bound" data-binding-inner="deviceOption.name"></b>
 				</div>
 				<button class="shadow-2" onclick="showDialogById('ChangeDeviceOptionNameDialog')">Rename</button>
 			</div>
 			<div class="card-element shadow-2 card-padding grid-1fr-auto">
 				<div class="centered-content">
-					<span>Remove</span>
+					<b>Remove</b>
 				</div>
 				<button class="shadow-2" onclick="showDialogById('RemoveDeviceOptionQuestionDialog')">Remove</button>
 			</div>
@@ -121,7 +127,7 @@
 					var deviceOptionAction = Model.ViewModel.DeviceOptionActions[i];
 
 					<div class="card-element grid-1fr-auto card-padding">
-						<span class="bound" style="align-self: center" data-binding-inner="deviceOptionActions[@(i)].display"></span>
+						<b class="bound" style="align-self: center" data-binding-inner="deviceOptionActions[@(i)].display"></b>
 						<button class="shadow-2" onclick="openRemoveDeviceOptionActionQuestionDialog('@deviceOptionAction.Id')">Remove</button>
 					</div>
 				}

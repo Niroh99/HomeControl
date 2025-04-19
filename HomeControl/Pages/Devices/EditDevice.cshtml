@@ -48,15 +48,15 @@
 					{
 						<div class="card-element grid-1fr-auto card-padding">
 							<div class="centered-content">
-								<span class="field-label">Name:</span>
-								<span class="bound" data-binding-inner="integrationDevice.displayName"></span>
+								<b class="field-label">Name:</b>
+								<b class="bound" data-binding-inner="integrationDevice.displayName"></b>
 							</div>
 							<button class="shadow-2" type="button" onclick="showDialogById('ChangaDisplayNameDialog')">Rename</button>
 						</div>
 					}
 					<div class="card-element card-padding grid-1fr-auto">
 						<div class="centered-content">
-							<span>Remove Device</span>
+							<b>Remove Device</b>
 						</div>
 						<button class="shadow-2" onclick="showDialogById('RemoveDeviceQuestionDialog')">Remove</button>
 					</div>
@@ -64,18 +64,7 @@
 					<a class="card-a card-element" asp-page="/Devices/DeviceOptions" asp-route-DeviceId="@Model.ViewModel.Device?.Id">
 						<div class="grid-1fr-auto card-padding">
 							<div class="centered-content">
-								<span>Options</span>
-							</div>
-
-							<div class="centered-content">
-								<img src="~/svg/arrow-right.svg" />
-							</div>
-						</div>
-					</a>
-					<a class="card-a card-element" asp-page="/Devices/DeviceRoutines">
-						<div class="grid-1fr-auto card-padding">
-							<div class="centered-content">
-								<span>Routines</span>
+								<b>Options</b>
 							</div>
 
 							<div class="centered-content">

@@ -61,6 +61,11 @@ namespace HomeControl.Pages.Devices
 
         }
 
+        public async Task OnPostExecute()
+        {
+            await deviceService.ExecuteDeviceOptionAsync(ViewModel.DeviceOption.Id);
+        }
+
         public async Task<IActionResult> OnPostRename(string deviceOptionName)
         {
             if (ViewModel.DeviceOption == null || string.IsNullOrWhiteSpace(deviceOptionName)) return null;

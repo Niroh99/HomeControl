@@ -4,11 +4,13 @@ using HomeControl.DatabaseModels;
 using HomeControl.Attributes;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using HomeControl.Modeling;
+using HomeControl.Integrations;
+using System.Threading.Tasks;
 
 namespace HomeControl.Pages.Devices
 {
     [MenuPage(typeof(IndexModel), "Manage Integrations", "/Devices/ManageIntegrations")]
-    public class ManageIntegrationsModel(IDatabaseConnection db) : ViewModelPageModel<ManageIntegrationsModel.ManageIntegrationsViewModel>
+    public class ManageIntegrationsModel(IDatabaseConnection db, IDeviceService deviceService) : ViewModelPageModel<ManageIntegrationsModel.ManageIntegrationsViewModel>
     {
         public class ManageIntegrationsViewModel(ViewModelPageModelBase page) : PageViewModel(page)
         {
@@ -69,6 +71,14 @@ namespace HomeControl.Pages.Devices
             }
 
             return ViewModelResponse();
+        }
+
+        public void OnPostClearTPLinkDevicesCache()
+        {
+            if (deviceService.TryGetDeviceCache<Integrations.TPLink.DeviceCache>(out var cache))
+            {
+                cache.InvalidateAll();
+            }
         }
     }
 }

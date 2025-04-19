@@ -6,7 +6,7 @@ namespace HomeControl.Integrations
     {
         private readonly Dictionary<int, IIntegrationDevice> _devices = [];
 
-        public bool CanHandleDevice(Device device)
+        public virtual bool CanHandleDevice(Device device)
         {
             return true;
         }

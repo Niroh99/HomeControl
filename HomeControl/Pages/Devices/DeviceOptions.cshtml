@@ -46,12 +46,17 @@
 				{
 					var deviceOption = Model.ViewModel.DeviceOptions[i];
 
-					<div class="card-element card-padding grid-1fr-auto">
-						<div class="centered-content">
-							<span class="bound" data-binding-inner="deviceOptions[@(i)].name"></span>
+					<a class="card-a card-padding grid-1fr-auto" asp-page="EditDeviceOption" asp-route-DeviceOptionId="@deviceOption.Id">
+						<div class="grid-1fr-auto card-padding">
+							<div class="centered-content">
+								<b class="bound" data-binding-inner="deviceOptions[@(i)].name"></b>
+							</div>
+
+							<div class="centered-content">
+								<img src="~/svg/arrow-right.svg" />
+							</div>
 						</div>
-						<a class="button-a shadow-2" asp-page="EditDeviceOption" asp-route-DeviceOptionId="@deviceOption.Id">Edit</a>
-					</div>
+					</a>
 				}
 			</div>
 		}
