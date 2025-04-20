@@ -158,7 +158,7 @@
 									<div class="centered-content">
 										<img src="~/svg/directory.svg" />
 									</div>
-									<b>@directory.Name</b>
+									<strong>@directory.Name</strong>
 
 									<div class="centered-content">
 										<img src="~/svg/arrow-right.svg" />
@@ -184,7 +184,7 @@
 										<div class="centered-content">
 											<div style="display: grid; grid-template-columns: auto auto 1fr">
 												<b style="text-overflow: ellipsis; overflow: hidden">@System.IO.Path.GetFileNameWithoutExtension(file.Name)</b>
-												<b>@System.IO.Path.GetExtension(file.Name)</b>
+												<strong>@System.IO.Path.GetExtension(file.Name)</strong>
 											</div>
 											<span class="lesser" style="font-size: 12px">@Model.FileSizeDisplay(file.Length)</span>
 										</div>
@@ -209,14 +209,14 @@
 								{
 									<div class="card-element grid-1fr-auto card-padding">
 										<div class="centered-content">
-											<b>Download</b>
+											<strong>Download</strong>
 										</div>
 										<a class="button-a shadow-2" href="@Model.BuildFileQuery(file.Name)" download="@file.Name">Download</a>
 									</div>
 								}
 								<div class="card-element grid-1fr-auto card-padding">
 									<div class="centered-content">
-										<b>Delete</b>
+										<strong>Delete</strong>
 									</div>
 									<button class="shadow-2" onclick="showDeleteFileDialog('@file.Name')">Delete</button>
 								</div>

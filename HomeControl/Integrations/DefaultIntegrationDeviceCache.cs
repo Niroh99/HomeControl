@@ -2,14 +2,11 @@
 
 namespace HomeControl.Integrations
 {
-    public class DefaultIntegrationDeviceCache : IIntegrationDeviceCache
+    public abstract class DefaultIntegrationDeviceCache : IIntegrationDeviceCache
     {
         private readonly Dictionary<int, IIntegrationDevice> _devices = [];
 
-        public virtual bool CanHandleDevice(Device device)
-        {
-            return true;
-        }
+        public abstract bool CanHandleDevice(Device device);
 
         public bool TryGetIntegrationDevice(Device device, out IIntegrationDevice integrationDevice)
         {

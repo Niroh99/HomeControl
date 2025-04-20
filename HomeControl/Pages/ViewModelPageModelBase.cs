@@ -13,16 +13,22 @@ namespace HomeControl.Pages
 
         public override async Task OnPageHandlerExecutionAsync(PageHandlerExecutingContext context, PageHandlerExecutionDelegate next)
         {
-            ViewModelBase = CreateViewModel();
-            await ViewModelBase.Initialize();
+            await CreateAndInitializeViewModel();
             await base.OnPageHandlerExecutionAsync(context, next);
+        }
+
+        public async Task<IActionResult> ViewModelResponse()
+        {
+            await CreateAndInitializeViewModel();
+            return new JsonResult(ViewModelBase);
         }
 
         protected abstract PageViewModel CreateViewModel();
 
-        public IActionResult ViewModelResponse()
+        private async Task CreateAndInitializeViewModel()
         {
-            return new JsonResult(ViewModelBase);
+            ViewModelBase = CreateViewModel();
+            await ViewModelBase.Initialize();
         }
     }
 }

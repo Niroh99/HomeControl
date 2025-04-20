@@ -7,18 +7,16 @@ using Microsoft.Extensions.FileProviders;
 using System.Net;
 using HomeControl.Events;
 using HomeControl.Integrations;
+using HomeControl.Weather;
+using HomeControl.Routines;
+using HomeControl.Actions;
 
 var builder = WebApplication.CreateBuilder(args);
 
 var connectionString = builder.Configuration.GetConnectionString("FW_HomeControl");
 AppDomain.CurrentDomain.SetData("DataDirectory", Directory.GetCurrentDirectory());
 
-builder.WebHost.ConfigureKestrel(serverOptions =>
-{
-    //if (!System.Diagnostics.Debugger.IsAttached)
-    //    serverOptions.ListenAnyIP(5000);
-    //serverOptions.Listen(IPAddress.Any, 5000);
-});
+var timerInterval = builder.Configuration.GetValue<int?>("TimerInterval");
 
 builder.Services.AddControllers();
 
@@ -34,10 +32,13 @@ builder.Services.AddSession(options =>
 });
 
 builder.Services.AddSingleton<IFileProvider>(new PhysicalFileProvider(HomeControl.Pages.Media.IndexModel.BasePath));
-builder.Services.AddSingleton<IEventService, EventService>();
+builder.Services.AddSingleton<IWeatherService, WeatherService>();
 
 builder.Services.AddScoped<IDatabaseConnection>((serviceProvider) => new DatabaseConnection(connectionString));
+builder.Services.AddScoped<IEventService, EventService>();
+builder.Services.AddScoped<IRoutinesService, RoutinesService>();
 builder.Services.AddScoped<IDeviceService, DeviceService>();
+builder.Services.AddScoped<IActionsService, ActionsService>();
 
 var app = builder.Build();
 
@@ -67,5 +68,23 @@ app.UseSession();
 app.MapRazorPages();
 
 app.MapControllers();
+
+if (timerInterval != null)
+{
+    var timer = new System.Timers.Timer(TimeSpan.FromSeconds(timerInterval.Value));
+
+    timer.Elapsed += async (s, e) =>
+    {
+        using var serviceScope = app.Services.CreateScope();
+
+        var eventService =  serviceScope.ServiceProvider.GetService<IEventService>();
+        var routinesService = serviceScope.ServiceProvider.GetService<IRoutinesService>();
+
+        await eventService.ExecuteScheduledEventsAsync();
+        await routinesService.ExecuteActiveRoutinesAsync();
+    };
+
+    timer.Start();
+}
 
 app.Run();

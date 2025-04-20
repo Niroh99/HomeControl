@@ -62,14 +62,14 @@ namespace HomeControl.Pages.Devices
         {
             await deviceService.ExecuteFeatureAsync(id, featureName);
 
-            return ViewModelResponse();
+            return await ViewModelResponse();
         }
 
         public async Task<IActionResult> OnPostExecuteOption(int optionId)
         {
             await deviceService.ExecuteDeviceOptionAsync(optionId);
 
-            return ViewModelResponse();
+            return await ViewModelResponse();
         }
     }
 }

@@ -133,7 +133,7 @@ namespace HomeControl.Database
             return await SelectSingleCoreAsync<T, int>(id);
         }
 
-        private async Task<T> SelectSingleCoreAsync<T, TKey>(TKey id) where T : Model
+        private async Task<T> SelectSingleCoreAsync<T, TKey>(TKey id) where T : DatabaseModel
         {
             ArgumentNullException.ThrowIfNull(id, nameof(id));
 
@@ -245,7 +245,7 @@ namespace HomeControl.Database
             await command.ExecuteNonQueryAsync();
         }
 
-        private static void AppendInstanceWhere<T>(StringBuilder commandStringBuilder, T instance, DatabaseModelMetadata modelMetadata, SqliteCommand command) where T : Model
+        private static void AppendInstanceWhere<T>(StringBuilder commandStringBuilder, T instance, DatabaseModelMetadata modelMetadata, SqliteCommand command) where T : DatabaseModel
         {
             commandStringBuilder.Append(" WHERE ");
 
@@ -286,7 +286,7 @@ namespace HomeControl.Database
             return commandStringBuilder.Append(" FROM ").Append($"[{modelMetadata.TableName}]");
         }
 
-        private static void ApplyFields<T>(T instance, DatabaseModelMetadata modelMetadata, SqliteDataReader reader) where T : Model
+        private static void ApplyFields<T>(T instance, DatabaseModelMetadata modelMetadata, SqliteDataReader reader) where T : DatabaseModel
         {
             for (int i = 0; i < reader.FieldCount; i++)
             {
@@ -305,7 +305,7 @@ namespace HomeControl.Database
             }
         }
 
-        private static string AddFieldParameter<T>(DatabaseColumnField field, T instance, SqliteCommand command) where T : Model
+        private static string AddFieldParameter<T>(DatabaseColumnField field, T instance, SqliteCommand command) where T : DatabaseModel
         {
             var fieldValue = field.Get(instance);
 
@@ -316,7 +316,8 @@ namespace HomeControl.Database
         {
             var parameterName = $"${field.Name}";
 
-            if (field.IsJson && fieldValue is not string) fieldValue = System.Text.Json.JsonSerializer.Serialize(fieldValue);
+            if (fieldValue == null) fieldValue = DBNull.Value;
+            else if (field.IsJson && fieldValue is not string) fieldValue = System.Text.Json.JsonSerializer.Serialize(fieldValue);
 
             command.Parameters.AddWithValue(parameterName, fieldValue);
 
@@ -330,7 +331,21 @@ namespace HomeControl.Database
 
             var valueType = value.GetType();
 
-            if (valueType == field.PropertyInfo.PropertyType) return;
+            var propertyType = field.PropertyInfo.PropertyType;
+
+            if (propertyType.IsGenericType)
+            {
+                var genericTypeDefinition = propertyType.GetGenericTypeDefinition();
+
+                if (genericTypeDefinition == typeof(Nullable<>))
+                {
+                    if (value == null) return;
+
+                    propertyType = propertyType.GetGenericArguments()[0];
+                }
+            }
+
+            if (valueType == propertyType) return;
 
             if (field.IsJson && value is string valueJson)
             {
@@ -344,22 +359,22 @@ namespace HomeControl.Database
                 return;
             }
 
-            if (field.PropertyInfo.PropertyType.IsEnum && valueType == typeof(string))
+            if (propertyType.IsEnum && valueType == typeof(string))
             {
-                value = Enum.Parse(field.PropertyInfo.PropertyType, (string)value);
+                value = Enum.Parse(propertyType, (string)value);
                 return;
             }
-            else if (field.PropertyInfo.PropertyType == typeof(int) && value is long longValue)
+            else if (propertyType == typeof(int) && value is long longValue)
             {
                 value = (int)longValue;
                 return;
             }
-            else if (field.PropertyInfo.PropertyType == typeof(bool) && value is long boolValue)
+            else if (propertyType == typeof(bool) && value is long boolValue)
             {
                 value = boolValue != 0;
                 return;
             }
-            else if (field.PropertyInfo.PropertyType == typeof(DateTime) && value is string dateTimeValue)
+            else if (propertyType == typeof(DateTime) && value is string dateTimeValue)
             {
                 value = DateTime.Parse(dateTimeValue);
                 return;
@@ -368,11 +383,13 @@ namespace HomeControl.Database
             throw new InvalidOperationException("Unable to Convert Database Type.");
         }
 
-        private async Task<T> ReadSingle<T>(Type modelType, DatabaseModelMetadata modelMetadata, SqliteCommand command) where T : Model
+        private async Task<T> ReadSingle<T>(Type modelType, DatabaseModelMetadata modelMetadata, SqliteCommand command) where T : DatabaseModel
         {
             using var reader = await command.ExecuteReaderAsync();
 
             var instance = Activator.CreateInstance(modelType) as T;
+
+            instance.Track(this);
 
             if (await reader.ReadAsync())
             {
@@ -385,7 +402,7 @@ namespace HomeControl.Database
             else return null;
         }
 
-        private async Task<List<T>> ReadMany<T>(Type modelType, DatabaseModelMetadata modelMetadata, SqliteCommand command) where T : Model
+        private async Task<List<T>> ReadMany<T>(Type modelType, DatabaseModelMetadata modelMetadata, SqliteCommand command) where T : DatabaseModel
         {
             using var reader = await command.ExecuteReaderAsync();
 
@@ -394,6 +411,8 @@ namespace HomeControl.Database
             while (await reader.ReadAsync())
             {
                 var instance = Activator.CreateInstance(modelType) as T;
+
+                instance.Track(this);
 
                 ApplyFields(instance, modelMetadata, reader);
 

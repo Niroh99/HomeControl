@@ -41,7 +41,7 @@ namespace HomeControl.Pages.Devices
 
                 if (databaseDevice == null)
                 {
-                    await db.InsertAsync(new Device()
+                    await db.InsertAsync(new Device
                     {
                         Type = tpLinkDevice.DeviceType,
                         Hostname = tpLinkDevice.Hostname,
@@ -70,7 +70,7 @@ namespace HomeControl.Pages.Devices
                 await db.DeleteAsync(databaseDeviceToDelete);
             }
 
-            return ViewModelResponse();
+            return await ViewModelResponse();
         }
 
         public void OnPostClearTPLinkDevicesCache()

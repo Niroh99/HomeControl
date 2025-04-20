@@ -38,7 +38,7 @@ namespace HomeControl.Pages.Devices
                     .Compare(i => i.DeviceOptionId, ComparisonOperator.Equals, DeviceOption.Id)))
                     .OrderBy(action => action.Index));
 
-                DeviceOptionActionTypes.AddRange(Enum.GetValues<DeviceOptionActionType>()
+                DeviceOptionActionTypes.AddRange(Enum.GetValues<ActionType>()
                     .Select(type => new SelectListItem(EnumHelper.GetValueDescription(type), type.ToString())));
             }
         }
@@ -86,9 +86,9 @@ namespace HomeControl.Pages.Devices
             return RedirectToPage("/Devices/DeviceOptions", new { ViewModel.DeviceOption.DeviceId });
         }
 
-        public async Task<IActionResult> OnPostCreateDeviceOptionAction(DeviceOptionActionType deviceOptionActionType, string newDeviceOptionActionData)
+        public async Task<IActionResult> OnPostCreateDeviceOptionAction(ActionType deviceOptionActionType, string newDeviceOptionActionData)
         {
-            var actionDataObject = System.Text.Json.JsonSerializer.Deserialize(newDeviceOptionActionData, IDeviceService.DeviceOptionActionTypeDataMap[deviceOptionActionType], new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web));
+            var actionDataObject = (Model)System.Text.Json.JsonSerializer.Deserialize(newDeviceOptionActionData, IDeviceService.DeviceOptionActionTypeDataMap[deviceOptionActionType], new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web));
 
             var deviceOptionActions = await db.SelectAsync(WhereBuilder.Where<DeviceOptionAction>()
                 .Compare(action => action.DeviceOptionId, ComparisonOperator.Equals, ViewModel.DeviceOption.Id));

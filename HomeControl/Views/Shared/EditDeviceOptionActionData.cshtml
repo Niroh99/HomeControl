@@ -3,11 +3,11 @@
 @model EditDeviceOptionActionDataModel
 
 <div id="@Model.Identifier">
-	@foreach (var deviceOptionActionType in Enum.GetValues<HomeControl.DatabaseModels.DeviceOptionActionType>())
+	@foreach (var deviceOptionActionType in Enum.GetValues<HomeControl.DatabaseModels.ActionType>())
 	{
 		switch (deviceOptionActionType)
 		{
-			case HomeControl.DatabaseModels.DeviceOptionActionType.ExecuteFeature:
+			case HomeControl.DatabaseModels.ActionType.ExecuteFeature:
 				<div id="@deviceOptionActionType" class="grid">
 					<label for="FeatureName">Feature Name</label>
 					<div class="select-wrapper">
@@ -22,7 +22,7 @@
 				</div>
 				break;
 
-			case HomeControl.DatabaseModels.DeviceOptionActionType.ScheduleFeatureExecution:
+			case HomeControl.DatabaseModels.ActionType.ScheduleFeatureExecution:
 				<div id="@deviceOptionActionType" class="grid">
 					<label for="@(deviceOptionActionType)FeatureName">Feature</label>
 					<div class="select-wrapper">

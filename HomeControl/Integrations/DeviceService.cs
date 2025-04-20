@@ -1,4 +1,5 @@
-﻿using HomeControl.Database;
+﻿using HomeControl.Actions;
+using HomeControl.Database;
 using HomeControl.DatabaseModels;
 using HomeControl.Events;
 using HomeControl.Events.EventDatas;
@@ -8,10 +9,10 @@ namespace HomeControl.Integrations
 {
     public interface IDeviceService
     {
-        public static Dictionary<DeviceOptionActionType, Type> DeviceOptionActionTypeDataMap { get; } = new Dictionary<DeviceOptionActionType, Type>
+        public static Dictionary<ActionType, Type> DeviceOptionActionTypeDataMap { get; } = new Dictionary<ActionType, Type>
         {
-            { DeviceOptionActionType.ExecuteFeature, typeof(ExecuteFeatureDeviceOptionActionData) },
-            { DeviceOptionActionType.ScheduleFeatureExecution, typeof(ScheduleFeatureExecutionDeviceOptionActionData) }
+            { ActionType.ExecuteFeature, typeof(ExecuteDeviceFeatureActionData) },
+            { ActionType.ScheduleFeatureExecution, typeof(ScheduleDeviceFeatureExecutionActionData) }
         };
 
         bool TryGetDeviceCache<T>(out T cache) where T : IIntegrationDeviceCache;
@@ -27,7 +28,7 @@ namespace HomeControl.Integrations
         Task ExecuteDeviceOptionAsync(int deviceOptionId);
     }
 
-    public class DeviceService(IDatabaseConnection db, IEventService eventService) : IDeviceService
+    public class DeviceService(IDatabaseConnection db, IActionsService actionsService, IServiceProvider serviceProvider) : IDeviceService
     {
         static DeviceService()
         {
@@ -112,29 +113,9 @@ namespace HomeControl.Integrations
 
             var device = await db.SelectSingleAsync<Device>(deviceOption.DeviceId);
 
-            var actions = await db.SelectAllAsync<DeviceOptionAction>();
+            var actions = await db.SelectAsync(WhereBuilder.Where<DeviceOptionAction>().Compare(i => i.DeviceOptionId, ComparisonOperator.Equals, deviceOption.Id));
 
-            foreach (var action in actions.Where(action => action.DeviceOptionId == deviceOption.Id).OrderBy(action => action.Index))
-            {
-                switch (action.Type)
-                {
-                    case DeviceOptionActionType.ExecuteFeature:
-                        var executeFeatureDeviceOptionActionData = (ExecuteFeatureDeviceOptionActionData)action.Data;
-
-                        await ExecuteFeatureAsync(device, executeFeatureDeviceOptionActionData.FeatureName);
-                        break;
-                    case DeviceOptionActionType.ScheduleFeatureExecution:
-                        var scheduleFeatureExecutionDeviceOptionActionData = (ScheduleFeatureExecutionDeviceOptionActionData)action.Data;
-
-                        await eventService.ScheduleEventAsync(db, EventType.ExecuteDeviceFeature, new ExecuteDeviceFeatureEventData
-                        {
-                            DeviceId = deviceOption.DeviceId,
-                            FeatureName = scheduleFeatureExecutionDeviceOptionActionData.FeatureName,
-                        }, DateTime.Now.AddSeconds(scheduleFeatureExecutionDeviceOptionActionData.ExecuteIn));
-                        break;
-                    default: throw new NotImplementedException();
-                }
-            }
+            await actionsService.ExecuteActionSequenceAsync(actions, serviceProvider);
         }
     }
 }

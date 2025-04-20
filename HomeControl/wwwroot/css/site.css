@@ -49,6 +49,7 @@
 
 .card-element {
     border-top: 1px solid var(--background);
+    min-height: 64px;
 }
 
     /*.card-element:not(.card-element ~ .card-element) {

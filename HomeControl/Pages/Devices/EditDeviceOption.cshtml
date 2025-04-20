@@ -5,11 +5,15 @@
 	Layout = "MenuPage_Layout";
 	ViewData["Title"] = "Edit Device Option";
 
-	var newDeviceOptionDataInformation = new Dictionary<string, object>();
+	var newDeviceOptionDataInformation = new Dictionary<string, DatabaseModels.DeviceActionData>();
 
-	foreach (var deviceOptionActionType in Enum.GetValues<HomeControl.DatabaseModels.DeviceOptionActionType>())
+	foreach (var actionType in Enum.GetValues<HomeControl.DatabaseModels.ActionType>())
 	{
-		newDeviceOptionDataInformation[deviceOptionActionType.ToString()] = Activator.CreateInstance(Integrations.IDeviceService.DeviceOptionActionTypeDataMap[deviceOptionActionType]);
+		var actionData = (DatabaseModels.DeviceActionData)Activator.CreateInstance(Integrations.IDeviceService.DeviceOptionActionTypeDataMap[actionType]);
+
+		actionData.DeviceId = Model.ViewModel.Device.Id;
+
+		newDeviceOptionDataInformation[actionType.ToString()] = actionData;
 	}
 
 	var newDeviceOptionDataInformationJson = Json.Serialize(newDeviceOptionDataInformation);
@@ -94,7 +98,7 @@
 		<div class="card shadow-2">
 			<div class="card-element grid-1fr-auto card-padding">
 				<div class="centered-content">
-					<b>Execute</b>
+					<strong>Execute</strong>
 				</div>
 				<button class="shadow-2" onclick="executePageHandler('Execute')">Execute</button>
 			</div>
@@ -107,13 +111,13 @@
 			</div>
 			<div class="card-element shadow-2 card-padding grid-1fr-auto">
 				<div class="centered-content">
-					<b>Remove</b>
+					<strong>Remove</strong>
 				</div>
 				<button class="shadow-2" onclick="showDialogById('RemoveDeviceOptionQuestionDialog')">Remove</button>
 			</div>
 		</div>
 
-		<h3 class="lesser">Actions</h3>
+		<h5 class="lesser">Actions</h5>
 
 		if (Model.ViewModel.DeviceOptionActions.Count == 0)
 		{
