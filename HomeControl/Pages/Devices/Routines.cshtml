@@ -3,9 +3,41 @@
 @{
 	Layout = "MenuPage_Layout";
 	ViewData["Title"] = "Routines";
+
+	void RenderCommands()
+	{
+		<button onclick="showDialogById('CreateRoutineDialog')">Create Routine</button>
+	}
+}
+
+@section Dialogs {
+	<dialog id="CreateRoutineDialog">
+		<form method="post" class="grid card-padding" asp-page-handler="CreateRoutine">
+			<div class="grid">
+				<label for="RoutineName">Name</label>
+				<input id="RoutineName" name="RoutineName" class="bound" />
+			</div>
+			<div class="flex" style="justify-content: right">
+				<button>Create Routine</button>
+				<button type="button" onclick="closeDialogById('CreateRoutineDialog')">Cancel</button>
+			</div>
+		</form>
+	</dialog>
+}
+
+@section Commands {
+	@{
+		RenderCommands();
+	}
 }
 
 <div class="body-content grid">
+	<div class="flex medium-to-large-display">
+		@{
+			RenderCommands();
+		}
+	</div>
+
 	@for (int i = 0; i < Model.ViewModel.Routines.Count; i++)
 	{
 		var routine = Model.ViewModel.Routines[i];

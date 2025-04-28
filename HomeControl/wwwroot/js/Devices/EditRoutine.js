@@ -1,5 +1,5 @@
 ﻿routineTriggerTypeChanged();
-routineActionTypeChanged();
+deviceOptionActionTypeChanged();
 routineActionDeviceChanged();
 
 function openRemoveRoutineTriggerQuestionDialog(triggerIdToRemove) {
@@ -78,7 +78,7 @@ function openRemoveRoutineActionQuestionDialog(actionIdToRemove) {
 	showDialogById("RemoveRoutineActionQuestionDialog");
 }
 
-function routineActionTypeChanged() {
+function deviceOptionActionTypeChanged() {
 	let select = document.getElementById("RoutineActionType");
 
 	let templateContainer = document.getElementById("RoutineActionDataTemplateContainer");

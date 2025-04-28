@@ -1,6 +1,6 @@
-﻿routineActionTypeChanged();
+﻿deviceOptionActionTypeChanged();
 
-function openRemoveRoutineActionQuestionDialog(actionIdToRemove) {
+function openRemoveDeviceOptionActionQuestionDialog(actionIdToRemove) {
 	let actionIdToRemoveInput = document.getElementById("ActionIdToRemove");
 
 	actionIdToRemoveInput.value = actionIdToRemove;
@@ -8,7 +8,7 @@ function openRemoveRoutineActionQuestionDialog(actionIdToRemove) {
 	showDialogById("RemoveDeviceOptionActionQuestionDialog");
 }
 
-function routineActionTypeChanged() {
+function deviceOptionActionTypeChanged() {
 	let select = document.getElementById("DeviceOptionActionType");
 
 	let editor = document.getElementById("DeviceOptionActionEditor");
@@ -27,7 +27,7 @@ function deviceOptionActionEditorSetVisibility(selectedValue, editor) {
 	}
 }
 
-function submitCreateRoutineActionForm() {
+function submitCreateDeviceOptionActionForm() {
 	
 	let form = document.getElementById("CreateDeviceOptionAction");
 

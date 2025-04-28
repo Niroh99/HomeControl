@@ -41,10 +41,13 @@
 
 	<dialog id="RemoveDeviceOptionQuestionDialog">
 		<div class="grid padded">
-			<span>Remove Device Option?</span>
+			<div>
+				<span>Remove</span>
+				<span class="bound" data-binding-inner="deviceOption.name"></span><span>?</span>
+			</div>
 			<form class="flex" style="justify-content: right" method="post" asp-page-handler="RemoveDeviceOption">
-				<button class="shadow-2">Remove</button>
-				<button class="shadow-2" type="button" onclick="closeDialogById('RemoveDeviceOptionQuestionDialog')">Cancel</button>
+				<button>Remove</button>
+				<button type="button" onclick="closeDialogById('RemoveDeviceOptionQuestionDialog')">Cancel</button>
 			</form>
 		</div>
 	</dialog>
@@ -58,8 +61,8 @@
 				@await Html.PartialAsync("EditDeviceOptionActionData", new EditDeviceOptionActionDataModel(Model.ViewModel.Device, Model.ViewModel.IntegrationDevice, Model.ViewModel.DeviceOption, "DeviceOptionActionEditor"))
 			</div>
 			<div class="flex" style="justify-content: right">
-				<button class="shadow-2" type="button" onclick="submitCreateDeviceOptionActionForm()">Create</button>
-				<button class="shadow-2" type="button" onclick="closeDialogById('CreateDeviceOptionActionDialog')">Cancel</button>
+				<button type="button" onclick="submitCreateDeviceOptionActionForm()">Create</button>
+				<button type="button" onclick="closeDialogById('CreateDeviceOptionActionDialog')">Cancel</button>
 			</div>
 		</form>
 	</dialog>
@@ -69,8 +72,8 @@
 			<span>Remove Action?</span>
 			<form class="flex" style="justify-content: right" method="post" asp-page-handler="RemoveDeviceOptionAction">
 				<input hidden id="ActionIdToRemove" name="ActionIdToRemove" />
-				<button class="shadow-2">Remove</button>
-				<button class="shadow-2" type="button" onclick="closeDialogById('RemoveDeviceOptionActionQuestionDialog')">Cancel</button>
+				<button>Remove</button>
+				<button type="button" onclick="closeDialogById('RemoveDeviceOptionActionQuestionDialog')">Cancel</button>
 			</form>
 		</div>
 	</dialog>
@@ -102,17 +105,17 @@
 
 		<div class="card card-children-separator">
 			<card-element class="card-padding" header="Execute">
-				<button class="shadow-2" onclick="executePageHandler('Execute')">Execute</button>
+				<button onclick="executePageHandler('Execute')">Execute</button>
 			</card-element>
 			<!card-element class="card-padding centered-content bound" data-binding-header="deviceOption.name">
 			<div class="centered-content">
 				<span class="field-label">Name:</span>
 				<strong Name="Header"></strong>
 			</div>
-			<button class="shadow-2" onclick="showDialogById('ChangeDeviceOptionNameDialog')">Rename</button>
+			<button onclick="showDialogById('ChangeDeviceOptionNameDialog')">Rename</button>
 			</!card-element>
 			<card-element class="card-padding" header="Remove">
-				<button class="shadow-2" onclick="showDialogById('RemoveDeviceOptionQuestionDialog')">Remove</button>
+				<button onclick="showDialogById('RemoveDeviceOptionQuestionDialog')">Remove</button>
 			</card-element>
 		</div>
 
@@ -136,7 +139,7 @@
 					var deviceOptionAction = Model.ViewModel.DeviceOptionActions[i];
 
 					<card-element class="card-padding bound" data-binding-header="deviceOptionActions[@(i)].display">
-						<button class="shadow-2" onclick="openRemoveDeviceOptionActionQuestionDialog('@deviceOptionAction.Id')">Remove</button>
+						<button onclick="openRemoveDeviceOptionActionQuestionDialog('@deviceOptionAction.Id')">Remove</button>
 					</card-element>
 				}
 			</div>
