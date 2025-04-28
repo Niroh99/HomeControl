@@ -11,7 +11,7 @@
 		<form method="post" class="grid card-padding" asp-page-handler="Rename">
 			<div class="grid">
 				<label for="DisplayName">Name</label>
-				<input id="DisplayName" name="DisplayName" class="bound" data-binding-value="integrationDevice.displayName" />
+				<input id="DisplayName" name="DisplayName" class="bound" data-binding-value="integrationDevice.displayName"/>
 			</div>
 			<div class="flex" style="justify-content: right">
 				<button class="shadow-2">Rename</button>
@@ -43,42 +43,31 @@
 		switch (Model.ViewModel.IntegrationDevice.InitilizationState)
 		{
 			case HomeControl.Integrations.DeviceInitilizationState.Success:
-				<div class="card shadow-2">
+				<div class="card card-children-separator">
 					@if (Model.ViewModel.IntegrationDevice.SupportsRename)
 					{
-						<div class="card-element grid-1fr-auto card-padding">
+						<!card-element class="card-padding centered-content bound" data-binding-header="integrationDevice.displayName">
 							<div class="centered-content">
 								<b class="field-label">Name:</b>
-								<b class="bound" data-binding-inner="integrationDevice.displayName"></b>
+								<strong name="Header"></strong>
 							</div>
 							<button class="shadow-2" type="button" onclick="showDialogById('ChangaDisplayNameDialog')">Rename</button>
-						</div>
+						</!card-element>
 					}
-					<div class="card-element card-padding grid-1fr-auto">
-						<div class="centered-content">
-							<strong>Remove Device</strong>
-						</div>
+					<card-element class="card-padding" header="Remove Device">
 						<button class="shadow-2" onclick="showDialogById('RemoveDeviceQuestionDialog')">Remove</button>
-					</div>
+					</card-element>
 
-					<a class="card-a card-element" asp-page="/Devices/DeviceOptions" asp-route-DeviceId="@Model.ViewModel.Device?.Id">
-						<div class="grid-1fr-auto card-padding">
-							<div class="centered-content">
-								<strong>Options</strong>
-							</div>
-
-							<div class="centered-content">
-								<img src="~/svg/arrow-right.svg" />
-							</div>
-						</div>
-					</a>
-					<div class="card-element grid-1-2 card-padding">
+					<card-a class="card-padding" asp-page="/Devices/DeviceOptions" asp-route-DeviceId="@Model.ViewModel.Device?.Id">
+						<card-element header="Options"></card-element>
+					</card-a>
+					<div class="grid-1-2 card-padding">
 						@await Html.PartialAsync("DeviceInformation", new DeviceInformationModel(Model.ViewModel.IntegrationDevice))
 					</div>
 				</div>
 				break;
 			case Integrations.DeviceInitilizationState.Error:
-				<b class="bound" data-binding-inner="integrationDevice.initializationError" style="color: darkred"></b>
+				<b class="bound error-text" data-binding-inner="integrationDevice.initializationError"></b>
 				break;
 			default: throw new NotImplementedException();
 		}

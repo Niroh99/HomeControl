@@ -25,6 +25,20 @@
 		<div id="body-container">
 			@RenderBody()
 		</div>
+		<button id="small-display-commands-overlay-button" class="overlay-button hidden" onclick="toggleSmallCommandsDisplay()"></button>
+		@if (IsSectionDefined("Commands"))
+		{
+			<div id="small-display-commands-section" class="grid-layer-item fade-in">
+				<div class="flex flex-vertical" style="justify-content: space-between">
+					<div id="small-display-commands-container" class="hidden">
+						@await RenderSectionAsync("Commands", false)
+					</div>
+					<button id="small-display-commands-toggle-button" class="shadow-4" onclick="toggleSmallCommandsDisplay()">
+						<img src="~/svg/Plus.svg" />
+					</button>
+				</div>
+			</div>
+		}
 	</main>
 
 	<div id="busy-overlay" class="overlay background40 grid hidden">
@@ -39,13 +53,22 @@
 		@await RenderSectionAsync("Dialogs", false)
 	</div>
 
+	@if (Model is ViewModelPageModelBase viewModelPage)
+	{
+		<script>
+			var model = @(Json.Serialize(viewModelPage.ViewModelBase))
+		</script>
+	}
+
 	<script src="~/lib/jquery/dist/jquery.min.js"></script>
 	<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-	<script src="~/js/site.js" asp-append-version="true"></script>
-	<script src="~/js/mainMenu.js" asp-append-version="true"></script>
 	<script src="~/js/dialog.js" asp-append-version="true"></script>
 	<script src="~/js/busy.js" asp-append-version="true"></script>
 	<script src="~/js/Breadcrumb.js"></script>
+	<script src="~/js/commands.js"></script>
+	<script src="~/js/Binding.js"></script>
+	<script src="~/js/cardElement.js"></script>
+	<script src="~/js/site.js" asp-append-version="true"></script>
 
 	@await RenderSectionAsync("Scripts", required: false)
 </body>

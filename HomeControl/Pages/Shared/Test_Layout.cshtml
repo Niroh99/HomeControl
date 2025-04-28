@@ -46,18 +46,20 @@
 
 		@await RenderSectionAsync("Dialogs", false)
 	</div>
-
 	<script>
 		var model = @(Json.Serialize(Model.ViewModelBase))
 	</script>
+
 	<script src="~/lib/jquery/dist/jquery.min.js"></script>
 	<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 	<script src="~/js/mainMenu.js" asp-append-version="true"></script>
 	<script src="~/js/dialog.js" asp-append-version="true"></script>
 	<script src="~/js/busy.js" asp-append-version="true"></script>
 	<script src="~/js/Breadcrumb.js"></script>
+	<script src="~/js/cardElement.js"></script>
 	<script src="~/js/Binding.js"></script>
 	<script src="~/js/site.js" asp-append-version="true"></script>
+	<script src="~/js/Test.js"></script>
 
 	@await RenderSectionAsync("Scripts", required: false)
 </body>

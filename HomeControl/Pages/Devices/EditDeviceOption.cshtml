@@ -1,22 +1,28 @@
 ﻿@page "{DeviceOptionId}"
 @using HomeControl.Views.Shared
+@using Microsoft.AspNetCore.Mvc.Razor
 @model HomeControl.Pages.Devices.EditDeviceOptionModel
 @{
 	Layout = "MenuPage_Layout";
 	ViewData["Title"] = "Edit Device Option";
 
-	var newDeviceOptionDataInformation = new Dictionary<string, DatabaseModels.DeviceActionData>();
+	var newDeviceOptionActionDataInformation = new Dictionary<string, DatabaseModels.DeviceActionData>();
 
-	foreach (var actionType in Enum.GetValues<HomeControl.DatabaseModels.ActionType>())
+	foreach (var actionTypeMapItem in Integrations.IDeviceService.DeviceOptionActionTypeDataMap)
 	{
-		var actionData = (DatabaseModels.DeviceActionData)Activator.CreateInstance(Integrations.IDeviceService.DeviceOptionActionTypeDataMap[actionType]);
+		var actionData = (DatabaseModels.DeviceActionData)Activator.CreateInstance(actionTypeMapItem.Value);
 
 		actionData.DeviceId = Model.ViewModel.Device.Id;
 
-		newDeviceOptionDataInformation[actionType.ToString()] = actionData;
+		newDeviceOptionActionDataInformation[actionTypeMapItem.Key.ToString()] = actionData;
 	}
 
-	var newDeviceOptionDataInformationJson = Json.Serialize(newDeviceOptionDataInformation);
+	var newDeviceOptionActionDataInformationJson = Json.Serialize(newDeviceOptionActionDataInformation);
+
+	void RenderActionCommands()
+	{
+		<button class="shadow-2" onclick="showDialogById('CreateDeviceOptionActionDialog')">Create Action</button>
+	}
 }
 
 @section Dialogs {
@@ -48,10 +54,7 @@
 			<input hidden id="NewDeviceOptionActionData" name="NewDeviceOptionActionData" />
 			<div class="grid">
 				<label for="DeviceOptionActionType">Name</label>
-				<div class="select-wrapper">
-					<select asp-items="Model.ViewModel.DeviceOptionActionTypes" id="DeviceOptionActionType" name="DeviceOptionActionType" onchange="deviceOptionActionTypeChanged()"></select>
-					<img class="select-marker" src="~/svg/arrow-down.svg" />
-				</div>
+				<custom-select asp-items="Model.ViewModel.DeviceOptionActionTypes" id="DeviceOptionActionType" name="DeviceOptionActionType" onchange="deviceOptionActionTypeChanged()"></custom-select>
 				@await Html.PartialAsync("EditDeviceOptionActionData", new EditDeviceOptionActionDataModel(Model.ViewModel.Device, Model.ViewModel.IntegrationDevice, Model.ViewModel.DeviceOption, "DeviceOptionActionEditor"))
 			</div>
 			<div class="flex" style="justify-content: right">
@@ -75,14 +78,16 @@
 
 @section Commands {
 	<div class="flex-vertical">
-		<button class="shadow-2" onclick="showDialogById('CreateDeviceOptionActionDialog')">Create Action</button>
+		@{
+			RenderActionCommands();
+		}
 	</div>
 }
 
 @section Scripts {
 	<script src="~/js/Devices/EditDeviceOption.js"></script>
 	<script>
-		var newDeviceOptionDataInformation = @newDeviceOptionDataInformationJson
+		var newDeviceOptionDataInformation = @newDeviceOptionActionDataInformationJson
 	</script>
 }
 
@@ -95,29 +100,29 @@
 	{
 		<h2 class="lesser bound" data-binding-inner="deviceOption.name"></h2>
 
-		<div class="card shadow-2">
-			<div class="card-element grid-1fr-auto card-padding">
-				<div class="centered-content">
-					<strong>Execute</strong>
-				</div>
+		<div class="card card-children-separator">
+			<card-element class="card-padding" header="Execute">
 				<button class="shadow-2" onclick="executePageHandler('Execute')">Execute</button>
+			</card-element>
+			<!card-element class="card-padding centered-content bound" data-binding-header="deviceOption.name">
+			<div class="centered-content">
+				<span class="field-label">Name:</span>
+				<strong Name="Header"></strong>
 			</div>
-			<div class="card-element grid-1fr-auto card-padding">
-				<div class="centered-content">
-					<b class="field-label">Name:</b>
-					<b class="bound" data-binding-inner="deviceOption.name"></b>
-				</div>
-				<button class="shadow-2" onclick="showDialogById('ChangeDeviceOptionNameDialog')">Rename</button>
-			</div>
-			<div class="card-element shadow-2 card-padding grid-1fr-auto">
-				<div class="centered-content">
-					<strong>Remove</strong>
-				</div>
+			<button class="shadow-2" onclick="showDialogById('ChangeDeviceOptionNameDialog')">Rename</button>
+			</!card-element>
+			<card-element class="card-padding" header="Remove">
 				<button class="shadow-2" onclick="showDialogById('RemoveDeviceOptionQuestionDialog')">Remove</button>
-			</div>
+			</card-element>
 		</div>
 
 		<h5 class="lesser">Actions</h5>
+
+		<div class="flex medium-to-large-display">
+			@{
+				RenderActionCommands();
+			}
+		</div>
 
 		if (Model.ViewModel.DeviceOptionActions.Count == 0)
 		{
@@ -125,15 +130,14 @@
 		}
 		else
 		{
-			<div class="card shadow-2">
+			<div class="card card-children-separator">
 				@for (int i = 0; i < Model.ViewModel.DeviceOptionActions.Count; i++)
 				{
 					var deviceOptionAction = Model.ViewModel.DeviceOptionActions[i];
 
-					<div class="card-element grid-1fr-auto card-padding">
-						<b class="bound" style="align-self: center" data-binding-inner="deviceOptionActions[@(i)].display"></b>
+					<card-element class="card-padding bound" data-binding-header="deviceOptionActions[@(i)].display">
 						<button class="shadow-2" onclick="openRemoveDeviceOptionActionQuestionDialog('@deviceOptionAction.Id')">Remove</button>
-					</div>
+					</card-element>
 				}
 			</div>
 		}

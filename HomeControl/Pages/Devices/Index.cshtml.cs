@@ -24,28 +24,15 @@ namespace HomeControl.Pages.Devices
             {
                 var databaseDevices = await db.SelectAllAsync<Device>();
 
-                var deviceOptions = await db.SelectAllAsync<DeviceOption>();
-
                 var devices = new List<DeviceInfo>();
 
                 foreach (var databaseDevice in databaseDevices)
                 {
-                    var integrationDevice = await deviceService.CreateAndInitializeIntegrationDeviceAsync(databaseDevice);
-
-                    devices.Add(new DeviceInfo(integrationDevice, deviceOptions.Where(option => option.DeviceId == databaseDevice.Id)));
+                    devices.Add(await DeviceInfo.CreateAsync(databaseDevice, deviceService, db));
                 }
 
-                Devices.AddRange(devices.OrderBy(device => device.Device.DisplayName));
+                Devices.AddRange(devices.OrderBy(device => device.IntegrationDevice.DisplayName));
             }
-        }
-
-        public class DeviceInfo(IIntegrationDevice device, IEnumerable<DeviceOption> options)
-        {
-            public IIntegrationDevice Device { get; } = device;
-
-            public IEnumerable<DeviceOption> Options { get; } = options;
-
-            public string PrimaryOption { get; } = device.GetExecutableFeatures().FirstOrDefault()?.Name;
         }
 
         protected override PageViewModel CreateViewModel()

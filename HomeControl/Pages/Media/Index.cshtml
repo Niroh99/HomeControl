@@ -5,21 +5,15 @@
 	Layout = "MenuPage_Layout";
 	ViewData["Title"] = "Media";
 
-	void RenderCommands(bool vertically)
+	void RenderCommands()
 	{
-		List<string> containerClasses = ["flex"];
+		<button onclick="showDialogById('UploadFileDialog')">Upload File</button>
+		<button onclick="showDialogById('CreateDirectoryDialog')">Create Directory</button>
 
-		if (vertically) containerClasses.Add("flex-vertical");
-
-		<div class="@string.Join(' ', containerClasses)">
-			<button class="shadow-2" onclick="showDialogById('UploadFileDialog')">Upload File</button>
-			<button class="shadow-2" onclick="showDialogById('CreateDirectoryDialog')">Create Directory</button>
-
-			@if (Model.DirectorySelected)
-			{
-				<button class="shadow-2" onclick="showDialogById('RenameDirectoryDialog')">Rename Directory</button>
-			}
-		</div>
+		if (Model.DirectorySelected)
+		{
+			<button onclick="showDialogById('RenameDirectoryDialog')">Rename Directory</button>
+		}
 	}
 }
 
@@ -85,36 +79,38 @@
 }
 
 @section Scripts {
-	@{
-		if (Model.MediaSelected)
-		{
-			<script>
-				function submitUploadFileForm() {
+	@if (Model.MediaSelected)
+	{
+		<script>
+			function submitUploadFileForm() {
 
-				closeDialogById('UploadFileDialog')
+			closeDialogById('UploadFileDialog')
 
-				BusyWithMessage("Uploading File...");
+			BusyWithMessage("Uploading File...");
 
-				let uploadFileForm = document.getElementById("UploadFileForm");
+			let uploadFileForm = document.getElementById("UploadFileForm");
 
-				uploadFileForm.submit();
-				}
+			uploadFileForm.submit();
+			}
 
-				function showDeleteFileDialog(filename) {
-				let fileToDeleteField = document.getElementById("FileToDelete");
+			function showDeleteFileDialog(filename) {
+			let fileToDeleteField = document.getElementById("FileToDelete");
 
-				fileToDeleteField.value = filename;
+			fileToDeleteField.value = filename;
 
-				showDialogById("DeleteFileDialog");
-				}
-			</script>
-		}
+			showDialogById("DeleteFileDialog");
+			}
+		</script>
 	}
 }
 
 @section Commands {
 	@{
-		RenderCommands(true);
+		<div class="flex-vertical">
+			@{
+				RenderCommands();
+			}
+		</div>
 	}
 }
 
@@ -123,9 +119,9 @@
 	{
 		if (Model.MediaSelected)
 		{
-			<div class="medium-to-large-display">
+			<div class="flex medium-to-large-display">
 				@{
-					RenderCommands(false);
+					RenderCommands();
 				}
 			</div>
 
@@ -152,20 +148,9 @@
 
 					foreach (var directory in Model.Directories)
 					{
-						<div class="card card-a-container shadow-2">
-							<a class="card-a" asp-route-MediaDirectoryPath="@Model.CurrentDirectoryPath" asp-route-MediaNavigateDirectory="@directory.Name">
-								<div class="grid card-padding" style="grid-template-columns: auto 1fr auto">
-									<div class="centered-content">
-										<img src="~/svg/directory.svg" />
-									</div>
-									<strong>@directory.Name</strong>
-
-									<div class="centered-content">
-										<img src="~/svg/arrow-right.svg" />
-									</div>
-								</div>
-							</a>
-						</div>
+						<card-a class="card card-padding" asp-route-MediaDirectoryPath="@Model.CurrentDirectoryPath" asp-route-MediaNavigateDirectory="@directory.Name">
+							<card-element icon-source="~/svg/directory.svg" header="@directory.Name"></card-element>
+						</card-a>
 					}
 				}
 
@@ -177,51 +162,36 @@
 					{
 						var canBrowserDisplayFile = Model.CanBrowserDisplayFile(file);
 
-						<div class="card shadow-2">
-							<details>
-								<summary>
-									<div class="card grid card-padding" style="grid-template-columns: 1fr auto auto">
-										<div class="centered-content">
-											<div style="display: grid; grid-template-columns: auto auto 1fr">
-												<b style="text-overflow: ellipsis; overflow: hidden">@System.IO.Path.GetFileNameWithoutExtension(file.Name)</b>
-												<strong>@System.IO.Path.GetExtension(file.Name)</strong>
-											</div>
-											<span class="lesser" style="font-size: 12px">@Model.FileSizeDisplay(file.Length)</span>
-										</div>
-
-										<div class="flex centered-content">
-											@if (canBrowserDisplayFile)
-											{
-												<a class="button-a shadow-2" href="@Model.BuildFileQuery(file.Name)">Open</a>
-											}
-											else
-											{
-												<a class="button-a shadow-2" href="@Model.BuildFileQuery(file.Name)" download="@file.Name">Download</a>
-											}
-										</div>
-										<div class="centered-content">
-											<img class="summary-marker" src="~/svg/arrow-down.svg" />
-											<img class="summary-marker-open" src="~/svg/arrow-up.svg" />
-										</div>
+						<details class="card shadow-2 card-children-separator">
+							<summary class="card-padding centered-content">
+								<!card-element class="centered-content grid-1fr-auto">
+								<div class="centered-content">
+									<div style="display: grid; grid-template-columns: auto auto 1fr">
+										<strong style="text-overflow: ellipsis; overflow: hidden">@System.IO.Path.GetFileNameWithoutExtension(file.Name)</strong>
+										<strong>@System.IO.Path.GetExtension(file.Name)</strong>
 									</div>
-								</summary>
-								@if (canBrowserDisplayFile)
-								{
-									<div class="card-element grid-1fr-auto card-padding">
-										<div class="centered-content">
-											<strong>Download</strong>
-										</div>
-										<a class="button-a shadow-2" href="@Model.BuildFileQuery(file.Name)" download="@file.Name">Download</a>
-									</div>
-								}
-								<div class="card-element grid-1fr-auto card-padding">
-									<div class="centered-content">
-										<strong>Delete</strong>
-									</div>
-									<button class="shadow-2" onclick="showDeleteFileDialog('@file.Name')">Delete</button>
+									<span class="lesser info-text">@Model.FileSizeDisplay(file.Length)</span>
 								</div>
-							</details>
-						</div>
+									@if (canBrowserDisplayFile)
+									{
+									<a class="button-a" href="@Model.BuildFileQuery(file.Name)">Open</a>
+									}
+									else
+									{
+									<a class="button-a" href="@Model.BuildFileQuery(file.Name)" download="@file.Name">Download</a>
+									}
+								</!card-element>
+							</summary>
+							@if (canBrowserDisplayFile)
+							{
+								<card-element class="card-padding" header="Download">
+									<a class="button-a" href="@Model.BuildFileQuery(file.Name)" download="@file.Name">Download</a>
+								</card-element>
+							}
+							<card-element class="card-padding" header="Delete">
+								<button onclick="showDeleteFileDialog('@file.Name')">Delete</button>
+							</card-element>
+						</details>
 					}
 				}
 			}

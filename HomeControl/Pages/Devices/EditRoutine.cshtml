@@ -1,0 +1,292 @@
+﻿@page "{RoutineId}"
+@using HomeControl.Modeling
+@using HomeControl.Views.Shared
+@model HomeControl.Pages.Devices.EditRoutineModel
+@{
+	Layout = "MenuPage_Layout";
+	ViewData["Title"] = "Edit Routine";
+
+	void RenderTriggerCommands()
+	{
+		<button onclick="showDialogById('CreateRoutineTriggerDialog')">Create Trigger</button>
+	}
+
+	void RenderActionCommands()
+	{
+		<button onclick="showDialogById('CreateRoutineActionDialog')">Create Action</button>
+	}
+
+	var newRoutineTriggerDataInformation = new Dictionary<string, object>();
+
+	async Task RenderWeekDaySelection()
+	{
+		<div class="flex" style="width: 100%" id="WeekDaySelectionDisplay">
+			<input hidden class="bound" id="WeekDaySelection" type="hidden" data-trigger-value="activeWeekDays;stringToJson" />
+			<toggle-button id="Monday" checked onchange="weekDaySelectionChanged()">Mo</toggle-button>
+			<toggle-button id="Tuesday" checked onchange="weekDaySelectionChanged()">Tu</toggle-button>
+			<toggle-button id="Wednesday" checked onchange="weekDaySelectionChanged()">We</toggle-button>
+			<toggle-button id="Thursday" checked onchange="weekDaySelectionChanged()">Th</toggle-button>
+			<toggle-button id="Friday" checked onchange="weekDaySelectionChanged()">Fr</toggle-button>
+			<toggle-button id="Saturday" checked onchange="weekDaySelectionChanged()">Sa</toggle-button>
+			<toggle-button id="Sunday" checked onchange="weekDaySelectionChanged()">So</toggle-button>
+		</div>
+	}
+
+	foreach (var triggerTypeMapItem in Routines.IRoutinesService.RoutineTriggerTypeDataMap)
+	{
+		var triggerData = Activator.CreateInstance(triggerTypeMapItem.Value);
+
+		newRoutineTriggerDataInformation[triggerTypeMapItem.Key.ToString()] = triggerData;
+
+		<template id="@(triggerTypeMapItem.Key)Template">
+			<div class="grid" id="@triggerTypeMapItem.Key">
+				@switch (triggerTypeMapItem.Key)
+				{
+					case DatabaseModels.RoutineTriggerType.Interval:
+						<label for="Interval">Execute every</label>
+						<div class="grid-1fr-auto">
+							<input class="bound" id="Interval" name="Interval" type="number" data-trigger-value="Interval" />
+							<span style="align-self: center">min</span>
+						</div>
+						break;
+					case DatabaseModels.RoutineTriggerType.TimeOfDay:
+						<label>Time</label>
+						<input type="time" class="bound" data-trigger-value="timeOfDay;inputTimeToTimeOnly" />
+						<label>Active</label>
+						await RenderWeekDaySelection();
+						break;
+					case DatabaseModels.RoutineTriggerType.Sunrise:
+					case DatabaseModels.RoutineTriggerType.Sunset:
+						<label>Active</label>
+						await RenderWeekDaySelection();
+						break;
+				}
+			</div>
+		</template>
+	}
+
+	var newRoutineTriggerDataInformationJson = Json.Serialize(newRoutineTriggerDataInformation);
+
+	var newRoutineActionDataInformation = new Dictionary<string, object>();
+
+	foreach (var actionTypeMapItem in Routines.IRoutinesService.RoutineActionTypeDataMap)
+	{
+		var actionData = Activator.CreateInstance(actionTypeMapItem.Value);
+
+		newRoutineActionDataInformation[actionTypeMapItem.Key.ToString()] = actionData;
+
+		<template id="@(actionTypeMapItem.Key)Template">
+			<div class="grid" id="@actionTypeMapItem.Key">
+				@switch (actionTypeMapItem.Key)
+				{
+					case DatabaseModels.ActionType.ExecuteFeature:
+						<label for="Device">Device</label>
+						<custom-select class="bound" id="NewActionDeviceId" name="DeviceId" data-action-value="DeviceId" onchange="routineActionDeviceChanged()">
+							@foreach (var device in Model.ViewModel.Devices.OrderBy(device => device.IntegrationDevice.DisplayName))
+							{
+								<option value="@device.Device.Id">@device.IntegrationDevice.DisplayName</option>
+							}
+						</custom-select>
+						<label for="FeatureName">Feature Name</label>
+						<custom-select class="bound" id="FeatureName" name="FeatureName" data-action-value="FeatureName"></custom-select>
+						break;
+					case DatabaseModels.ActionType.ScheduleFeatureExecution:
+						<label for="Device">Device</label>
+						<custom-select class="bound" id="NewActionDeviceId" name="DeviceId" data-action-value="DeviceId" onchange="routineActionDeviceChanged()">
+							@foreach (var device in Model.ViewModel.Devices)
+							{
+								<option value="@device.Device.Id">@device.IntegrationDevice.DisplayName</option>
+							}
+						</custom-select>
+						<label for="FeatureName">Feature Name</label>
+						<custom-select class="bound" id="FeatureName" name="FeatureName" data-action-value="FeatureName"></custom-select>
+						<label for="ExecuteIn">Execute after</label>
+						<div class="grid-1fr-auto">
+							<input class="bound" id="ExecuteIn" name="ExecuteIn" type="number" data-action-value="ExecuteIn" />
+							<span style="align-self: center">min</span>
+						</div>
+						break;
+				}
+			</div>
+		</template>
+	}
+
+	var newRoutineActionDataInformationJson = Json.Serialize(newRoutineActionDataInformation);
+}
+
+@section Dialogs {
+	<dialog id="ChangeRoutineNameDialog">
+		<form method="post" class="grid card-padding" asp-page-handler="Rename">
+			<div class="grid">
+				<label for="RoutineName">Name</label>
+				<input id="RoutineName" name="RoutineName" class="bound" data-binding-value="routine.name" />
+			</div>
+			<div class="flex" style="justify-content: right">
+				<button>Rename</button>
+				<button type="button" onclick="closeDialogById('ChangeRoutineNameDialog')">Cancel</button>
+			</div>
+		</form>
+	</dialog>
+
+	<dialog id="RemoveRoutineQuestionDialog">
+		<div class="grid padded">
+			<span>Remove Routine?</span>
+			<form class="flex" style="justify-content: right" method="post" asp-page-handler="RemoveRoutine">
+				<button>Remove</button>
+				<button type="button" onclick="closeDialogById('RemoveRoutineQuestionDialog')">Cancel</button>
+			</form>
+		</div>
+	</dialog>
+
+	<dialog id="CreateRoutineTriggerDialog">
+		<form id="CreateRoutineTrigger" method="post" class="grid card-padding" asp-page-handler="CreateRoutineTrigger">
+			<input hidden id="NewRoutineTriggerData" name="NewRoutineTriggerData" />
+			<div class="grid">
+				<label for="RoutineTriggerType">Name</label>
+				<custom-select id="RoutineTriggerType" name="RoutineTriggerType" asp-items="@Model.ViewModel.TriggerTypes" onchange="routineTriggerTypeChanged()"></custom-select>
+			</div>
+			<div id="RoutineTriggerDataTemplateContainer" class="grid">
+			</div>
+			<div class="flex" style="justify-content: right">
+				<button type="button" onclick="submitCreateRoutineTriggerForm()">Create</button>
+				<button type="button" onclick="closeDialogById('CreateRoutineTriggerDialog')">Cancel</button>
+			</div>
+		</form>
+	</dialog>
+
+	<dialog id="RemoveRoutineTriggerQuestionDialog">
+		<div class="grid padded">
+			<span>Remove Trigger?</span>
+			<form class="flex" style="justify-content: right" method="post" asp-page-handler="RemoveRoutineTrigger">
+				<input hidden id="TriggerIdToRemove" name="TriggerIdToRemove" />
+				<button>Remove</button>
+				<button type="button" onclick="closeDialogById('RemoveRoutineTriggerQuestionDialog')">Cancel</button>
+			</form>
+		</div>
+	</dialog>
+
+	<dialog id="CreateRoutineActionDialog">
+		<form id="CreateRoutineAction" method="post" class="grid card-padding" asp-page-handler="CreateRoutineAction">
+			<input hidden id="NewRoutineActionData" name="NewRoutineActionData" />
+			<div class="grid">
+				<label for="RoutineActionType">Name</label>
+				<custom-select id="RoutineActionType" name="RoutineActionType" asp-items="@Model.ViewModel.ActionTypes" onchange="routineActionTypeChanged()"></custom-select>
+			</div>
+			<div id="RoutineActionDataTemplateContainer" class="grid">
+			</div>
+			<div class="flex" style="justify-content: right">
+				<button type="button" onclick="submitCreateRoutineActionForm()">Create</button>
+				<button type="button" onclick="closeDialogById('CreateRoutineActionDialog')">Cancel</button>
+			</div>
+		</form>
+	</dialog>
+
+	<dialog id="RemoveRoutineActionQuestionDialog">
+		<div class="grid padded">
+			<span>Remove Action?</span>
+			<form class="flex" style="justify-content: right" method="post" asp-page-handler="RemoveRoutineAction">
+				<input hidden id="ActionIdToRemove" name="ActionIdToRemove" />
+				<button>Remove</button>
+				<button type="button" onclick="closeDialogById('RemoveRoutineActionQuestionDialog')">Cancel</button>
+			</form>
+		</div>
+	</dialog>
+}
+
+@section Commands {
+	<div class="flex-vertical">
+		@{
+			RenderTriggerCommands();
+		}
+		@{
+			RenderActionCommands();
+		}
+	</div>
+}
+
+@section Scripts {
+	<script src="~/js/Devices/EditRoutine.js"></script>
+	<script>
+		var newRoutineTriggerDataInformation = @newRoutineTriggerDataInformationJson
+		var newRoutineActionDataInformation = @newRoutineActionDataInformationJson
+	</script>
+}
+
+<div class="grid body-content">
+	@if (Model.ViewModel.Routine == null)
+	{
+		<h2 class="lesser">Unknown Routine</h2>
+	}
+	else
+	{
+		<h2 class="lesser bound" data-binding-inner="routine.name"></h2>
+
+		<div class="card card-children-separator">
+			<card-element class="card-padding bound" header="Active">
+				<switch checked-label="Yes" unchecked-label="No" class="bound" data-binding-checked="routine.isActive" onchange="executePageHandler('ToggleRoutineIsActive')" />
+			</card-element>
+			<!card-element class="card-padding centered-content bound" data-binding-header="routine.name">
+			<div class="centered-content">
+				<span class="field-label">Name:</span>
+				<strong name="Header"></strong>
+			</div>
+			<button onclick="showDialogById('ChangeRoutineNameDialog')">Rename</button>
+			</!card-element>
+			<card-element class="card-padding" header="Remove">
+				<button onclick="showDialogById('RemoveRoutineQuestionDialog')">Remove</button>
+			</card-element>
+		</div>
+
+		<h5 class="lesser">Triggers</h5>
+
+		<div class="flex medium-to-large-display">
+			@{
+				RenderTriggerCommands();
+			}
+		</div>
+
+		if (Model.ViewModel.RoutineTriggers.Count == 0)
+		{
+			<h4 class="lesser">No Triggers</h4>
+		}
+		else
+		{
+			<div class="card card-children-separator">
+				@for (int i = 0; i < Model.ViewModel.RoutineTriggers.Count; i++)
+				{
+					var routineTrigger = Model.ViewModel.RoutineTriggers[i];
+
+					<card-element class="bound card-padding" data-binding-header="routineTriggers[@(i)].display" data-binding-info-text="routineTriggers[@(i)].additionalInfo">
+						<button onclick="openRemoveRoutineTriggerQuestionDialog('@routineTrigger.Id')">Remove</button>
+					</card-element>
+				}
+			</div>
+		}
+
+		<h5 class="lesser">Actions</h5>
+
+		<div class="flex medium-to-large-display">
+			@{
+				RenderActionCommands();
+			}
+		</div>
+
+		if (Model.ViewModel.RoutineActions.Count == 0)
+		{
+			<h4 class="lesser">No Actions</h4>
+		}
+		else
+		{
+			<div class="card card-children-separator">
+				@for (int i = 0; i < Model.ViewModel.RoutineActions.Count; i++)
+				{
+					var routineAction = Model.ViewModel.RoutineActions[i];
+
+					<card-element class="bound card-padding" data-binding-header="routineActions[@(i)].display">
+						<button onclick="openRemoveRoutineActionQuestionDialog('@routineAction.Id')">Remove</button>
+					</card-element>
+				}
+			</div>
+		}
+	}
+</div>

@@ -57,7 +57,7 @@
 								}
 							}
 
-							var breadcrumbModel = new BreadcrumbModel("TitleBreadcrumb", ">", ["h2", "lesser"]);
+							var breadcrumbModel = new BreadcrumbModel("TitleBreadcrumb", ">", ["h1", "lesser"]);
 
 							breadcrumbModel.Breadcrumbs.AddRange(breadcrumbs);
 
@@ -68,7 +68,7 @@
 							<h1 class="lesser">@ViewData["Title"]</h1>
 						}
 					}
-				</div>
+				</div> 
 			</div>
 		</div>
 	</header>
@@ -78,16 +78,19 @@
 				@RenderBody()
 			</div>
 			<button id="small-display-commands-overlay-button" class="overlay-button hidden" onclick="toggleSmallCommandsDisplay()"></button>
-			<div id="small-display-commands-section" class="grid-layer-item fade-in">
-				<div class="flex flex-vertical" style="justify-content: space-between">
-					<div id="small-display-commands-container" class="hidden">
-						@await RenderSectionAsync("Commands", false)
+			@if (IsSectionDefined("Commands"))
+			{
+				<div id="small-display-commands-section" class="grid-layer-item fade-in">
+					<div class="flex flex-vertical" style="justify-content: space-between">
+						<div id="small-display-commands-container" class="hidden">
+							@await RenderSectionAsync("Commands", false)
+						</div>
+						<button id="small-display-commands-toggle-button" class="shadow-4" onclick="toggleSmallCommandsDisplay()">
+							<img src="~/svg/Plus.svg" />
+						</button>
 					</div>
-					<button id="small-display-commands-toggle-button" class="shadow-4" onclick="toggleSmallCommandsDisplay()">
-						<img src="~/svg/Plus.svg" />
-					</button>
 				</div>
-			</div>
+			}
 			<button id="main-menu-overlay" class="main-menu-component overlay-button hidden" onclick="ToggleMainMenu()"></button>
 			<div id="main-menu" class="main-menu-component flex flex-vertical hidden">
 				@{
@@ -101,7 +104,7 @@
 
 						<div class="@menuItemClasses">
 							<a class="menu-item-a padded" asp-area="" asp-page="@menuItem.Url">
-								<h3>@menuItem.Name</h3>
+								<h5>@menuItem.Name</h5>
 							</a>
 						</div>
 					}
@@ -137,6 +140,7 @@
 	<script src="~/js/Breadcrumb.js"></script>
 	<script src="~/js/commands.js"></script>
 	<script src="~/js/Binding.js"></script>
+	<script src="~/js/cardElement.js"></script>
 	<script src="~/js/site.js" asp-append-version="true"></script>
 
 	@await RenderSectionAsync("Scripts", required: false)

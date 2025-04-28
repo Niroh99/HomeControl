@@ -20,6 +20,8 @@ namespace HomeControl.Integrations.TPLink
 
         public string DisplayName => _sysInfo == null ? Owner?.Hostname : Alias;
 
+        public string AdditionalInfo => _sysInfo == null ? null : DeviceName;
+
         public bool SupportsRename { get => true; }
 
         private DeviceInitilizationState _initilizationState = DeviceInitilizationState.None;
@@ -29,6 +31,8 @@ namespace HomeControl.Integrations.TPLink
         public string InitializationError { get => _initializationError; }
 
         public bool IsInitialized { get => InitilizationState == DeviceInitilizationState.Success; }
+
+        public List<Feature> Features { get => [.. GetFeatures()]; }
 
         public string Hostname { get; } = hostname;
 

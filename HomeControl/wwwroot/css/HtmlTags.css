@@ -58,6 +58,11 @@ h5 {
     font-weight: bold;
 }
 
+.h2 {
+    margin: 0px;
+    font-size: 32px;
+}
+
 .h3 {
     font-size: 1.17em;
     font-weight: bold;
@@ -74,10 +79,12 @@ button {
     border: none;
     color: var(--foreground);
     border-radius: var(--smallBorderRadius);
-    padding: var(--mediumGap);
+    padding: var(--smallGap) var(--mediumGap) var(--smallGap) var(--mediumGap);
     width: 100%;
+    min-width: 120px;
     font-size: inherit;
     line-height: 1em;
+    box-shadow: var(--shadow2);
 }
 
     button:active {
@@ -112,6 +119,8 @@ button {
     button.empty {
         background: transparent;
         padding: 0 var(--smallGap);
+        min-width: initial;
+        box-shadow: initial;
     }
 
         button.empty:active {
@@ -207,6 +216,7 @@ select {
     position: absolute;
     top: calc(50% - 3px);
     right: 10px;
+    pointer-events: none;
 }
 
 .select-wrapper 
@@ -240,11 +250,14 @@ a.button-a {
     border: none;
     color: var(--foreground);
     border-radius: var(--smallBorderRadius);
-    padding: var(--mediumGap);
+    padding: var(--smallGap) var(--mediumGap) var(--smallGap) var(--mediumGap);
     width: 100%;
+    min-width: 120px;
     font-size: inherit;
     line-height: 1em;
     align-content: center;
+    text-align: center;
+    box-shadow: var(--shadow2);
 }
 
     a.button-a:active {

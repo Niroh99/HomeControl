@@ -1,4 +1,6 @@
-﻿namespace HomeControl.Integrations
+﻿using System.Text.Json.Serialization;
+
+namespace HomeControl.Integrations
 {
     public class Feature
     {
@@ -10,6 +12,7 @@
 
         public string Name { get; }
 
+        [JsonIgnore]
         public Func<Task> Execute { get; }
     }
 }

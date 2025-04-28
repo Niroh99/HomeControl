@@ -1,0 +1,17 @@
+﻿@page
+@model HomeControl.Pages.Devices.RoutinesModel
+@{
+	Layout = "MenuPage_Layout";
+	ViewData["Title"] = "Routines";
+}
+
+<div class="body-content grid">
+	@for (int i = 0; i < Model.ViewModel.Routines.Count; i++)
+	{
+		var routine = Model.ViewModel.Routines[i];
+
+		<card-a class="card card-padding" asp-page="EditRoutine" asp-route-RoutineId="@routine.Id">
+			<card-element class="bound" data-binding-header="routines[@(i)].name"></card-element>
+		</card-a>
+	}
+</div>

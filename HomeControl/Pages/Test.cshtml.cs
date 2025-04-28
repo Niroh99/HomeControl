@@ -18,72 +18,109 @@ namespace HomeControl.Pages
         public class TestViewModel(ViewModelPageModelBase page) : PageViewModel(page)
         {
             public string Test { get => Get<string>(); set => Set(value); }
+
+            public string CardHeader { get => Get<string>(); set => Set(value); }
+
+            public string CardInfoText { get => Get<string>(); set => Set(value); }
+
+            public string CardErrorText { get => Get<string>(); set => Set(value); }
         }
 
         protected override PageViewModel CreateViewModel()
         {
-            return new TestViewModel(this);
+            return new TestViewModel(this) { Test = "ERROR!", CardHeader = "Header", CardInfoText = "Very Importand Information", CardErrorText = "Error!" };
         }
 
         public async Task OnGet()
         {
-            await routinesService.ExecuteActiveRoutinesAsync();
+            var data = new TimeOfDayRoutineTriggerData
+            {
+                TimeOfDay = TimeOnly.Parse("20:31"),
+                ActiveWeekDays = new HashSet<DayOfWeek> { DayOfWeek.Monday, DayOfWeek.Thursday }
+            };
+
+            var json = System.Text.Json.JsonSerializer.Serialize(data);
+
+            System.Diagnostics.Debug.WriteLine(json);
+
+            var test = System.Text.Json.JsonSerializer.Deserialize<TimeOfDayRoutineTriggerData>("{\"timeOfDay\":\"20:48\",\"activeWeekDays\":\"[1,2,4,5,6,0]\",\"typeName\":\"HomeControl.DatabaseModels.TimeOfDayRoutineTriggerData\",\"display\":null,\"additionalInfo\":null}");
         }
 
         private async Task InsertTestRoutine()
         {
-            var routine = new Routine
+            var sunsetRoutine = new Routine
             {
+                Name = "Sunrise",
                 IsActive = true,
             };
 
-            await db.InsertAsync(routine);
+            await db.InsertAsync(sunsetRoutine);
 
-            var routineTrigger = new RoutineTrigger
+            var sunsetRoutineTrigger = new RoutineTrigger
             {
-                RoutineId = routine.Id,
-                Type = RoutineTriggerType.Interval,
-                Data = new IntervalTriggerData
+                RoutineId = sunsetRoutine.Id,
+                Type = RoutineTriggerType.Sunset,
+                Data = new SunsetRoutineTriggerData
                 {
-                    Interval = TimeSpan.FromMinutes(2),
+                    ActiveWeekDays = [.. Enum.GetValues<DayOfWeek>()]
                 }
             };
 
-            await db.InsertAsync(routineTrigger);
+            await db.InsertAsync(sunsetRoutineTrigger);
 
-            var firstRoutineAction = new RoutineAction
+            var sunsetRoutineAction = new RoutineAction
             {
                 Index = 1,
-                RoutineId = routine.Id,
+                RoutineId = sunsetRoutine.Id,
                 Type = ActionType.ExecuteFeature,
                 Data = new ExecuteDeviceFeatureActionData
                 {
-                    DeviceId = 2,
+                    DeviceId = 5,
                     FeatureName = "Turn On",
                 }
             };
 
-            await db.InsertAsync(firstRoutineAction);
+            await db.InsertAsync(sunsetRoutineAction);
 
-            var secondRoutineAction = new RoutineAction
+            var midnightRoutine = new Routine
             {
-                Index = 2,
-                RoutineId = routine.Id,
-                Type = ActionType.ScheduleFeatureExecution,
-                Data = new ScheduleDeviceFeatureExecutionActionData
+                Name = "Midnight",
+                IsActive = true,
+            };
+
+            await db.InsertAsync(midnightRoutine);
+
+            var midnightRoutineTrigger = new RoutineTrigger
+            {
+                RoutineId = midnightRoutine.Id,
+                Type = RoutineTriggerType.TimeOfDay,
+                Data = new TimeOfDayRoutineTriggerData
                 {
-                    DeviceId = 2,
-                    ExecuteIn = 1,
-                    FeatureName = "Turn Off"
+                    TimeOfDay = TimeOnly.MinValue,
+                    ActiveWeekDays = [.. Enum.GetValues<DayOfWeek>()]
                 }
             };
 
-            await db.InsertAsync(secondRoutineAction);
+            await db.InsertAsync(midnightRoutineTrigger);
+
+            var midnightRoutineAction = new RoutineAction
+            {
+                Index = 1,
+                RoutineId = midnightRoutine.Id,
+                Type = ActionType.ExecuteFeature,
+                Data = new ExecuteDeviceFeatureActionData
+                {
+                    DeviceId = 5,
+                    FeatureName = "Turn Off",
+                }
+            };
+
+            await db.InsertAsync(midnightRoutineAction);
         }
 
         public async Task<IActionResult> OnPostTestAjaxPost(string id)
         {
-            var test = await db.SelectAsync(WhereBuilder.Where<Device>().Compare(device => device.Id, ComparisonOperator.Equals, 2).Or().Compare(device => device.Port, ComparisonOperator.GreaterThan, 9997));
+            await InsertTestRoutine();
 
             return await ViewModelResponse();
         }

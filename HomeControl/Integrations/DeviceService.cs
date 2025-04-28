@@ -3,17 +3,17 @@ using HomeControl.Database;
 using HomeControl.DatabaseModels;
 using HomeControl.Events;
 using HomeControl.Events.EventDatas;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Reflection;
 
 namespace HomeControl.Integrations
 {
     public interface IDeviceService
     {
-        public static Dictionary<ActionType, Type> DeviceOptionActionTypeDataMap { get; } = new Dictionary<ActionType, Type>
-        {
-            { ActionType.ExecuteFeature, typeof(ExecuteDeviceFeatureActionData) },
-            { ActionType.ScheduleFeatureExecution, typeof(ScheduleDeviceFeatureExecutionActionData) }
-        };
+        public static ReadOnlyDictionary<ActionType, Type> DeviceOptionActionTypeDataMap { get; } =
+            new ActionType[] { ActionType.ExecuteFeature, ActionType.ScheduleFeatureExecution }
+            .ToDictionary(actionType => actionType, actionType => IActionsService.ActionTypeDataMap[actionType]).AsReadOnly();
 
         bool TryGetDeviceCache<T>(out T cache) where T : IIntegrationDeviceCache;
 

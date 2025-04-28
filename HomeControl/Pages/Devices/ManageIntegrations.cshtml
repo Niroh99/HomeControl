@@ -18,16 +18,10 @@
 
 <div class="grid body-content">
 	<h2 class="lesser">TP-Link</h2>
-	<div method="post" asp-page-handler="DiscoverDevices" class="card shadow-2 grid-1fr-auto card-padding">
-		<div class="centered-content">
-			<strong>Discover Devices</strong>
-		</div>
+	<card-element class="card card-padding" header="Discover Devices">
 		<button type="button" class="shadow-2" onclick="discoverDevices()">Discover</button>
-	</div>
-	<div method="post" asp-page-handler="DiscoverDevices" class="card shadow-2 grid-1fr-auto card-padding">
-		<div class="centered-content">
-			<strong>Clear Devices Cache</strong>
-		</div>
+	</card-element>
+	<card-element class="card card-padding" header="Clear Devices Cache">
 		<button type="button" class="shadow-2" onclick="executePageHandler('ClearTPLinkDevicesCache')">Clear</button>
-	</div>
+	</card-element>
 </div>

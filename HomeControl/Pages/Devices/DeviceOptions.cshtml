@@ -3,11 +3,18 @@
 @{
 	Layout = "MenuPage_Layout";
 	ViewData["Title"] = "Device Options";
+
+	void RenderCommands()
+	{
+		<button onclick="showDialogById('CreateDeviceOptionDialog')">Create Option</button>
+	}
 }
 
 @section Commands {
 	<div class="flex-vertical">
-		<button class="shadow-2" onclick="showDialogById('CreateDeviceOptionDialog')">Create Option</button>
+		@{
+			RenderCommands();
+		}
 	</div>
 }
 
@@ -35,30 +42,26 @@
 	{
 		<h2 class="lesser bound" data-binding-inner="integrationDevice.displayName"></h2>
 
+		<div class="flex medium-to-large-display">
+			@{
+				RenderCommands();
+			}
+		</div>
+
 		if (Model.ViewModel.DeviceOptions.Count == 0)
 		{
 			<h3 class="lesser">No Options</h3>
 		}
 		else
 		{
-			<div class="card shadow-2">
-				@for (int i = 0; i < Model.ViewModel.DeviceOptions.Count; i++)
-				{
-					var deviceOption = Model.ViewModel.DeviceOptions[i];
+			@for (int i = 0; i < Model.ViewModel.DeviceOptions.Count; i++)
+			{
+				var deviceOption = Model.ViewModel.DeviceOptions[i];
 
-					<a class="card-a card-padding grid-1fr-auto" asp-page="EditDeviceOption" asp-route-DeviceOptionId="@deviceOption.Id">
-						<div class="grid-1fr-auto card-padding">
-							<div class="centered-content">
-								<b class="bound" data-binding-inner="deviceOptions[@(i)].name"></b>
-							</div>
-
-							<div class="centered-content">
-								<img src="~/svg/arrow-right.svg" />
-							</div>
-						</div>
-					</a>
-				}
-			</div>
+				<card-a class="card card-padding" asp-page="EditDeviceOption" asp-route-DeviceOptionId="@deviceOption.Id">
+					<card-element class="bound" data-binding-header="deviceOptions[@(i)].name"></card-element>
+				</card-a>
+			}
 		}
 	}
 </div>

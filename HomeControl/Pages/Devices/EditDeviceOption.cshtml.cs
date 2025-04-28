@@ -38,8 +38,8 @@ namespace HomeControl.Pages.Devices
                     .Compare(i => i.DeviceOptionId, ComparisonOperator.Equals, DeviceOption.Id)))
                     .OrderBy(action => action.Index));
 
-                DeviceOptionActionTypes.AddRange(Enum.GetValues<ActionType>()
-                    .Select(type => new SelectListItem(EnumHelper.GetValueDescription(type), type.ToString())));
+                DeviceOptionActionTypes.AddRange(IDeviceService.DeviceOptionActionTypeDataMap
+                    .Select(type => new SelectListItem(EnumHelper.GetValueDescription(type.Key), type.Key.ToString())));
             }
         }
 
@@ -90,13 +90,10 @@ namespace HomeControl.Pages.Devices
         {
             var actionDataObject = (Model)System.Text.Json.JsonSerializer.Deserialize(newDeviceOptionActionData, IDeviceService.DeviceOptionActionTypeDataMap[deviceOptionActionType], new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web));
 
-            var deviceOptionActions = await db.SelectAsync(WhereBuilder.Where<DeviceOptionAction>()
-                .Compare(action => action.DeviceOptionId, ComparisonOperator.Equals, ViewModel.DeviceOption.Id));
-            
             var deviceOptionAction = new DeviceOptionAction
             {
                 DeviceOptionId = ViewModel.DeviceOption.Id,
-                Index = deviceOptionActions.Count + 1,
+                Index = ViewModel.DeviceOptionActions.Count + 1,
                 Type = deviceOptionActionType,
                 Data = actionDataObject
             };

@@ -8,19 +8,12 @@
 }
 
 <div class="grid body-content">
-	<div class="card shadow-2 card-a-container">
-		<a class="card-a" asp-page="ManageIntegrations">
-			<div class="grid-1fr-auto card-padding">
-				<div class="centered-content">
-					<strong>Manage Integrations</strong>
-				</div>
-
-				<div class="centered-content">
-					<img src="~/svg/arrow-right.svg" />
-				</div>
-			</div>
-		</a>
-	</div>
+	<card-a class="card card-padding" asp-page="ManageIntegrations">
+		<card-element header="Manage Integrations"></card-element>
+	</card-a>
+	<card-a class="card card-padding" asp-page="Routines">
+		<card-element header="Routines"></card-element>
+	</card-a>
 
 	<h2 class="lesser">TP-Link Devices</h2>
 
@@ -28,62 +21,40 @@
 	{
 		var deviceInfo = Model.ViewModel.Devices[i];
 
-		<div class="card shadow-2">
-			@switch (deviceInfo.Device.InitilizationState)
-			{
-				case DeviceInitilizationState.Success:
-					<details>
-						<summary>
-							<div class="grid card-padding medium-gap" style="grid-template-columns: 1fr auto auto">
-								<div class="centered-content">
-									<b class="bound" data-binding-inner="devices[@(i)].device.displayName"></b>
-								</div>
-
-								@if (deviceInfo.PrimaryOption != null)
-								{
-									<button class="bound shadow-2" type="button" data-binding-inner="devices[@(i)].primaryOption" data-clickbinding-id="devices[@(i)].device.owner.id" data-clickbinding-featureName="devices[@(i)].primaryOption" onclick="executePageHandler('ExecuteFeature', this.dataset)"></button>
-								}
-								<div class="centered-content">
-									<img class="summary-marker" src="~/svg/arrow-down.svg" />
-									<img class="summary-marker-open" src="~/svg/arrow-up.svg" />
-								</div>
-							</div>
-						</summary>
-						@{
-							var options = deviceInfo.Options.ToArray();
-
-							for (int j = 0; j < options.Length; j++)
+		@switch (deviceInfo.IntegrationDevice.InitilizationState)
+		{
+			case DeviceInitilizationState.Success:
+				<details class="card card-children-separator">
+					<summary class="card-padding">
+						<card-element class="bound" data-binding-header="devices[@(i)].integrationDevice.displayName" data-binding-info-text="devices[@(i)].integrationDevice.additionalInfo">
+							@if (deviceInfo.PrimaryOption != null)
 							{
-								<div class="card-element grid-1fr-auto card-padding">
-									<div class="centered-content">
-										<b class="bound" data-binding-inner="devices[@(i)].options[@(j)].name"></b>
-									</div>
-									<button type="button" class="shadow-2" data-clickbinding-optionId="devices[@(i)].options[@(j)].id" onclick="executePageHandler('ExecuteOption', this.dataset)">Execute</button>
-								</div>
+								<button class="bound" type="button" data-binding-inner="devices[@(i)].primaryOption" data-clickbinding-id="devices[@(i)].Device.id" data-clickbinding-featureName="devices[@(i)].primaryOption" onclick="executePageHandler('ExecuteFeature', this.dataset)"></button>
 							}
-						}
+						</card-element>
+					</summary>
+					@{
+						var options = deviceInfo.Options.ToArray();
 
-						<div class="card-element grid-1fr-auto card-padding">
-							<div class="centered-content">
-								<strong>Edit</strong>
-							</div>
-							<a class="button-a shadow-2" asp-page="EditDevice" asp-route-DeviceId="@deviceInfo.Device.Owner.Id">Edit</a>
-						</div>
-						<div class="card-element grid-1-2 card-padding">
-							@await Html.PartialAsync("DeviceInformation", new DeviceInformationModel(deviceInfo.Device))
-						</div>
-					</details>
-					break;
-				case DeviceInitilizationState.Error:
-					<div class="card-padding">
-						<div class="centered-content">
-							<b class="bound" data-binding-inner="devices[@(i)].device.displayName"></b><br />
-							<b class="lesser bound" style="font-size: 12px; color:darkred" data-binding-inner="devices[@(i)].device.initializationError"></b>
-						</div>
+						for (int j = 0; j < options.Length; j++)
+						{
+							<card-element class="card-padding bound" data-binding-header="devices[@(i)].options[@(j)].name">
+								<button type="button" data-clickbinding-optionId="devices[@(i)].options[@(j)].id" onclick="executePageHandler('ExecuteOption', this.dataset)">Execute</button>
+							</card-element>
+						}
+					}
+					<card-element class="card-padding" header="Edit">
+						<a class="button-a" asp-page="EditDevice" asp-route-DeviceId="@deviceInfo.Device.Id">Edit</a>
+					</card-element>
+					<div class="grid-1-2 card-padding">
+						@await Html.PartialAsync("DeviceInformation", new DeviceInformationModel(deviceInfo.IntegrationDevice))
 					</div>
-					break;
-				default: throw new NotImplementedException();
-			}
-		</div>
+				</details>
+				break;
+			case DeviceInitilizationState.Error:
+				<card-element class="card card-padding bound" data-binding-header="devices[@(i)].integrationDevice.displayName" data-binding-error-text="devices[@(i)].integrationDevice.initializationError"></card-element>
+				break;
+			default: throw new NotImplementedException();
+		}
 	}
 </div>

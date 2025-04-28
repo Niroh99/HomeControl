@@ -1,7 +1,4 @@
-﻿using HomeControl.Integrations;
-using HomeControl.Integrations.TPLink;
-using HomeControl.Database;
-using System.ComponentModel.DataAnnotations;
+﻿using HomeControl.Database;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HomeControl.DatabaseModels

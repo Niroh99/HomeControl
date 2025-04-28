@@ -7,6 +7,9 @@ namespace HomeControl.DatabaseModels
     public class Routine : IdentityKeyModel
     {
         [Column]
+        public string Name { get => Get<string>(); set => Set(value); }
+
+        [Column]
         public bool IsActive { get => Get<bool>(); set => Set(value); }
 
         [Column]

@@ -3,7 +3,6 @@
 }
 
 .bound {
-
 }
 
 .overlay {
@@ -15,6 +14,82 @@
     width: 100%;
     height: 100vh;
 }
+
+.switch-container {
+    display: flex;
+    gap: var(--mediumGap);
+}
+
+    .switch-container label.switch-input-label {
+        display: inline-block;
+        width: 4em;
+        height: calc(1em + 10px);
+        border-radius: 18px;
+        border: 1px solid var(--borders);
+        padding: 4px;
+        transition: 0.3s;
+        align-self: center;
+    }
+
+    .switch-container label.switch-checked-label {
+        display: none;
+        align-self: center;
+    }
+
+    .switch-container label.switch-unchecked-label {
+        align-self: center;
+    }
+
+    .switch-container span.switch-thumb {
+        display: block;
+        justify-self: left;
+        width: 1em;
+        height: 1em;
+        background: var(--foreground);
+        border-radius: 50%;
+    }
+
+    .switch-container:has(input[type=checkbox]:checked) label.switch-input-label {
+        background: var(--highlights);
+    }
+
+    .switch-container:has(input[type=checkbox]:checked) label.switch-checked-label {
+        display: initial;
+    }
+
+    .switch-container:has(input[type=checkbox]:checked) label.switch-unchecked-label {
+        display: none;
+    }
+
+    .switch-container input[type=checkbox]:checked + .switch-thumb {
+        justify-self: right;
+        background: var(--hightlightedForeground);
+    }
+
+.toggle-button-container {
+}
+
+    .toggle-button-container div.toggle-button {
+        background: var(--controls);
+        border: none;
+        color: var(--foreground);
+        border-radius: var(--smallBorderRadius);
+        padding: var(--smallGap) var(--mediumGap) var(--smallGap) var(--mediumGap);
+        width: 100%;
+        font-size: inherit;
+        line-height: 1em;
+        box-shadow: var(--shadow2);
+    }
+
+        .toggle-button-container div.toggle-button:active {
+            background: var(--highlights);
+            color: var(--highlightedForeground);
+        }
+
+    .toggle-button-container input[type=checkbox]:checked + div.toggle-button {
+        background: var(--highlights);
+        color: var(--highlightedForeground);
+    }
 
 .background40 {
     background: var(--background40);
@@ -41,23 +116,51 @@
     min-height: 64px;
     text-overflow: ellipsis;
     white-space: nowrap;
+    box-shadow: var(--shadow2);
 }
 
-    .card:nth-child(1 of .card-element) {
-        border-top: none;
+card-element {
+    min-height: 64px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    line-height: 1;
+}
+
+.card-padding {
+    padding: var(--mediumGap);
+}
+
+    .card-padding card-element {
+        min-height: calc(64px - (var(--mediumGap) * 2));
     }
 
-.card-element {
-    border-top: 1px solid var(--background);
-    min-height: 64px;
+.card-children-separator {
 }
 
-    /*.card-element:not(.card-element ~ .card-element) {
-        border-top: none;
-    }*/
 
-    .card-padding {
-        padding: var(--mediumGap);
+    .card-children-separator > * {
+        border-top: 1px solid var(--background);
+    }
+
+    .card-children-separator > :first-child {
+        border-top: unset;
+    }
+
+.info-text {
+    font-size: 12px;
+}
+
+    .info-text:empty {
+        display: none;
+    }
+
+.error-text {
+    color: darkred;
+    font-size: 12px;
+}
+
+    .error-text:empty {
+        display: none;
     }
 
 .padded {
@@ -86,14 +189,6 @@
 
 .lesser {
     color: var(--foreground80);
-}
-
-.medium-to-large-display {
-    display: none;
-}
-
-.small-display {
-
 }
 
 .grid-layer-item {
@@ -139,6 +234,12 @@
     grid-template-columns: 1fr auto;
 }
 
+.grid-auto-1fr-auto {
+    display: grid;
+    gap: var(--smallGap);
+    grid-template-columns: auto 1fr auto;
+}
+
 .grid-2 {
     display: grid;
     gap: var(--smallGap);
@@ -178,6 +279,13 @@
     animation: fadein 0.3s;
 }
 
+.medium-to-large-display {
+    display: none;
+}
+
+.small-display {
+}
+
 .hidden {
     display: none;
 }
@@ -202,14 +310,14 @@
 }
 
 #small-display-commands-toggle-button {
+    min-width: initial;
     width: 96px;
     height: 96px;
-    border-radius: 48px;
+    border-radius: 50%;
     align-self: self-end;
 }
 
 #small-display-commands-overlay-button {
-
 }
 
 @media (min-width: 768px) {

@@ -34,7 +34,7 @@ builder.Services.AddSession(options =>
 builder.Services.AddSingleton<IFileProvider>(new PhysicalFileProvider(HomeControl.Pages.Media.IndexModel.BasePath));
 builder.Services.AddSingleton<IWeatherService, WeatherService>();
 
-builder.Services.AddScoped<IDatabaseConnection>((serviceProvider) => new DatabaseConnection(connectionString));
+builder.Services.AddScoped<IDatabaseConnection>((serviceProvider) => new DatabaseConnection(connectionString, serviceProvider));
 builder.Services.AddScoped<IEventService, EventService>();
 builder.Services.AddScoped<IRoutinesService, RoutinesService>();
 builder.Services.AddScoped<IDeviceService, DeviceService>();

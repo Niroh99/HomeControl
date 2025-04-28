@@ -11,16 +11,9 @@
 		{
 			if (menuItem.Name == "Home") continue;
 
-			<div class="card shadow-2 card-a-container">
-				<a class="card-a" asp-area="" asp-page="@menuItem.Url">
-					<div class="grid-1fr-auto card-padding">
-						<strong>@menuItem.Name</strong>
-						<div class="centered-content">
-							<img src="~/svg/arrow-right.svg" />
-						</div>
-					</div>
-				</a>
-			</div>
+			<card-a class="card card-padding" asp-page="@menuItem.Url">
+				<card-element header="@menuItem.Name"></card-element>
+			</card-a>
 		}
 	}
 </div>

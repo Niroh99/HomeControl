@@ -3,11 +3,18 @@ using HomeControl.DatabaseModels;
 using HomeControl.Events;
 using HomeControl.Events.EventDatas;
 using HomeControl.Integrations;
+using System.Collections.ObjectModel;
 
 namespace HomeControl.Actions
 {
     public interface IActionsService
     {
+        public static ReadOnlyDictionary<ActionType, Type> ActionTypeDataMap { get; } = new Dictionary<ActionType, Type>
+        {
+            { ActionType.ExecuteFeature, typeof(ExecuteDeviceFeatureActionData) },
+            { ActionType.ScheduleFeatureExecution, typeof(ScheduleDeviceFeatureExecutionActionData) }
+        }.AsReadOnly();
+
         Task ExecuteActionSequenceAsync<T>(List<T> actions, IServiceProvider serviceProvider) where T : DatabaseModels.Action;
     }
 

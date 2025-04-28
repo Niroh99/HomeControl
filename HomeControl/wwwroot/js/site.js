@@ -30,7 +30,7 @@ function SetScrollY(scrollY) {
     root.style.setProperty("--scrollY", `${scrollY}px`);
 }
 
-bindFromModel();
+const clickBindingPrefix = "clickbinding";
 
 function buildPageHandlerRequestData(dataset) {
     if (dataset === undefined) return null;
@@ -62,3 +62,5 @@ function executePageHandler(pageHandler, dataset) {
 function bindFromModel() {
     bindFromSource(model, document);
 }
+
+bindFromModel();

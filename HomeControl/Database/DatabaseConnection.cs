@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Reflection;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace HomeControl.Database
 {
@@ -66,8 +67,12 @@ namespace HomeControl.Database
 
         private SqliteTransaction _sqlTransaction;
 
-        public DatabaseConnection(string connectionString)
+        private readonly IServiceProvider _serviceProvider;
+
+        public DatabaseConnection(string connectionString, IServiceProvider serviceProvider)
         {
+            _serviceProvider = serviceProvider;
+
             SqlConnection = new SqliteConnection(connectionString);
 
             SqlConnection.Open();
@@ -114,11 +119,13 @@ namespace HomeControl.Database
             {
                 var id = await command.ExecuteScalarAsync();
 
-                ConvertDatabaseValue(primaryKey, ref id);
+                id = await ConvertDatabaseValue(primaryKey, id);
 
                 instance.Set(id, primaryKey.Name);
 
                 instance.ApplyChanges();
+
+                await instance.CreateDisplay(_serviceProvider);
             }
             else await command.ExecuteNonQueryAsync();
         }
@@ -223,6 +230,8 @@ namespace HomeControl.Database
             await command.ExecuteNonQueryAsync();
 
             instance.ApplyChanges();
+
+            await instance.CreateDisplay(_serviceProvider);
         }
 
         public async Task DeleteAsync<T>(T instance) where T : DatabaseModel
@@ -286,7 +295,7 @@ namespace HomeControl.Database
             return commandStringBuilder.Append(" FROM ").Append($"[{modelMetadata.TableName}]");
         }
 
-        private static void ApplyFields<T>(T instance, DatabaseModelMetadata modelMetadata, SqliteDataReader reader) where T : DatabaseModel
+        private async Task ApplyFields<T>(T instance, DatabaseModelMetadata modelMetadata, SqliteDataReader reader) where T : DatabaseModel
         {
             for (int i = 0; i < reader.FieldCount; i++)
             {
@@ -298,7 +307,7 @@ namespace HomeControl.Database
                 {
                     var field = modelMetadata.Fields.First(field => field.Name == fieldName);
 
-                    ConvertDatabaseValue(field, ref fieldValue);
+                    fieldValue = await ConvertDatabaseValue(field, fieldValue);
                 }
 
                 instance.Set(fieldValue, fieldName);
@@ -324,12 +333,12 @@ namespace HomeControl.Database
             return parameterName;
         }
 
-        private static void ConvertDatabaseValue(DatabaseField field, ref object value)
+        private async Task<object> ConvertDatabaseValue(DatabaseField field, object databaseValue)
         {
-            ArgumentNullException.ThrowIfNull(value, nameof(value));
+            ArgumentNullException.ThrowIfNull(databaseValue, nameof(databaseValue));
             ArgumentNullException.ThrowIfNull(field, nameof(field));
 
-            var valueType = value.GetType();
+            var valueType = databaseValue.GetType();
 
             var propertyType = field.PropertyInfo.PropertyType;
 
@@ -339,15 +348,15 @@ namespace HomeControl.Database
 
                 if (genericTypeDefinition == typeof(Nullable<>))
                 {
-                    if (value == null) return;
+                    if (databaseValue == null) return null;
 
                     propertyType = propertyType.GetGenericArguments()[0];
                 }
             }
 
-            if (valueType == propertyType) return;
+            if (valueType == propertyType) return databaseValue;
 
-            if (field.IsJson && value is string valueJson)
+            if (field.IsJson && databaseValue is string valueJson)
             {
                 var jsonDocument = System.Text.Json.JsonDocument.Parse(valueJson);
 
@@ -355,29 +364,28 @@ namespace HomeControl.Database
 
                 var jsonObjectType = Assembly.GetExecutingAssembly().GetType(typeName);
 
-                value = System.Text.Json.JsonSerializer.Deserialize(valueJson, jsonObjectType);
-                return;
+                var value = System.Text.Json.JsonSerializer.Deserialize(valueJson, jsonObjectType);
+
+                if (value is Model modelValue) await modelValue.CreateDisplay(_serviceProvider);
+
+                return value;
             }
 
             if (propertyType.IsEnum && valueType == typeof(string))
             {
-                value = Enum.Parse(propertyType, (string)value);
-                return;
+                return Enum.Parse(propertyType, (string)databaseValue);
             }
-            else if (propertyType == typeof(int) && value is long longValue)
+            else if (propertyType == typeof(int) && databaseValue is long longValue)
             {
-                value = (int)longValue;
-                return;
+                return (int)longValue;
             }
-            else if (propertyType == typeof(bool) && value is long boolValue)
+            else if (propertyType == typeof(bool) && databaseValue is long boolValue)
             {
-                value = boolValue != 0;
-                return;
+                return boolValue != 0;
             }
-            else if (propertyType == typeof(DateTime) && value is string dateTimeValue)
+            else if (propertyType == typeof(DateTime) && databaseValue is string dateTimeValue)
             {
-                value = DateTime.Parse(dateTimeValue);
-                return;
+                return DateTime.Parse(dateTimeValue);
             }
 
             throw new InvalidOperationException("Unable to Convert Database Type.");
@@ -393,10 +401,12 @@ namespace HomeControl.Database
 
             if (await reader.ReadAsync())
             {
-                ApplyFields(instance, modelMetadata, reader);
+                await ApplyFields(instance, modelMetadata, reader);
 
                 instance.ApplyChanges();
 
+                await instance.CreateDisplay(_serviceProvider);
+                
                 return instance;
             }
             else return null;
@@ -414,10 +424,12 @@ namespace HomeControl.Database
 
                 instance.Track(this);
 
-                ApplyFields(instance, modelMetadata, reader);
+                await ApplyFields(instance, modelMetadata, reader);
 
                 instance.ApplyChanges();
 
+                await instance.CreateDisplay(_serviceProvider);
+                
                 result.Add(instance);
             }
 

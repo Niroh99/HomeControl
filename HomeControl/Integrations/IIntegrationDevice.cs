@@ -12,11 +12,15 @@ namespace HomeControl.Integrations
 
         string DisplayName { get; }
 
+        string AdditionalInfo { get; }
+
         bool SupportsRename { get; }
 
         DeviceInitilizationState InitilizationState { get; }
 
         string InitializationError { get; }
+
+        List<Feature> Features { get; }
 
         Task InitializeAsync();
 

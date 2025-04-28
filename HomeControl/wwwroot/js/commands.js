@@ -1,12 +1,8 @@
-﻿var smallDisplayCommandsToggleButton = document.getElementById("small-display-commands-toggle-button");
-var smallDisplayCommandsContainer = document.getElementById("small-display-commands-container");
-var smallDisplayCommandsOverlayButton = document.getElementById("small-display-commands-overlay-button");
+﻿function toggleSmallCommandsDisplay() {
+    let smallDisplayCommandsToggleButton = document.getElementById("small-display-commands-toggle-button");
+    let smallDisplayCommandsContainer = document.getElementById("small-display-commands-container");
+    let smallDisplayCommandsOverlayButton = document.getElementById("small-display-commands-overlay-button");
 
-if (smallDisplayCommandsContainer.children.length == 0) {
-    smallDisplayCommandsToggleButton.classList.add("hidden");
-}
-
-function toggleSmallCommandsDisplay() {
     if (smallDisplayCommandsToggleButton.isChecked == undefined) smallDisplayCommandsToggleButton.isChecked = false;
 
     if (smallDisplayCommandsToggleButton.isChecked) {

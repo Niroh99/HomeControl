@@ -1,6 +1,6 @@
 ﻿const bindingPrefix = "binding";
-const clickBindingPrefix = "clickbinding";
 const propertySeparator = ".";
+const converterFunctionSeparator = ";";
 
 function correctCasing(value) {
     return value.charAt(0).toLowerCase() + value.slice(1);
@@ -36,12 +36,22 @@ function resolveBinding(source, sourcePropertyPath) {
 function* iterateBoundPropertiesWithPrefix(source, dataset, prefix) {
     for (let [datasetPropertyName, sourcePropertyPath] of dataset) {
         if (datasetPropertyName.startsWith(prefix)) {
+            let converterFunctionIndex = sourcePropertyPath.indexOf(converterFunctionSeparator)
+
+            let converterFunctionName = null;
+
+            if (converterFunctionIndex >= 0) {
+                converterFunctionName = sourcePropertyPath.substring(converterFunctionIndex + 1);
+                sourcePropertyPath = sourcePropertyPath.substring(0, converterFunctionIndex);
+                console.log(sourcePropertyPath);
+            }
+
             let boundPropertyValue = resolveBinding(source, sourcePropertyPath);
 
             let targetAttributeName = datasetPropertyName.substring(prefix.length);
             targetAttributeName = correctCasing(targetAttributeName);
 
-            yield[targetAttributeName, boundPropertyValue, sourcePropertyPath];
+            yield[targetAttributeName, boundPropertyValue, sourcePropertyPath, converterFunctionName];
         }
     }
 }
@@ -55,7 +65,6 @@ function bindFromSource(source, context) {
 
     for (element of elements) {
         for ([targetAttributeName, boundPropertyValue] of iterateBoundProperties(source, Object.entries(element.dataset))) {
-            console.log([targetAttributeName, boundPropertyValue]);
             if (targetAttributeName == "inner") element.innerHTML = boundPropertyValue;
             else element[targetAttributeName] = boundPropertyValue;
         }
@@ -96,11 +105,23 @@ function bindToSourceWithPrefix(source, context, prefix) {
     let elements = context.getElementsByClassName("bound");
 
     for (element of elements) {
-        for ([targetAttributeName, boundPropertyValue, sourcePropertyPath] of iterateBoundPropertiesWithPrefix(source, Object.entries(element.dataset), prefix)) {
+        for ([targetAttributeName, boundPropertyValue, sourcePropertyPath, converterFunctionName] of iterateBoundPropertiesWithPrefix(source, Object.entries(element.dataset), prefix)) {
             let pathElements = sourcePropertyPath.split(propertySeparator);
 
-            if (targetAttributeName == "inner") setPropertyValueRecursive(source, pathElements, element.innerHTML);
-            else setPropertyValueRecursive(source, pathElements, element[targetAttributeName]);
+            let value;
+
+            if (targetAttributeName == "inner") value = element.innerHTML;
+            else value = element[targetAttributeName];
+
+            if (converterFunctionName != null) {
+                value = window[converterFunctionName](value);
+            }
+
+            setPropertyValueRecursive(source, pathElements, value);
         }
     }
+}
+
+function stringToJson(string) {
+    return JSON.parse(string);
 }

@@ -11,5 +11,11 @@ namespace HomeControl.DatabaseModels
     {
         [Column]
         public int DeviceOptionId { get => Get<int>(); set => Set(value); }
+
+        public override async Task<string> ToString(IServiceProvider serviceProvider)
+        {
+            await Task.CompletedTask;
+            return Data.ToString();
+        }
     }
 }
