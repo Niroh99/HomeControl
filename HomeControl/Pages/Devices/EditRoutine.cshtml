@@ -45,7 +45,7 @@
 					case DatabaseModels.RoutineTriggerType.Interval:
 						<label for="Interval">Execute every</label>
 						<div class="grid-1fr-auto">
-							<input class="bound" id="Interval" name="Interval" type="number" data-trigger-value="Interval" />
+							<input class="bound" id="Interval" name="Interval" type="number" data-trigger-value="Interval;minutesToTimespan" />
 							<span style="align-self: center">min</span>
 						</div>
 						break;
@@ -169,8 +169,8 @@
 		<form id="CreateRoutineAction" method="post" class="grid card-padding" asp-page-handler="CreateRoutineAction">
 			<input hidden id="NewRoutineActionData" name="NewRoutineActionData" />
 			<div class="grid">
-				<label for="RoutineActionType">Name</label>
-				<custom-select id="RoutineActionType" name="RoutineActionType" asp-items="@Model.ViewModel.ActionTypes" onchange="routineActionTypeChanged()"></custom-select>
+				<label for="ActionType">Name</label>
+				<custom-select id="ActionType" name="ActionType" asp-items="@Model.ViewModel.ActionTypes" onchange="routineActionTypeChanged()"></custom-select>
 			</div>
 			<div id="RoutineActionDataTemplateContainer" class="grid">
 			</div>

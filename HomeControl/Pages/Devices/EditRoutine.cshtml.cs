@@ -134,7 +134,7 @@ namespace HomeControl.Pages.Devices
 
         public async Task<IActionResult> OnPostCreateRoutineAction(ActionType actionType, string newRoutineActionData)
         {
-            var actionDataObject = (Model)System.Text.Json.JsonSerializer.Deserialize(newRoutineActionData, IDeviceService.DeviceOptionActionTypeDataMap[actionType], new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web));
+            var actionDataObject = (Model)System.Text.Json.JsonSerializer.Deserialize(newRoutineActionData, IRoutinesService.RoutineActionTypeDataMap[actionType], new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web));
 
             var routineAction = new RoutineAction
             {

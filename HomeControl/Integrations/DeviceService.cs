@@ -1,9 +1,6 @@
 ﻿using HomeControl.Actions;
 using HomeControl.Database;
 using HomeControl.DatabaseModels;
-using HomeControl.Events;
-using HomeControl.Events.EventDatas;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Reflection;
 
@@ -15,7 +12,9 @@ namespace HomeControl.Integrations
             new ActionType[] { ActionType.ExecuteFeature, ActionType.ScheduleFeatureExecution }
             .ToDictionary(actionType => actionType, actionType => IActionsService.ActionTypeDataMap[actionType]).AsReadOnly();
 
-        bool TryGetDeviceCache<T>(out T cache) where T : IIntegrationDeviceCache;
+        ReadOnlyCollection<IIntegrationDeviceCache> IntegrationDeviceCaches { get; }
+
+        bool TryGetIntegrationDeviceCache<T>(out T cache) where T : IIntegrationDeviceCache;
 
         IIntegrationDevice CreateIntegrationDevice(Device device);
 
@@ -44,17 +43,19 @@ namespace HomeControl.Integrations
 
         private static readonly List<IIntegrationDeviceCache> _integrationDeviceCaches = [];
 
+        public ReadOnlyCollection<IIntegrationDeviceCache> IntegrationDeviceCaches { get; } = _integrationDeviceCaches.AsReadOnly();
+
         public static bool TryGetDeviceCache(Device device, out IIntegrationDeviceCache cache)
         {
             cache = _integrationDeviceCaches.FirstOrDefault(cache => cache.CanHandleDevice(device));
-
+            
             return cache != null;
         }
 
-        public bool TryGetDeviceCache<T>(out T cache) where T : IIntegrationDeviceCache
+        public bool TryGetIntegrationDeviceCache<T>(out T cache) where T : IIntegrationDeviceCache
         {
             cache = _integrationDeviceCaches.OfType<T>().FirstOrDefault();
-
+            
             return cache != null;
         }
 

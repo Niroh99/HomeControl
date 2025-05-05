@@ -3,6 +3,7 @@ using HomeControl.DatabaseModels;
 using HomeControl.Events;
 using HomeControl.Events.EventDatas;
 using HomeControl.Integrations;
+using HomeControl.Modeling;
 using System.Collections.ObjectModel;
 
 namespace HomeControl.Actions
@@ -12,7 +13,8 @@ namespace HomeControl.Actions
         public static ReadOnlyDictionary<ActionType, Type> ActionTypeDataMap { get; } = new Dictionary<ActionType, Type>
         {
             { ActionType.ExecuteFeature, typeof(ExecuteDeviceFeatureActionData) },
-            { ActionType.ScheduleFeatureExecution, typeof(ScheduleDeviceFeatureExecutionActionData) }
+            { ActionType.ScheduleFeatureExecution, typeof(ScheduleDeviceFeatureExecutionActionData) },
+            { ActionType.ClearIntegrationDevicesCache, typeof(ClearIntegrationDevicesCacheActionData) }
         }.AsReadOnly();
 
         Task ExecuteActionSequenceAsync<T>(List<T> actions, IServiceProvider serviceProvider) where T : DatabaseModels.Action;
@@ -42,6 +44,12 @@ namespace HomeControl.Actions
                             DeviceId = scheduleFeatureExecutionDeviceOptionActionData.DeviceId,
                             FeatureName = scheduleFeatureExecutionDeviceOptionActionData.FeatureName,
                         }, DateTime.Now.AddMinutes(scheduleFeatureExecutionDeviceOptionActionData.ExecuteIn));
+                        break;
+                    case ActionType.ClearIntegrationDevicesCache:
+                        foreach (var cache in deviceService.IntegrationDeviceCaches)
+                        {
+                            cache.InvalidateAll();
+                        }
                         break;
                     default: throw new NotImplementedException();
                 }

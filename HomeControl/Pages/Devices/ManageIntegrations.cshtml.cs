@@ -75,7 +75,7 @@ namespace HomeControl.Pages.Devices
 
         public void OnPostClearTPLinkDevicesCache()
         {
-            if (deviceService.TryGetDeviceCache<Integrations.TPLink.DeviceCache>(out var cache))
+            if (deviceService.TryGetIntegrationDeviceCache<Integrations.TPLink.DeviceCache>(out var cache))
             {
                 cache.InvalidateAll();
             }

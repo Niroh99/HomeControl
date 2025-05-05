@@ -1,5 +1,5 @@
 ﻿routineTriggerTypeChanged();
-deviceOptionActionTypeChanged();
+routineActionTypeChanged();
 routineActionDeviceChanged();
 
 function openRemoveRoutineTriggerQuestionDialog(triggerIdToRemove) {
@@ -47,7 +47,11 @@ function weekDaySelectionChanged() {
 }
 
 function inputTimeToTimeOnly(time) {
-	return time + ":00";
+	return `${time}:00`;
+}
+
+function minutesToTimespan(minutes) {
+	return `00:${minutes.padStart(2, "0")}:00`;
 }
 
 function submitCreateRoutineTriggerForm() {
@@ -78,8 +82,8 @@ function openRemoveRoutineActionQuestionDialog(actionIdToRemove) {
 	showDialogById("RemoveRoutineActionQuestionDialog");
 }
 
-function deviceOptionActionTypeChanged() {
-	let select = document.getElementById("RoutineActionType");
+function routineActionTypeChanged() {
+	let select = document.getElementById("ActionType");
 
 	let templateContainer = document.getElementById("RoutineActionDataTemplateContainer");
 
@@ -122,7 +126,7 @@ function submitCreateRoutineActionForm() {
 	console.log("submit");
 	let form = document.getElementById("CreateRoutineAction");
 
-	let routineActionType = document.getElementById("RoutineActionType").value;
+	let routineActionType = document.getElementById("ActionType").value;
 
 	let routineActionTypeData = newRoutineActionDataInformation[routineActionType];
 

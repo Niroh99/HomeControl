@@ -33,17 +33,14 @@ namespace HomeControl.Pages
 
         public async Task OnGet()
         {
-            var data = new TimeOfDayRoutineTriggerData
+            var data = new IntervalTriggerData
             {
-                TimeOfDay = TimeOnly.Parse("20:31"),
-                ActiveWeekDays = new HashSet<DayOfWeek> { DayOfWeek.Monday, DayOfWeek.Thursday }
+                Interval = TimeSpan.FromMinutes(4)
             };
 
             var json = System.Text.Json.JsonSerializer.Serialize(data);
 
             System.Diagnostics.Debug.WriteLine(json);
-
-            var test = System.Text.Json.JsonSerializer.Deserialize<TimeOfDayRoutineTriggerData>("{\"timeOfDay\":\"20:48\",\"activeWeekDays\":\"[1,2,4,5,6,0]\",\"typeName\":\"HomeControl.DatabaseModels.TimeOfDayRoutineTriggerData\",\"display\":null,\"additionalInfo\":null}");
         }
 
         private async Task InsertTestRoutine()

@@ -31,10 +31,12 @@ namespace HomeControl.DatabaseModels
         [Description("Execute Feature")]
         ExecuteFeature,
         [Description("Schedule Feature Execution")]
-        ScheduleFeatureExecution
+        ScheduleFeatureExecution,
+        [Description("Clear Devices Cache")]
+        ClearIntegrationDevicesCache
     }
 
-    public class DeviceActionData : Model
+    public abstract class DeviceActionData : Model
     {
         public int DeviceId { get => Get<int>(); set => Set(value); }
 
@@ -68,6 +70,14 @@ namespace HomeControl.DatabaseModels
         public override string ToString()
         {
             return base.ToString() + $" after {ExecuteIn} min";
+        }
+    }
+
+    public class ClearIntegrationDevicesCacheActionData : Model
+    {
+        public override string ToString()
+        {
+            return "Clear Devices Cache";
         }
     }
 }
