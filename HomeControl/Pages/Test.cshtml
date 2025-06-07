@@ -4,41 +4,4 @@
 	Layout = "Test_Layout";
 }
 
-@section Scripts {
-	<script>
-		function inputOnChange(input){
-			console.log(input["checked"]);
-		}
-	</script>
-}
-
-<button data-binding-id="test" onclick="testAjaxPost(this.dataset)">Test</button>
-<div class="grid">
-	<div class="card card-padding">
-		<card-element class="bound" data-binding-header="cardHeader" data-binding-info-text="cardInfoText" data-binding-error-text="cardErrorText">
-			<div class="flex centered-content">
-				<button>TEST</button>
-				<switch>
-					<input id="checkboxInput" type="checkbox" hidden />
-				</switch>
-			</div>
-		</card-element>
-	</div>
-	<details class="card card-children-separator">
-		<summary class="card-padding">
-			<card-element Header="Summary Test" info-text="Information"></card-element>
-		</summary>
-		<card-a asp-page="/Devices/Index" class="card-padding">
-			<card-element helper class="bound" data-binding-header="cardHeader">
-				<switch><input id="checkboxInput" type="checkbox" hidden /></switch>
-			</card-element>
-		</card-a>
-	</details>
-
-	<div class="card">
-		<card-a asp-page="/Devices/Index" class="card-padding">
-			<card-element class="bound" header="Devices">
-			</card-element>
-		</card-a>
-	</div>
-</div>
+<button onclick="testAjaxPost(this.dataset)">Test</button>

@@ -31,7 +31,7 @@ namespace HomeControl.Pages.Devices
         {
             var databaseDevices = await db.SelectAllAsync<Device>();
 
-            var tpLinkDevices = Integrations.TPLink.Discovery.Discover();
+            var tpLinkDevices = HomeControl.Integrations.TPLink.Discovery.Discover();
 
             var rediscoveredDeviceIds = new List<int>();
 
@@ -75,7 +75,7 @@ namespace HomeControl.Pages.Devices
 
         public void OnPostClearTPLinkDevicesCache()
         {
-            if (deviceService.TryGetIntegrationDeviceCache<Integrations.TPLink.DeviceCache>(out var cache))
+            if (deviceService.TryGetIntegrationDeviceCache<HomeControl.Integrations.TPLink.DeviceCache>(out var cache))
             {
                 cache.InvalidateAll();
             }

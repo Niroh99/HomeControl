@@ -8,7 +8,7 @@
 
 	var newDeviceOptionActionDataInformation = new Dictionary<string, DatabaseModels.DeviceActionData>();
 
-	foreach (var actionTypeMapItem in Integrations.IDeviceService.DeviceOptionActionTypeDataMap)
+	foreach (var actionTypeMapItem in HomeControl.Integrations.IDeviceService.DeviceOptionActionTypeDataMap)
 	{
 		var actionData = (DatabaseModels.DeviceActionData)Activator.CreateInstance(actionTypeMapItem.Value);
 

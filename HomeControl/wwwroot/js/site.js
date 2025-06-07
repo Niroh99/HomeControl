@@ -59,6 +59,23 @@ function executePageHandler(pageHandler, dataset) {
     });
 }
 
+function executePageHandlerAndRefresh(pageHandler, dataset) {
+    let data = buildPageHandlerRequestData(dataset);
+
+    busy();
+
+    return $.ajax({
+        method: "POST",
+        url: model.pageInfo.url + "?handler=" + pageHandler,
+        data: data,
+        headers: { RequestVerificationToken: document.getElementById("RequestVerificationToken").value }
+    }).done(function () {
+        location.reload();
+    }).always(function () {
+        notBusy();
+    });
+}
+
 function bindFromModel() {
     bindFromSource(model, document);
 }

@@ -14,8 +14,8 @@
 				<input id="DisplayName" name="DisplayName" class="bound" data-binding-value="integrationDevice.displayName"/>
 			</div>
 			<div class="flex" style="justify-content: right">
-				<button class="shadow-2">Rename</button>
-				<button class="shadow-2" type="button" onclick="closeDialogById('ChangaDisplayNameDialog')">Cancel</button>
+				<button>Rename</button>
+				<button type="button" onclick="closeDialogById('ChangaDisplayNameDialog')">Cancel</button>
 			</div>
 		</form>
 	</dialog>
@@ -66,7 +66,7 @@
 					</div>
 				</div>
 				break;
-			case Integrations.DeviceInitilizationState.Error:
+			case HomeControl.Integrations.DeviceInitilizationState.Error:
 				<b class="bound error-text" data-binding-inner="integrationDevice.initializationError"></b>
 				break;
 			default: throw new NotImplementedException();

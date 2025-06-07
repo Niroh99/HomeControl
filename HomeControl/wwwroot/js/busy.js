@@ -9,14 +9,14 @@ busyMessage.innerHTML = defaultBusyMessage;
 function BusyWithMessage(message) {
     busyMessage.innerHTML = message;
 
-    Busy();
+    busy();
 }
 
-function Busy() {
+function busy() {
     busyOverlay.classList.remove("hidden");
 }
 
-function NotBusy() {
+function notBusy() {
     busyMessage.innerHTML = defaultBusyMessage;
 
     busyOverlay.classList.add("hidden");
