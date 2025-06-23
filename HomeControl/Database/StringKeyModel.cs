@@ -6,7 +6,7 @@ namespace HomeControl.Database
     public abstract class StringKeyModel : DatabaseModel
     {
         [Key]
-        [Column()]
+        [Column]
         public string Id { get => Get<string>(); set => Set(value); }
     }
 }

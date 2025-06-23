@@ -27,7 +27,7 @@ namespace HomeControl.Integrations
         Task ExecuteDeviceOptionAsync(int deviceOptionId);
     }
 
-    public class DeviceService(IDatabaseConnection db, IActionsService actionsService, IServiceProvider serviceProvider) : IDeviceService
+    public class DeviceService(IDatabaseConnectionService db, IActionsService actionsService, IServiceProvider serviceProvider) : IDeviceService
     {
         static DeviceService()
         {
@@ -89,7 +89,7 @@ namespace HomeControl.Integrations
 
         public async Task ExecuteFeatureAsync(int deviceId, string featureName)
         {
-            var device = await db.SelectSingleAsync<Device>(deviceId);
+            var device = await db.SelectSingle<Device>(deviceId).ExecuteAsync();
 
             await ExecuteFeatureAsync(device, featureName);
         }
@@ -108,13 +108,16 @@ namespace HomeControl.Integrations
 
         public async Task ExecuteDeviceOptionAsync(int deviceOptionId)
         {
-            var deviceOption = await db.SelectSingleAsync<DeviceOption>(deviceOptionId);
+            var deviceOption = await db.SelectSingle<DeviceOption>(deviceOptionId).ExecuteAsync();
 
             ArgumentNullException.ThrowIfNull(deviceOption, nameof(deviceOptionId));
 
-            var device = await db.SelectSingleAsync<Device>(deviceOption.DeviceId);
+            var device = await db.SelectSingle<Device>(deviceOption.DeviceId).ExecuteAsync();
 
-            var actions = await db.SelectAsync(WhereBuilder.Where<DeviceOptionAction>().Compare(i => i.DeviceOptionId, ComparisonOperator.Equals, deviceOption.Id));
+            var actionsSelect = db.Select<DeviceOptionAction>();
+            actionsSelect.Where().Compare(i => i.DeviceOptionId, ComparisonOperator.Equals, deviceOption.Id);
+
+            var actions = await actionsSelect.ExecuteAsync();
 
             await actionsService.ExecuteActionSequenceAsync(actions, serviceProvider);
         }

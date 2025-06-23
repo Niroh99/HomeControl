@@ -16,7 +16,7 @@ using Microsoft.AspNetCore.Mvc.Formatters;
 
 namespace HomeControl.Pages
 {
-    public class TestModel(IDatabaseConnection db) : ViewModelPageModel<TestModel.TestViewModel>
+    public class TestModel(IDatabaseConnectionService db) : ViewModelPageModel<TestModel.TestViewModel>
     {
         public class TestViewModel(ViewModelPageModelBase page) : PageViewModel(page)
         {
@@ -35,6 +35,12 @@ namespace HomeControl.Pages
 
         public async Task<IActionResult> OnPostTestAjaxPost(string id)
         {
+            var select = db.Select<Stock>();
+
+            select.LeftJoin(i => i.Product);
+
+            var stock = await select.ExecuteAsync();
+
             return await ViewModelResponse();
         }
     }

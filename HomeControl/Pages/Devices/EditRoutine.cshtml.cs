@@ -12,9 +12,9 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 namespace HomeControl.Pages.Devices
 {
     [MenuPage(typeof(RoutinesModel), "Edit Routine", null)]
-    public class EditRoutineModel(IDatabaseConnection db, IDeviceService deviceService) : ViewModelPageModel<EditRoutineModel.EditRoutineViewModel>
+    public class EditRoutineModel(IDatabaseConnectionService db, IDeviceService deviceService) : ViewModelPageModel<EditRoutineModel.EditRoutineViewModel>
     {
-        public class EditRoutineViewModel(EditRoutineModel page, IDatabaseConnection db, IDeviceService deviceService) : PageViewModel(page)
+        public class EditRoutineViewModel(EditRoutineModel page, IDatabaseConnectionService db, IDeviceService deviceService) : PageViewModel(page)
         {
             public Routine Routine { get; set; }
 
@@ -30,28 +30,31 @@ namespace HomeControl.Pages.Devices
 
             public async override Task Initialize()
             {
-                Routine = await db.SelectSingleAsync<Routine>(page.RoutineId);
+                Routine = await db.SelectSingle<Routine>(page.RoutineId).ExecuteAsync();
 
                 if (Routine == null) return;
 
-                RoutineTriggers.AddRange(await db.SelectAsync(WhereBuilder.Where<RoutineTrigger>()
-                    .Compare(i => i.RoutineId, ComparisonOperator.Equals, Routine.Id)));
+                var triggersSelect = db.Select<RoutineTrigger>();
+                triggersSelect.Where().Compare(i => i.RoutineId, ComparisonOperator.Equals, Routine.Id);
+
+                RoutineTriggers.AddRange(await triggersSelect.ExecuteAsync());
 
                 foreach (var triggerType in IRoutinesService.RoutineTriggerTypeDataMap.Keys)
                 {
                     TriggerTypes.Add(new SelectListItem(EnumHelper.GetValueDescription(triggerType), triggerType.ToString()));
                 }
 
-                RoutineActions.AddRange((await db.SelectAsync(WhereBuilder.Where<RoutineAction>()
-                    .Compare(i => i.RoutineId, ComparisonOperator.Equals, Routine.Id)))
-                    .OrderBy(action => action.Index));
+                var actionsSelect = db.Select<RoutineAction>();
+                actionsSelect.Where().Compare(i => i.RoutineId, ComparisonOperator.Equals, Routine.Id);
+
+                RoutineActions.AddRange((await actionsSelect.ExecuteAsync()).OrderBy(action => action.Index));
 
                 foreach (var actionType in IRoutinesService.RoutineActionTypeDataMap.Keys)
                 {
                     ActionTypes.Add(new SelectListItem(EnumHelper.GetValueDescription(actionType), actionType.ToString()));
                 }
 
-                var devices = await db.SelectAllAsync<Device>();
+                var devices = await db.Select<Device>().ExecuteAsync();
 
                 foreach (var device in devices)
                 {
@@ -84,7 +87,7 @@ namespace HomeControl.Pages.Devices
 
             ViewModel.Routine.IsActive = !ViewModel.Routine.IsActive;
 
-            await db.UpdateAsync(ViewModel.Routine);
+            await db.Update(ViewModel.Routine).ExecuteAsync();
 
             return await ViewModelResponse();
         }
@@ -95,7 +98,7 @@ namespace HomeControl.Pages.Devices
 
             ViewModel.Routine.Name = routineName;
 
-            await db.UpdateAsync(ViewModel.Routine);
+            await db.Update(ViewModel.Routine).ExecuteAsync();
 
             return RedirectToPage();
         }
@@ -104,7 +107,7 @@ namespace HomeControl.Pages.Devices
         {
             if (ViewModel.Routine == null) return null;
 
-            await db.DeleteAsync(ViewModel.Routine);
+            await db.Delete(ViewModel.Routine).ExecuteAsync();
 
             return RedirectToPage("/Devices/Routines");
         }
@@ -120,14 +123,14 @@ namespace HomeControl.Pages.Devices
                 Data = triggerDataObject
             };
 
-            await db.InsertAsync(routineTrigger);
+            await db.Insert(routineTrigger).ExecuteAsync();
 
             return RedirectToPage();
         }
 
         public async Task<IActionResult> OnPostRemoveRoutineTrigger(int triggerIdToRemove)
         {
-            await db.DeleteAsync(await db.SelectSingleAsync<RoutineTrigger>(triggerIdToRemove));
+            await db.Delete(await db.SelectSingle<RoutineTrigger>(triggerIdToRemove).ExecuteAsync()).ExecuteAsync();
 
             return RedirectToPage();
         }
@@ -144,14 +147,14 @@ namespace HomeControl.Pages.Devices
                 Data = actionDataObject
             };
 
-            await db.InsertAsync(routineAction);
+            await db.Insert(routineAction).ExecuteAsync();
 
             return RedirectToPage();
         }
 
         public async Task<IActionResult> OnPostRemoveRoutineAction(int actionIdToRemove)
         {
-            await db.DeleteAsync(await db.SelectSingleAsync<RoutineAction>(actionIdToRemove));
+            await db.Delete(await db.SelectSingle<RoutineAction>(actionIdToRemove).ExecuteAsync()).ExecuteAsync();
 
             return RedirectToPage();
         }

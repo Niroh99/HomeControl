@@ -6,15 +6,15 @@ using Microsoft.AspNetCore.Mvc;
 namespace HomeControl.Pages.Devices
 {
     [MenuPage(typeof(IndexModel), "Routines", "/Devices/Routines")]
-    public class RoutinesModel(IDatabaseConnection db) : ViewModelPageModel<RoutinesModel.RoutinesViewModel>
+    public class RoutinesModel(IDatabaseConnectionService db) : ViewModelPageModel<RoutinesModel.RoutinesViewModel>
     {
-        public class RoutinesViewModel(RoutinesModel page, IDatabaseConnection db) : PageViewModel(page)
+        public class RoutinesViewModel(RoutinesModel page, IDatabaseConnectionService db) : PageViewModel(page)
         {
             public List<Routine> Routines { get; } = [];
 
             public override async Task Initialize()
             {
-                Routines.AddRange(await db.SelectAllAsync<Routine>());
+                Routines.AddRange(await db.Select<Routine>().ExecuteAsync());
             }
         }
 
@@ -33,7 +33,7 @@ namespace HomeControl.Pages.Devices
                 IsActive = true,
             };
 
-            await db.InsertAsync(routine);
+            await db.Insert(routine).ExecuteAsync();
 
             return RedirectToPage("/Devices/EditRoutine", new { RoutineId = routine.Id });
         }

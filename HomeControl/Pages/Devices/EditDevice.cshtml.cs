@@ -9,9 +9,9 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 namespace HomeControl.Pages.Devices
 {
     [MenuPage(typeof(IndexModel), "Edit Device", null)]
-    public class EditDeviceModel(IDatabaseConnection db, IDeviceService deviceService) : ViewModelPageModel<EditDeviceModel.EditDeviceViewModel>
+    public class EditDeviceModel(IDatabaseConnectionService db, IDeviceService deviceService) : ViewModelPageModel<EditDeviceModel.EditDeviceViewModel>
     {
-        public class EditDeviceViewModel(EditDeviceModel page, IDatabaseConnection db, IDeviceService deviceService) : PageViewModel(page)
+        public class EditDeviceViewModel(EditDeviceModel page, IDatabaseConnectionService db, IDeviceService deviceService) : PageViewModel(page)
         {
             public Device Device { get; set; }
 
@@ -19,7 +19,7 @@ namespace HomeControl.Pages.Devices
 
             public async override Task Initialize()
             {
-                Device = await db.SelectSingleAsync<Device>(page.DeviceId);
+                Device = await db.SelectSingle<Device>(page.DeviceId).ExecuteAsync();
 
                 if (Device == null) return;
 
@@ -53,7 +53,7 @@ namespace HomeControl.Pages.Devices
         {
             if (ViewModel.Device == null) return null;
 
-            await db.DeleteAsync(ViewModel.Device);
+            await db.Delete(ViewModel.Device).ExecuteAsync();
 
             return RedirectToPage("/Devices/Index");
         }

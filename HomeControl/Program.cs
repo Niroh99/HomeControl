@@ -10,10 +10,14 @@ using HomeControl.Integrations;
 using HomeControl.Weather;
 using HomeControl.Routines;
 using HomeControl.Actions;
+using HomeControl;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var connectionString = builder.Configuration.GetConnectionString("FW_HomeControl");
+if (await CommandLineHandler.HandleCommands(args, builder.Configuration)) return;
+
+var connectionString = builder.Configuration.GetConnectionString(Configuration.ConnectionStringName);
+
 AppDomain.CurrentDomain.SetData("DataDirectory", Directory.GetCurrentDirectory());
 
 var timerInterval = builder.Configuration.GetValue<int?>("TimerInterval");
@@ -34,7 +38,7 @@ builder.Services.AddSession(options =>
 builder.Services.AddSingleton<IFileProvider>(new PhysicalFileProvider(HomeControl.Pages.Media.IndexModel.BasePath));
 builder.Services.AddSingleton<IWeatherService, WeatherService>();
 
-builder.Services.AddScoped<IDatabaseConnection>((serviceProvider) => new DatabaseConnection(connectionString, serviceProvider));
+builder.Services.AddScoped<IDatabaseConnectionService>((serviceProvider) => new DatabaseConnectionService(connectionString, serviceProvider));
 builder.Services.AddScoped<IEventService, EventService>();
 builder.Services.AddScoped<IRoutinesService, RoutinesService>();
 builder.Services.AddScoped<IDeviceService, DeviceService>();

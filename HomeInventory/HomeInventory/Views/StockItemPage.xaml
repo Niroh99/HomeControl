@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:HomeInventory.ViewModels"
+             Padding="10"
+             Title="{Binding StockItem.Product.Name}"
+             x:Class="HomeInventory.Views.StockItemPage">
+    <ContentPage.BindingContext>
+        <vm:StockItemViewModel/>
+    </ContentPage.BindingContext>
+    <Frame CornerRadius="8" BackgroundColor="{AppThemeBinding Light={StaticResource ElevatedBackgroundLight}, Dark={StaticResource ElevatedBackgroundDark}}" Padding="0" VerticalOptions="Start">
+        <StackLayout Orientation="Horizontal" Spacing="10" Padding="10,0">
+            <Image Source="{Binding StockItem.Product.FrontImageLarge}" IsVisible="{Binding ProductHasImage}"/>
+            <StackLayout Margin="0,10">
+                <Label>
+                    <Label.FormattedText>
+                        <FormattedString>
+                            <Span Text="Product Name: " FontAttributes="Bold"/>
+                            <Span Text="{Binding StockItem.Product.Name}"/>
+                        </FormattedString>
+                    </Label.FormattedText>
+                </Label>
+                <Label>
+                    <Label.FormattedText>
+                        <FormattedString>
+                            <Span Text="Quantity: " FontAttributes="Bold"/>
+                            <Span Text="{Binding StockItem.Quantity}"/>
+                        </FormattedString>
+                    </Label.FormattedText>
+                </Label>
+                <Label>
+                    <Label.FormattedText>
+                        <FormattedString>
+                            <Span Text="Location: " FontAttributes="Bold"/>
+                            <Span Text="{Binding StockItem.Location.Name}"/>
+                        </FormattedString>
+                    </Label.FormattedText>
+                </Label>
+            </StackLayout>
+        </StackLayout>
+    </Frame>
+</ContentPage>

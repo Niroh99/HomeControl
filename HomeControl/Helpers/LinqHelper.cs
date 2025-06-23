@@ -9,7 +9,7 @@ namespace HomeControl.Helpers
             if (expression == null) throw new ArgumentNullException(nameof(expression));
 
             if (expression.Body is MemberExpression memberExpression) return memberExpression.Member.Name;
-            else if (expression.Body is UnaryExpression unaryExpression && unaryExpression.Operand is MemberExpression OperandMemberExpression) return OperandMemberExpression.Member.Name;
+            else if (expression.Body is UnaryExpression unaryExpression && unaryExpression.Operand is MemberExpression operandMemberExpression) return operandMemberExpression.Member.Name;
 
             return null;
         }

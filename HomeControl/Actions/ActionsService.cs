@@ -20,7 +20,7 @@ namespace HomeControl.Actions
         Task ExecuteActionSequenceAsync<T>(List<T> actions, IServiceProvider serviceProvider) where T : DatabaseModels.Action;
     }
 
-    public class ActionsService(IDatabaseConnection db) : IActionsService
+    public class ActionsService(IDatabaseConnectionService db) : IActionsService
     {
         public async Task ExecuteActionSequenceAsync<T>(List<T> actions, IServiceProvider serviceProvider) where T : DatabaseModels.Action
         {

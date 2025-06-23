@@ -42,10 +42,10 @@ namespace HomeControl.DatabaseModels
 
         public override async Task<string> ToString(IServiceProvider serviceProvider)
         {
-            var db = serviceProvider.GetService<IDatabaseConnection>();
+            var db = serviceProvider.GetService<IDatabaseConnectionService>();
             var deviceService = serviceProvider.GetService<IDeviceService>();
 
-            var device = await db.SelectSingleAsync<Device>(DeviceId);
+            var device = await db.SelectSingle<Device>(DeviceId).ExecuteAsync();
 
             var integrationDevice = await deviceService.CreateAndInitializeIntegrationDeviceAsync(device);
 

@@ -18,7 +18,7 @@ namespace HomeControl.Integrations
 
         public string PrimaryOption { get => IntegrationDevice.GetExecutableFeatures().FirstOrDefault()?.Name; } 
 
-        public static async Task<DeviceInfo> CreateAsync(Device device, IDeviceService deviceService, IDatabaseConnection db)
+        public static async Task<DeviceInfo> CreateAsync(Device device, IDeviceService deviceService, IDatabaseConnectionService db)
         {
             var instance = new DeviceInfo
             {
@@ -26,7 +26,10 @@ namespace HomeControl.Integrations
                 IntegrationDevice = await deviceService.CreateAndInitializeIntegrationDeviceAsync(device)
             };
 
-            instance.Options.AddRange(await db.SelectAsync(WhereBuilder.Where<DeviceOption>().Compare(i => i.DeviceId, ComparisonOperator.Equals, device.Id)));
+            var optionsSelect = db.Select<DeviceOption>();
+            optionsSelect.Where().Compare(i => i.DeviceId, ComparisonOperator.Equals, device.Id);
+
+            instance.Options.AddRange(await optionsSelect.ExecuteAsync());
 
             return instance;
         }

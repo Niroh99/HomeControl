@@ -22,17 +22,23 @@ namespace HomeControl.Routines
         Task ExecuteActiveRoutinesAsync();
     }
 
-    public class RoutinesService(IServiceProvider serviceProvider, IDatabaseConnection db, IWeatherService weatherService, IActionsService actionsService) : IRoutinesService
+    public class RoutinesService(IServiceProvider serviceProvider, IDatabaseConnectionService db, IWeatherService weatherService, IActionsService actionsService) : IRoutinesService
     {
         public async Task ExecuteActiveRoutinesAsync()
         {
-            foreach (var routine in await db.SelectAsync(WhereBuilder.Where<Routine>().Compare(i => i.IsActive, ComparisonOperator.Equals, true)))
+            var routinesSelect = db.Select<Routine>();
+            routinesSelect.Where().Compare(i => i.IsActive, ComparisonOperator.Equals, true);
+
+            foreach (var routine in await routinesSelect.ExecuteAsync())
             {
                 if (await ShouldExecuteRoutine(routine))
                 {
                     try
                     {
-                        var actions = await db.SelectAsync(WhereBuilder.Where<RoutineAction>().Compare(i => i.RoutineId, ComparisonOperator.Equals, routine.Id));
+                        var actionsSelect = db.Select<RoutineAction>();
+                        actionsSelect.Where().Compare(i => i.RoutineId, ComparisonOperator.Equals, routine.Id);
+
+                        var actions = await actionsSelect.ExecuteAsync();
 
                         await actionsService.ExecuteActionSequenceAsync(actions, serviceProvider);
                     }
@@ -43,14 +49,17 @@ namespace HomeControl.Routines
 
                     routine.LastExecution = DateTime.Now;
 
-                    await db.UpdateAsync(routine);
+                    await db.Update(routine).ExecuteAsync();
                 }
             }
         }
 
         private async Task<bool> ShouldExecuteRoutine(Routine routine)
         {
-            foreach (var trigger in await db.SelectAsync(WhereBuilder.Where<RoutineTrigger>().Compare(i => i.RoutineId, ComparisonOperator.Equals, routine.Id)))
+            var triggersSelect = db.Select<RoutineTrigger>();
+            triggersSelect.Where().Compare(i => i.RoutineId, ComparisonOperator.Equals, routine.Id);
+
+            foreach (var trigger in await triggersSelect.ExecuteAsync())
             {
                 switch (trigger.Type)
                 {

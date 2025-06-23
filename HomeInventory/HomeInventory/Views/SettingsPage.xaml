@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<local:ContentPageBase xmlns="http://xamarin.com/schemas/2014/forms"
+                       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                       xmlns:vm="clr-namespace:HomeInventory.ViewModels"
+                       xmlns:local="clr-namespace:HomeInventory.Views"
+                       x:Class="HomeInventory.Views.SettingsPage"
+                       Title="{Binding Title}"
+                       BackButtonCommand="{Binding BackButtonCommand}">
+    <local:ContentPageBase.BindingContext>
+        <vm:SettingsViewModel/>
+    </local:ContentPageBase.BindingContext>
+    <Shell.BackButtonBehavior>
+        <BackButtonBehavior IsEnabled="{Binding SettingsService.IsValid}"/>
+    </Shell.BackButtonBehavior>
+    <StackLayout>
+        <Frame Style="{StaticResource Card}" Margin="10">
+            <StackLayout>
+                <Label Text="Hostname"/>
+                <Entry Text="{Binding SettingsService.Hostname}"/>
+                <Label Text="Port"/>
+                <Entry Text="{Binding SettingsService.Port}" Keyboard="Numeric"/>
+                <Label Text="Settings Invalid!" TextColor="Red" IsVisible="{Binding SettingsService.IsValid, Converter={StaticResource InvertedBooleanConverter}}"/>
+            </StackLayout>
+        </Frame>
+    </StackLayout>
+</local:ContentPageBase>

@@ -11,9 +11,9 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 namespace HomeControl.Pages.Devices
 {
     [MenuPage(typeof(EditDeviceModel), "Edit Device Option", null)]
-    public class EditDeviceOptionModel(IDatabaseConnection db, IDeviceService deviceService) : ViewModelPageModel<EditDeviceOptionModel.EditDeviceOptionViewModel>
+    public class EditDeviceOptionModel(IDatabaseConnectionService db, IDeviceService deviceService) : ViewModelPageModel<EditDeviceOptionModel.EditDeviceOptionViewModel>
     {
-        public class EditDeviceOptionViewModel(EditDeviceOptionModel page, IDatabaseConnection db, IDeviceService deviceService) : PageViewModel(page)
+        public class EditDeviceOptionViewModel(EditDeviceOptionModel page, IDatabaseConnectionService db, IDeviceService deviceService) : PageViewModel(page)
         {
             public Device Device { get; set; }
 
@@ -27,16 +27,17 @@ namespace HomeControl.Pages.Devices
 
             public async override Task Initialize()
             {
-                DeviceOption = await db.SelectSingleAsync<DeviceOption>(page.DeviceOptionId);
+                DeviceOption = await db.SelectSingle<DeviceOption>(page.DeviceOptionId).ExecuteAsync();
 
                 if (DeviceOption == null) return;
 
-                Device = await db.SelectSingleAsync<Device>(DeviceOption.DeviceId);
+                Device = await db.SelectSingle<Device>(DeviceOption.DeviceId).ExecuteAsync();
                 IntegrationDevice = await deviceService.CreateAndInitializeIntegrationDeviceAsync(Device);
 
-                DeviceOptionActions.AddRange((await db.SelectAsync(WhereBuilder.Where<DeviceOptionAction>()
-                    .Compare(i => i.DeviceOptionId, ComparisonOperator.Equals, DeviceOption.Id)))
-                    .OrderBy(action => action.Index));
+                var deviceOptionActionsSelect = db.Select<DeviceOptionAction>();
+                deviceOptionActionsSelect.Where().Compare(i => i.DeviceOptionId, ComparisonOperator.Equals, DeviceOption.Id);
+
+                DeviceOptionActions.AddRange((await deviceOptionActionsSelect.ExecuteAsync()).OrderBy(action => action.Index));
 
                 DeviceOptionActionTypes.AddRange(IDeviceService.DeviceOptionActionTypeDataMap
                     .Select(type => new SelectListItem(EnumHelper.GetValueDescription(type.Key), type.Key.ToString())));
@@ -72,7 +73,7 @@ namespace HomeControl.Pages.Devices
 
             ViewModel.DeviceOption.Name = deviceOptionName;
 
-            await db.UpdateAsync(ViewModel.DeviceOption);
+            await db.Update(ViewModel.DeviceOption).ExecuteAsync();
 
             return RedirectToPage();
         }
@@ -81,7 +82,7 @@ namespace HomeControl.Pages.Devices
         {
             if (ViewModel.DeviceOption == null) return null;
 
-            await db.DeleteAsync(ViewModel.DeviceOption);
+            await db.Delete(ViewModel.DeviceOption).ExecuteAsync();
 
             return RedirectToPage("/Devices/DeviceOptions", new { ViewModel.DeviceOption.DeviceId });
         }
@@ -98,14 +99,14 @@ namespace HomeControl.Pages.Devices
                 Data = actionDataObject
             };
 
-            await db.InsertAsync(deviceOptionAction);
+            await db.Insert(deviceOptionAction).ExecuteAsync();
 
             return RedirectToPage();
         }
 
         public async Task<IActionResult> OnPostRemoveDeviceOptionAction(int actionIdToRemove)
         {
-            await db.DeleteAsync(await db.SelectSingleAsync<DeviceOptionAction>(actionIdToRemove));
+            await db.Delete(await db.SelectSingle<DeviceOptionAction>(actionIdToRemove).ExecuteAsync()).ExecuteAsync();
 
             return RedirectToPage();
         }

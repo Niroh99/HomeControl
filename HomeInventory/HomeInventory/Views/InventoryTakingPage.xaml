@@ -1,0 +1,147 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<local:ContentPageBase xmlns="http://xamarin.com/schemas/2014/forms"
+                       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                       x:Class="HomeInventory.Views.InventoryTakingPage"
+                       xmlns:local="clr-namespace:HomeInventory.Views"
+                       xmlns:vm="clr-namespace:HomeInventory.ViewModels"
+                       xmlns:gv="clr-namespace:BarcodeScanner.Mobile;assembly=BarcodeScanner.Mobile.XamarinForms"
+                       xmlns:converter="clr-namespace:HomeInventory.Converters"
+                       Title="{Binding Title}"
+                       IsBusy="{Binding IsBusy}"
+                       AppearingCommand="{Binding ViewAppearing}">
+    <local:ContentPageBase.Resources>
+        <converter:InventoryTakingAddingRemovingColorIndicatorConverter x:Key="AddingRemovingColorIndicatorConverter"/>
+    </local:ContentPageBase.Resources>
+    <local:ContentPageBase.BindingContext>
+        <vm:InventoryTakingViewModel />
+    </local:ContentPageBase.BindingContext>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="2*"/>
+        </Grid.RowDefinitions>
+        <Frame Padding="0" Margin="10,10,10,0" Style="{StaticResource Card}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Grid HeightRequest="40">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <RadioButton IsChecked="{Binding IsAdding}" Content="Add" TextColor="Lime" HorizontalOptions="Center" BackgroundColor="Transparent"/>
+                    <RadioButton Grid.Column="1" IsChecked="{Binding IsRemoving}" Content="Remove" TextColor="Red" HorizontalOptions="Center" BackgroundColor="Transparent"/>
+                </Grid>
+
+                <Frame Grid.Row="1" Padding="5">
+                    <Frame.BackgroundColor>
+                        <MultiBinding Converter="{StaticResource AddingRemovingColorIndicatorConverter}">
+                            <MultiBinding.Bindings>
+                                <Binding Path="IsAdding"/>
+                                <Binding Path="IsRemoving"/>
+                                <Binding Path="IsScanning"/>
+                            </MultiBinding.Bindings>
+                        </MultiBinding>
+                    </Frame.BackgroundColor>
+                    <gv:CameraView Grid.Row="1" IsScanning="{Binding IsScanning}" OnDetectedCommand="{Binding BarcodeDetected}" ScanInterval="100" VibrationOnDetected="False"/>
+                </Frame>
+                <Grid Grid.Row="2" RowDefinitions="Auto,*" Padding="10">
+                    <Label VerticalOptions="Center">
+                        <Label.FormattedText>
+                            <FormattedString>
+                                <FormattedString.Spans>
+                                    <Span Text="Location: " FontAttributes="Bold"/>
+                                    <Span Text="{Binding Location.Name}"/>
+                                </FormattedString.Spans>
+                            </FormattedString>
+                        </Label.FormattedText>
+                    </Label>
+                    <Button Grid.Column="1" HorizontalOptions="End" Text="Restart" Command="{Binding RestartScanningCommand}"/>
+                </Grid>
+            </Grid>
+        </Frame>
+
+        <Grid Grid.Row="1">
+            <Frame Margin="10,0,10,10" Padding="0" Style="{StaticResource Card}">
+                <Grid Padding="0,0,0,10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Grid ColumnSpacing="10" Padding="10,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Image Source="{Binding Product.FrontImageLarge}" HorizontalOptions="StartAndExpand" VerticalOptions="Start"/>
+
+                        <StackLayout Grid.Column="1" Margin="0,10" IsVisible="{Binding HasProduct}">
+                            <Label>
+                                <Label.FormattedText>
+                                    <FormattedString>
+                                        <Span Text="Product Name: " FontAttributes="Bold"/>
+                                        <Span Text="{Binding Product.Name}"/>
+                                    </FormattedString>
+                                </Label.FormattedText>
+                            </Label>
+                            <Label>
+                                <Label.FormattedText>
+                                    <FormattedString>
+                                        <Span Text="GTIN: " FontAttributes="Bold"/>
+                                        <Span Text="{Binding Product.GlobalTradeItemNumber}"/>
+                                    </FormattedString>
+                                </Label.FormattedText>
+                            </Label>
+                            <Label>
+                                <Label.FormattedText>
+                                    <FormattedString>
+                                        <Span Text="Brands: " FontAttributes="Bold"/>
+                                        <Span Text="{Binding Product.Brands}"/>
+                                    </FormattedString>
+                                </Label.FormattedText>
+                            </Label>
+                        </StackLayout>
+                    </Grid>
+
+                    <CollectionView x:Name="ItemsListView"
+                                    Grid.Row="1"
+                                    SelectionMode="None"
+                                    ItemsUpdatingScrollMode="KeepScrollOffset"
+                                    ItemsSource="{Binding ScanHistory}">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <StackLayout>
+                                    <Grid Padding="10">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <Label Text="{Binding ProductName}" LineBreakMode="NoWrap"/>
+                                        <Label Grid.Column="1" LineBreakMode="NoWrap">
+                                            <Label.FormattedText>
+                                                <FormattedString>
+                                                    <Span Text="{Binding MovedAmountDisplay}" TextColor="{Binding MovedAmountColor}"/>
+                                                    <Span Text=" -> "/>
+                                                    <Span Text="{Binding NewQuantity}"/>
+                                                </FormattedString>
+                                            </Label.FormattedText>
+                                        </Label>
+                                    </Grid>
+                                    <BoxView Style="{StaticResource CardSeparator}"/>
+                                </StackLayout>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </Grid>
+            </Frame>
+
+            <ActivityIndicator IsRunning="{Binding IsBusy}"/>
+        </Grid>
+    </Grid>
+</local:ContentPageBase>

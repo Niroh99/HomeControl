@@ -9,9 +9,9 @@ using HomeControl.Modeling;
 namespace HomeControl.Pages.Devices
 {
     [MenuPage(null, "Devices", "/Devices/Index")]
-    public class IndexModel(IDatabaseConnection db, IDeviceService deviceService) : ViewModelPageModel<IndexModel.DevicesViewModel>
+    public class IndexModel(IDatabaseConnectionService db, IDeviceService deviceService) : ViewModelPageModel<IndexModel.DevicesViewModel>
     {
-        public class DevicesViewModel(IndexModel page, IDatabaseConnection db, IDeviceService deviceService) : PageViewModel(page)
+        public class DevicesViewModel(IndexModel page, IDatabaseConnectionService db, IDeviceService deviceService) : PageViewModel(page)
         {
             public List<DeviceInfo> Devices { get; } = [];
 
@@ -22,7 +22,7 @@ namespace HomeControl.Pages.Devices
 
             private async Task PopulateDevicesAsync()
             {
-                var databaseDevices = await db.SelectAllAsync<Device>();
+                var databaseDevices = await db.Select<Device>().ExecuteAsync();
 
                 var devices = new List<DeviceInfo>();
 

@@ -1,0 +1,77 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Application xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:converters="clr-namespace:HomeInventory.Converters"
+             x:Class="HomeInventory.App">
+    <!--
+        Define global resources and styles here, that apply to all pages in your app.
+    -->
+    <Application.Resources>
+        <ResourceDictionary>
+            <converters:InvertedBooleanConverter x:Key="InvertedBooleanConverter"/>
+
+            <Color x:Key="BackgroundLight">#F0F0F0</Color>
+            <Color x:Key="BackgroundDark">#1B1B1B</Color>
+            <Color x:Key="ForegroundLight">#000000</Color>
+            <Color x:Key="ForegroundDark">#D3D3D3</Color>
+            <Color x:Key="ElevatedBackgroundLight">#FFFFFF</Color>
+            <Color x:Key="ElevatedBackgroundDark">#2C2C2C</Color>
+            <Color x:Key="ControlsDark">#3e3e3e</Color>
+            <Color x:Key="ControlsLight">#FFFFFF</Color>
+            <Color x:Key="Highlight">#5A669C</Color>
+            <Color x:Key="HighlightedForeground">#FFFFFF</Color>
+
+            <Style TargetType="Page" ApplyToDerivedTypes="True">
+                <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource BackgroundLight}, Dark={StaticResource BackgroundDark}}"/>
+            </Style>
+            <Style TargetType="Label" ApplyToDerivedTypes="True">
+                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource ForegroundLight}, Dark={StaticResource ForegroundDark}}"/>
+            </Style>
+            <Style TargetType="Button">
+                <Setter Property="VisualStateManager.VisualStateGroups">
+                    <VisualStateGroupList>
+                        <VisualStateGroup x:Name="CommonStates">
+                            <VisualState x:Name="Normal">
+                                <VisualState.Setters>
+                                    <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource ForegroundLight}, Dark={StaticResource ForegroundDark}}"/>
+                                    <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource ControlsLight}, Dark={StaticResource ControlsDark}}" />
+                                </VisualState.Setters>
+                            </VisualState>
+                            <VisualState x:Name="Pressed">
+                                <VisualState.Setters>
+                                    <Setter Property="BackgroundColor" Value="{StaticResource Highlight}" />
+                                    <Setter Property="TextColor" Value="{StaticResource HighlightedForeground}"/>
+                                </VisualState.Setters>
+                            </VisualState>
+                            <VisualState x:Name="Disabled">
+                                <VisualState.Setters>
+                                    <Setter Property="BackgroundColor" Value="#332196F3" />
+                                </VisualState.Setters>
+                            </VisualState>
+                        </VisualStateGroup>
+                    </VisualStateGroupList>
+                </Setter>
+            </Style>
+            <Style TargetType="Frame" x:Key="Card">
+                <Setter Property="Background" Value="{AppThemeBinding Light={StaticResource ElevatedBackgroundLight}, Dark={StaticResource ElevatedBackgroundDark}}"/>
+                <Setter Property="CornerRadius" Value="8"/>
+                <Setter Property="Padding" Value="10"/>
+            </Style>
+            <Style TargetType="ActivityIndicator" ApplyToDerivedTypes="True">
+                <Setter Property="Color" Value="{AppThemeBinding Light={StaticResource ForegroundLight}, Dark={StaticResource ForegroundDark}}"/>
+            </Style>
+            <Style TargetType="RefreshView">
+                <Setter Property="RefreshColor" Value="{AppThemeBinding Light={StaticResource ForegroundLight}, Dark={StaticResource ForegroundDark}}"/>
+                <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource ElevatedBackgroundLight}, Dark={StaticResource ElevatedBackgroundDark}}"/>
+            </Style>
+            <Style TargetType="BoxView" x:Key="Separator">
+                <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource ElevatedBackgroundLight}, Dark={StaticResource ElevatedBackgroundDark}}"/>
+                <Setter Property="HeightRequest" Value="2"/>
+            </Style>
+            <Style TargetType="BoxView" x:Key="CardSeparator">
+                <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource BackgroundLight}, Dark={StaticResource BackgroundDark}}"/>
+                <Setter Property="HeightRequest" Value="2"/>
+            </Style>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

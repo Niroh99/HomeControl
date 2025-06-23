@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace HomeControl.Pages.Devices
 {
     [MenuPage(typeof(IndexModel), "Manage Integrations", "/Devices/ManageIntegrations")]
-    public class ManageIntegrationsModel(IDatabaseConnection db, IDeviceService deviceService) : ViewModelPageModel<ManageIntegrationsModel.ManageIntegrationsViewModel>
+    public class ManageIntegrationsModel(IDatabaseConnectionService db, IDeviceService deviceService) : ViewModelPageModel<ManageIntegrationsModel.ManageIntegrationsViewModel>
     {
         public class ManageIntegrationsViewModel(ViewModelPageModelBase page) : PageViewModel(page)
         {
@@ -29,7 +29,7 @@ namespace HomeControl.Pages.Devices
 
         public async Task<IActionResult> OnPostDiscoverDevices()
         {
-            var databaseDevices = await db.SelectAllAsync<Device>();
+            var databaseDevices = await db.Select<Device>().ExecuteAsync();
 
             var tpLinkDevices = HomeControl.Integrations.TPLink.Discovery.Discover();
 
@@ -37,23 +37,26 @@ namespace HomeControl.Pages.Devices
 
             foreach (var tpLinkDevice in tpLinkDevices)
             {
-                var databaseDevice = (await db.SelectAsync(WhereBuilder.Where<Device>().Compare(i => i.Hostname, ComparisonOperator.Equals, tpLinkDevice.Hostname))).FirstOrDefault();
+                var databaseDeviceSelect = db.Select<Device>();
+                databaseDeviceSelect.Where().Compare(i => i.Hostname, ComparisonOperator.Equals, tpLinkDevice.Hostname);
+
+                var databaseDevice = (await databaseDeviceSelect.ExecuteAsync()).FirstOrDefault();
 
                 if (databaseDevice == null)
                 {
-                    await db.InsertAsync(new Device
+                    await db.Insert(new Device
                     {
                         Type = tpLinkDevice.DeviceType,
                         Hostname = tpLinkDevice.Hostname,
                         Port = tpLinkDevice.Port,
-                    });
+                    }).ExecuteAsync();
                 }
                 else rediscoveredDeviceIds.Add(databaseDevice.Id);
             }
 
-            var deviceOptions = await db.SelectAllAsync<DeviceOption>();
+            var deviceOptions = await db.Select<DeviceOption>().ExecuteAsync();
 
-            var deviceOptionActions = await db.SelectAllAsync<DeviceOptionAction>();
+            var deviceOptionActions = await db.Select<DeviceOptionAction>().ExecuteAsync();
 
             foreach (var databaseDeviceToDelete in databaseDevices.Where(databaseDevice => !rediscoveredDeviceIds.Contains(databaseDevice.Id)))
             {
@@ -61,13 +64,13 @@ namespace HomeControl.Pages.Devices
                 {
                     foreach (var action in deviceOptionActions.Where(action => action.DeviceOptionId == deviceOption.Id))
                     {
-                        await db.DeleteAsync(action);
+                        await db.Delete(action).ExecuteAsync();
                     }
 
-                    await db.DeleteAsync(deviceOption);
+                    await db.Delete(deviceOption).ExecuteAsync();
                 }
 
-                await db.DeleteAsync(databaseDeviceToDelete);
+                await db.Delete(databaseDeviceToDelete).ExecuteAsync();
             }
 
             return await ViewModelResponse();

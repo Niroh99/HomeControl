@@ -1,0 +1,52 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<local:ContentPageBase xmlns="http://xamarin.com/schemas/2014/forms"
+                       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                       xmlns:vm="clr-namespace:HomeInventory.ViewModels"
+                       xmlns:local="clr-namespace:HomeInventory.Views"
+                       xmlns:model="clr-namespace:HomeInventory.Models"
+                       x:Class="HomeInventory.Views.StockPage"
+                       Title="{Binding Title}"
+                       AppearingCommand="{Binding ViewAppearing}">
+    <local:ContentPageBase.BindingContext>
+        <vm:StockViewModel/>
+    </local:ContentPageBase.BindingContext>
+    
+    <RefreshView Command="{Binding RefreshCommand}" IsRefreshing="{Binding IsBusy}">
+        <CollectionView x:Name="ItemsListView"
+                        ItemsSource="{Binding Stock}"
+                        SelectionMode="Single"
+                        SelectedItem="{Binding SelectedItem}">
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="model:Stock">
+                    <StackLayout>
+                        <Grid ColumnDefinitions="Auto,*" Padding="10" ColumnSpacing="10" MinimumHeightRequest="50">
+                            <Image Source="{Binding Product.FrontImageSmall}" WidthRequest="80"/>
+                            <StackLayout Grid.Column="1">
+                                <Label Text="{Binding Product.Name}" FontSize="16" VerticalOptions="Center"/>
+                                <Grid ColumnDefinitions="*,*">
+                                    <Label Opacity="0.8">
+                                        <Label.FormattedText>
+                                            <FormattedString>
+                                                <Span Text="Quantity: "/>
+                                                <Span Text="{Binding Quantity}"/>
+                                            </FormattedString>
+                                        </Label.FormattedText>
+                                    </Label>
+                                    <Label Grid.Column="1" Opacity="0.8">
+                                        <Label.FormattedText>
+                                            <FormattedString>
+                                                <Span Text="Location: "/>
+                                                <Span Text="{Binding Location.Name}"/>
+                                            </FormattedString>
+                                        </Label.FormattedText>
+                                    </Label>
+                                </Grid>
+                            </StackLayout>
+                        </Grid>
+                        <BoxView Style="{StaticResource Separator}"/>
+                    </StackLayout>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </RefreshView>
+</local:ContentPageBase>

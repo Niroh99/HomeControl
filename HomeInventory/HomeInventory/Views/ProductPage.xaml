@@ -1,0 +1,49 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:HomeInventory.ViewModels"
+             Padding="10"
+             Title="{Binding Product.Name}"
+             x:Class="HomeInventory.Views.ProductPage">
+    <ContentPage.BindingContext>
+        <vm:ProductViewModel/>
+    </ContentPage.BindingContext>
+    <Frame CornerRadius="8" BackgroundColor="{AppThemeBinding Light={StaticResource ElevatedBackgroundLight}, Dark={StaticResource ElevatedBackgroundDark}}" Padding="0" VerticalOptions="Start">
+        <StackLayout Orientation="Horizontal" Spacing="10" Padding="10,0">
+            <StackLayout BindableLayout.ItemsSource="{Binding Images}" Spacing="10" IsVisible="{Binding HasImages}">
+                <BindableLayout.ItemTemplate>
+                    <DataTemplate>
+                        <Image Source="{Binding }"/>
+                    </DataTemplate>
+                </BindableLayout.ItemTemplate>
+            </StackLayout>
+
+            <StackLayout Margin="0,10">
+                <Label>
+                    <Label.FormattedText>
+                        <FormattedString>
+                            <Span Text="Product Name: " FontAttributes="Bold"/>
+                            <Span Text="{Binding Product.Name}"/>
+                        </FormattedString>
+                    </Label.FormattedText>
+                </Label>
+                <Label>
+                    <Label.FormattedText>
+                        <FormattedString>
+                            <Span Text="GTIN: " FontAttributes="Bold"/>
+                            <Span Text="{Binding Product.GlobalTradeItemNumber}"/>
+                        </FormattedString>
+                    </Label.FormattedText>
+                </Label>
+                <Label>
+                    <Label.FormattedText>
+                        <FormattedString>
+                            <Span Text="Brands: " FontAttributes="Bold"/>
+                            <Span Text="{Binding Product.Brands}"/>
+                        </FormattedString>
+                    </Label.FormattedText>
+                </Label>
+            </StackLayout>
+        </StackLayout>
+    </Frame>
+</ContentPage>

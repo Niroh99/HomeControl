@@ -8,7 +8,7 @@ namespace HomeControl.Events
 {
     public interface IEventService
     {
-        Task<Event> ScheduleEventAsync(IDatabaseConnection db, EventType eventType, EventData eventData, DateTime plannedExecution);
+        Task<Event> ScheduleEventAsync(IDatabaseConnectionService db, EventType eventType, EventData eventData, DateTime plannedExecution);
 
         Task ExecuteScheduledEventsAsync();
     }
@@ -39,7 +39,7 @@ namespace HomeControl.Events
             { EventType.ExecuteDeviceFeature, typeof(ExecuteDeviceFeatureEventData) },
         };
 
-        public async Task<Event> ScheduleEventAsync(IDatabaseConnection db, EventType eventType, EventData eventData, DateTime plannedExecution)
+        public async Task<Event> ScheduleEventAsync(IDatabaseConnectionService db, EventType eventType, EventData eventData, DateTime plannedExecution)
         {
             if (!_eventTypeEventDataTypeMap.TryGetValue(eventType, out var eventDataType)) throw new NotImplementedException();
 
@@ -54,16 +54,19 @@ namespace HomeControl.Events
                 PlannedExecution = plannedExecution,
             };
 
-            await db.InsertAsync(newEvent);
+            await db.Insert(newEvent).ExecuteAsync();
 
             return newEvent;
         }
 
         public async Task ExecuteScheduledEventsAsync()
         {
-            var db = serviceProvider.GetService<IDatabaseConnection>();
+            var db = serviceProvider.GetService<IDatabaseConnectionService>();
 
-            foreach (var eventToExecute in await db.SelectAsync(WhereBuilder.Where<Event>().Compare(@event => @event.Handled, ComparisonOperator.Equals, false)))
+            var eventsToExecuteSelect = db.Select<Event>();
+            eventsToExecuteSelect.Where().Compare(@event => @event.Handled, ComparisonOperator.Equals, false);
+
+            foreach (var eventToExecute in await eventsToExecuteSelect.ExecuteAsync())
             {
                 if (DateTime.Now < eventToExecute.PlannedExecution) continue;
 
@@ -81,12 +84,12 @@ namespace HomeControl.Events
                         Error = ex.ToString()
                     };
 
-                    await db.InsertAsync(eventError);
+                    await db.Insert(eventError).ExecuteAsync();
                 }
 
                 eventToExecute.Handled = true;
 
-                await db.UpdateAsync(eventToExecute);
+                await db.Update(eventToExecute).ExecuteAsync();
             }
         }
 

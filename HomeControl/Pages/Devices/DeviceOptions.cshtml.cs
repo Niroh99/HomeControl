@@ -10,9 +10,9 @@ using System.Threading.Tasks;
 namespace HomeControl.Pages.Devices
 {
     [MenuPage(typeof(EditDeviceModel), "Device Options", "/Devices/DeviceOptions")]
-    public class DeviceOptionsModel(IDatabaseConnection db, IDeviceService deviceService) : ViewModelPageModel<DeviceOptionsModel.DeviceOptionsViewModel>
+    public class DeviceOptionsModel(IDatabaseConnectionService db, IDeviceService deviceService) : ViewModelPageModel<DeviceOptionsModel.DeviceOptionsViewModel>
     {
-        public class DeviceOptionsViewModel(DeviceOptionsModel page, IDatabaseConnection db, IDeviceService deviceService) : PageViewModel(page)
+        public class DeviceOptionsViewModel(DeviceOptionsModel page, IDatabaseConnectionService db, IDeviceService deviceService) : PageViewModel(page)
         {
             public Device Device { get; set; }
 
@@ -22,11 +22,14 @@ namespace HomeControl.Pages.Devices
 
             public async override Task Initialize()
             {
-                Device = await db.SelectSingleAsync<Device>(page.DeviceId);
+                Device = await db.SelectSingle<Device>(page.DeviceId).ExecuteAsync();
 
                 if (Device == null) return;
 
-                DeviceOptions.AddRange(await db.SelectAsync(WhereBuilder.Where<DeviceOption>().Compare(i => i.DeviceId, ComparisonOperator.Equals, Device.Id)));
+                var deviceOptionsSelect = db.Select<DeviceOption>();
+                deviceOptionsSelect.Where().Compare(i => i.DeviceId, ComparisonOperator.Equals, Device.Id);
+
+                DeviceOptions.AddRange(await deviceOptionsSelect.ExecuteAsync());
 
                 IntegrationDevice = await deviceService.CreateAndInitializeIntegrationDeviceAsync(Device);
             }
@@ -55,7 +58,7 @@ namespace HomeControl.Pages.Devices
                 Name = deviceOptionName
             };
 
-            await db.InsertAsync(newDeviceOption);
+            await db.Insert(newDeviceOption).ExecuteAsync();
 
             return RedirectToPage("/Devices/EditDeviceOption", new { DeviceOptionId = newDeviceOption.Id });
         }
