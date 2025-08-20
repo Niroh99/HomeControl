@@ -1,13 +1,17 @@
 ﻿using HomeControl.Database;
 using HomeControl.Integrations;
+using HomeControl.Integrations.TPLink;
 using HomeControl.Modeling;
+using NTIH.Database.Modeling;
+using NTIH.Database.Modeling.Attributes;
+using NTIH.Modeling;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Threading.Tasks;
 
 namespace HomeControl.DatabaseModels
 {
-    public abstract class Action : IdentityKeyModel, IIndexedObject
+    public abstract class Action : IdentityKeyModel, IIndexedObject, IDisplayable
     {
         [Column]
         public int Index { get => Get<int>(); set { Set(value); } }
@@ -17,12 +21,22 @@ namespace HomeControl.DatabaseModels
 
         [Column]
         [JsonField]
-        public Model Data { get => Get<Model>(); set => Set(value); }
+        public ActionData Data { get => Get<ActionData>(); set => Set(value); }
 
-        public override async Task<string> ToString(IServiceProvider serviceProvider)
+        private string _display;
+        public string Display => _display;
+
+        private string _additionalInfo;
+        public string AdditionalInfo => _additionalInfo;
+
+        public async Task CreateDisplay(IServiceProvider serviceProvider)
         {
-            await Task.CompletedTask;
-            return Data.Display;
+            if (Data is IDisplayable displayableData)
+            {
+                await displayableData.CreateDisplay(serviceProvider);
+                _display = displayableData.Display;
+                _additionalInfo = displayableData.AdditionalInfo;
+            }
         }
     }
 
@@ -36,11 +50,26 @@ namespace HomeControl.DatabaseModels
         ClearIntegrationDevicesCache
     }
 
-    public abstract class DeviceActionData : Model
+    public abstract class ActionData : Model, IDisplayable
+    {
+        private string _display;
+        public string Display { get; protected set; }
+
+        private string _additionalInfo;
+        public string AdditionalInfo => _additionalInfo;
+
+        public virtual async Task CreateDisplay(IServiceProvider serviceProvider)
+        {
+            _display = ToString();
+            await Task.CompletedTask;
+        }
+    }
+
+    public abstract class DeviceActionData : ActionData
     {
         public int DeviceId { get => Get<int>(); set => Set(value); }
 
-        public override async Task<string> ToString(IServiceProvider serviceProvider)
+        public override async Task CreateDisplay(IServiceProvider serviceProvider)
         {
             var db = serviceProvider.GetService<IDatabaseConnectionService>();
             var deviceService = serviceProvider.GetService<IDeviceService>();
@@ -49,7 +78,7 @@ namespace HomeControl.DatabaseModels
 
             var integrationDevice = await deviceService.CreateAndInitializeIntegrationDeviceAsync(device);
 
-            return $"{integrationDevice.DisplayName}: {ToString()}";
+            Display = $"{integrationDevice.DisplayName}: {ToString()}";
         }
     }
 
@@ -73,7 +102,7 @@ namespace HomeControl.DatabaseModels
         }
     }
 
-    public class ClearIntegrationDevicesCacheActionData : Model
+    public class ClearIntegrationDevicesCacheActionData : ActionData
     {
         public override string ToString()
         {

@@ -1,5 +1,6 @@
-﻿using HomeControl.Database;
-using HomeControl.Events;
+﻿using HomeControl.Events;
+using NTIH.Database.Modeling;
+using NTIH.Database.Modeling.Attributes;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HomeControl.DatabaseModels

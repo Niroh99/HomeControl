@@ -1,6 +1,6 @@
 ﻿using System.Collections;
 
-namespace HomeControl.Modeling
+namespace NTIH.Modeling
 {
     public class CollectionModel<T> : Model, ICollection<T>
     {

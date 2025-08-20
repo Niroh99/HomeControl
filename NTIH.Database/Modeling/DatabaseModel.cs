@@ -1,8 +1,6 @@
-﻿using HomeControl.Modeling;
-
-namespace HomeControl.Database
+﻿namespace NTIH.Database.Modeling
 {
-    public abstract class DatabaseModel : Model
+    public abstract class DatabaseModel : NTIH.Modeling.Model
     {
         public bool IsTracked { get => DB != null; }
 

@@ -1,4 +1,4 @@
-﻿namespace HomeControl.Modeling
+﻿namespace NTIH.Modeling
 {
     public class ModelMetadata<T> where T : FieldMetadata
     {

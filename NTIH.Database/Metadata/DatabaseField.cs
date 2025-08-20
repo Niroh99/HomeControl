@@ -1,10 +1,9 @@
-﻿using HomeControl.Modeling;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using NTIH.Database.Modeling.Attributes;
 using System.Reflection;
 
-namespace HomeControl.Database
+namespace NTIH.Database.Metadata
 {
-    public class DatabaseField : FieldMetadata
+    public class DatabaseField : NTIH.Modeling.FieldMetadata
     {
         public DatabaseField(PropertyInfo propertyInfo) : base(propertyInfo)
         {

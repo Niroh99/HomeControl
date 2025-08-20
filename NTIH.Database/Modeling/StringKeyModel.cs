@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace HomeControl.Database
+namespace NTIH.Database.Modeling
 {
     public abstract class StringKeyModel : DatabaseModel
     {

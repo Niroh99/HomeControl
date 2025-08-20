@@ -1,11 +1,10 @@
-﻿using HomeControl.Helpers;
-using HomeControl.Modeling;
-using Microsoft.AspNetCore.Mvc.Formatters;
+﻿using NTIH.Modeling;
+using NTIH.Database.Metadata;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 
-namespace HomeControl.Database
+namespace NTIH.Database
 {
     public static class WhereBuilder
     {

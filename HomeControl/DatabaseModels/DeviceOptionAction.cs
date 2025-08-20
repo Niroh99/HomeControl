@@ -1,8 +1,4 @@
-﻿using HomeControl.Database;
-using HomeControl.Integrations;
-using HomeControl.Modeling;
-using System.ComponentModel;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HomeControl.DatabaseModels
 {
@@ -11,11 +7,5 @@ namespace HomeControl.DatabaseModels
     {
         [Column]
         public int DeviceOptionId { get => Get<int>(); set => Set(value); }
-
-        public override async Task<string> ToString(IServiceProvider serviceProvider)
-        {
-            await Task.CompletedTask;
-            return Data.ToString();
-        }
     }
 }

@@ -1,69 +1,16 @@
-﻿using HomeControl.Helpers;
-using HomeControl.Modeling;
+﻿using NTIH.Database.Modeling;
+using NTIH.Database.Metadata;
 using Microsoft.Data.Sqlite;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq.Expressions;
-using System.Numerics;
 using System.Reflection;
-using System.Reflection.Metadata;
 using System.Text;
 using System.Threading.Tasks;
+using NTIH.Database.Exceptions;
 
-namespace HomeControl.Database
+namespace NTIH.Database
 {
-    public interface IDatabaseConnectionService : IDisposable
-    {
-        bool TryGetMetadata(string modelName, out Type modelType, out DatabaseModelMetadata metadata);
-
-        bool TryGetMetadata<T>(out DatabaseModelMetadata metadata) where T : DatabaseModel;
-
-        bool TryGetMetadata(Type modelType, out DatabaseModelMetadata metadata);
-
-        InsertQuery<T> Insert<T>(T instance) where T : DatabaseModel;
-
-        SelectSingleIdentityKeyModelQuery<T> SelectSingle<T>(int id) where T : IdentityKeyModel;
-
-        SelectSingleStringKeyModelQuery<T> SelectSingle<T>(string id) where T : StringKeyModel;
-
-        SelectQuery<T> Select<T>() where T : DatabaseModel;
-
-        UpdateQuery<T> Update<T>(T instance) where T : DatabaseModel;
-
-        DeleteQuery<T> Delete<T>(T instance) where T : DatabaseModel;
-
-        Task CommitTransactionAsync();
-    }
-
-    public class DatabaseConnectionService(string connectionString, IServiceProvider serviceProvider) : DatabaseConnection(connectionString), IDatabaseConnectionService
-    {
-        private readonly IServiceProvider _serviceProvider = serviceProvider;
-
-        public override async Task OnInserted(DatabaseModel model)
-        {
-            await model.CreateDisplay(_serviceProvider);
-        }
-
-        public override async Task OnSelected(DatabaseModel model)
-        {
-            await model.CreateDisplay(_serviceProvider);
-        }
-
-        public override async Task OnUpdated(DatabaseModel model)
-        {
-            await model.CreateDisplay(_serviceProvider);
-        }
-
-        public override async Task<object> DeserializeJsonField(string valueJson)
-        {
-            var jsonField = await base.DeserializeJsonField(valueJson);
-
-            if (jsonField is Model modelValue) await modelValue.CreateDisplay(_serviceProvider);
-
-            return jsonField;
-        }
-    }
-
     public interface IDatabaseConnection : IDisposable
     {
         bool TryGetMetadata(string modelName, out Type modelType, out DatabaseModelMetadata metadata);

@@ -1,4 +1,4 @@
-﻿namespace HomeControl.Modeling
+﻿namespace NTIH.Modeling
 {
     public abstract class Model
     {
@@ -8,12 +8,6 @@
         }
 
         public string TypeName { get; }
-
-        private string _display;
-        public string Display { get => _display; }
-
-        private string _additionalInfo;
-        public string AdditionalInfo { get => _additionalInfo; }
 
         private readonly Dictionary<string, object> _properties = [];
         private readonly Dictionary<string, object> _modifiedProperties = [];
@@ -45,24 +39,6 @@
         public string[] GetModifiedProperties()
         {
             return _modifiedProperties.Keys.ToArray();
-        }
-
-        public async Task CreateDisplay(IServiceProvider serviceProvider)
-        {
-            _display = await ToString(serviceProvider);
-            _additionalInfo = await GetAdditionalInfo(serviceProvider);
-        }
-
-        public virtual async Task<string> ToString(IServiceProvider serviceProvider)
-        {
-            await Task.CompletedTask;
-            return ToString();
-        }
-
-        public virtual async Task<string> GetAdditionalInfo(IServiceProvider serviceProvider)
-        {
-            await Task.CompletedTask;
-            return null;
         }
 
         private T GetPropertyValue<T>(string propertyName)

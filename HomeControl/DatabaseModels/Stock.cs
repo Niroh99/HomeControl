@@ -1,4 +1,5 @@
 ﻿using HomeControl.Database;
+using NTIH.Database.Modeling;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HomeControl.DatabaseModels

@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 
-namespace HomeControl.Modeling
+namespace NTIH.Modeling
 {
     public class FieldMetadata(PropertyInfo propertyInfo)
     {

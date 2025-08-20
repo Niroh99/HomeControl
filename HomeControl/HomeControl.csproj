@@ -12,7 +12,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Data.Sqlite" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="9.0.8" />
     <PackageReference Include="tplink-smartdevices" Version="2.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\NTIH.Database\NTIH.Database.csproj" />
+    <ProjectReference Include="..\NTIH.Modeling\NTIH.Modeling.csproj" />
   </ItemGroup>
 </Project>

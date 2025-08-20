@@ -1,13 +1,16 @@
 ﻿using HomeControl.Database;
 using HomeControl.Helpers;
 using HomeControl.Modeling;
+using NTIH.Database.Modeling;
+using NTIH.Database.Modeling.Attributes;
+using NTIH.Modeling;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HomeControl.DatabaseModels
 {
     [Table(nameof(RoutineTrigger))]
-    public class RoutineTrigger : IdentityKeyModel
+    public class RoutineTrigger : IdentityKeyModel, IDisplayable
     {
         [Column]
         public int RoutineId { get => Get<int>(); set => Set(value); }
@@ -19,14 +22,20 @@ namespace HomeControl.DatabaseModels
         [JsonField]
         public Model Data { get => Get<Model>(); set => Set(value); }
 
-        public override Task<string> ToString(IServiceProvider serviceProvider)
-        {
-            return Data.ToString(serviceProvider);
-        }
+        private string _display;
+        public string Display => _display;
 
-        public override async Task<string> GetAdditionalInfo(IServiceProvider serviceProvider)
+        private string _additionalInfo;
+        public string AdditionalInfo => _additionalInfo;
+
+        public async Task CreateDisplay(IServiceProvider serviceProvider)
         {
-            return await Data.GetAdditionalInfo(serviceProvider);
+            if (Data is IDisplayable displayableData)
+            {
+                await displayableData.CreateDisplay(serviceProvider);
+                _display = displayableData.Display;
+                _additionalInfo = displayableData.AdditionalInfo;
+            }
         }
     }
 
@@ -42,13 +51,31 @@ namespace HomeControl.DatabaseModels
         Sunset,
     }
 
-    public abstract class DailyRoutineTriggerData : Model
+    public abstract class RoutineTriggerData : Model, IDisplayable
+    {
+        private string _display;
+        public string Display => _display;
+        private string _additionalInfo;
+        public string AdditionalInfo => _additionalInfo;
+        public virtual async Task CreateDisplay(IServiceProvider serviceProvider)
+        {
+            _display = ToString();
+            _additionalInfo = GetAdditionalInfo(serviceProvider);
+            await Task.CompletedTask;
+        }
+
+        protected virtual string GetAdditionalInfo(IServiceProvider serviceProvider)
+        {
+            return null;
+        }
+    }
+
+    public abstract class DailyRoutineTriggerData : RoutineTriggerData
     {
         public HashSet<DayOfWeek> ActiveWeekDays { get; set; }
 
-        public override async Task<string> GetAdditionalInfo(IServiceProvider serviceProvider)
+        protected override string GetAdditionalInfo(IServiceProvider serviceProvider)
         {
-            await Task.CompletedTask;
             return string.Join(", ", ActiveWeekDays.Select(dayOfWeek => dayOfWeek.ToShortDayOfWeek()));
         }
     }
@@ -79,7 +106,7 @@ namespace HomeControl.DatabaseModels
         }
     }
 
-    public class IntervalTriggerData : Model
+    public class IntervalTriggerData : RoutineTriggerData
     {
         public TimeSpan Interval { get; set; }
 

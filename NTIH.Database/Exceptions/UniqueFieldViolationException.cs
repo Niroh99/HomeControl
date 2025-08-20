@@ -1,6 +1,6 @@
 ﻿using System.Runtime.Serialization;
 
-namespace HomeControl.Database
+namespace NTIH.Database.Exceptions
 {
     public class UniqueFieldViolationException : Exception
     {

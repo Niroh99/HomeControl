@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 
-namespace HomeControl.Database
+namespace NTIH.Database.Metadata
 {
     public class DatabaseColumnField : DatabaseField
     {
