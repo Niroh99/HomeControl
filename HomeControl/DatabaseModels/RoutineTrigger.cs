@@ -20,7 +20,7 @@ namespace HomeControl.DatabaseModels
 
         [Column]
         [JsonField]
-        public Model Data { get => Get<Model>(); set => Set(value); }
+        public RoutineTriggerData Data { get => Get<RoutineTriggerData>(); set => Set(value); }
 
         private string _display;
         public string Display => _display;

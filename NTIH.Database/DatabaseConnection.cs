@@ -372,13 +372,6 @@ namespace NTIH.Database
 
         private readonly HashSet<Join> _joins = [];
 
-        public void LeftJoin<TProperty>(Expression<Func<T, TProperty>> selectorExpression)
-        {
-            ArgumentNullException.ThrowIfNull(selectorExpression, nameof(selectorExpression));
-
-            LeftJoin(LinqHelper.GetExpressionMemberName(selectorExpression));
-        }
-
         public void LeftJoin(string propertyName)
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(propertyName, nameof(propertyName));

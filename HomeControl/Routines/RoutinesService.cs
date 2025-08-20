@@ -2,6 +2,7 @@
 using HomeControl.Database;
 using HomeControl.DatabaseModels;
 using HomeControl.Weather;
+using NTIH.Database;
 using System.Collections.ObjectModel;
 using System.Timers;
 

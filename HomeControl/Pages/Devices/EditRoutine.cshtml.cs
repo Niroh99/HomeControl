@@ -8,6 +8,7 @@ using HomeControl.Routines;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using NTIH.Database;
 
 namespace HomeControl.Pages.Devices
 {
@@ -114,7 +115,7 @@ namespace HomeControl.Pages.Devices
 
         public async Task<IActionResult> OnPostCreateRoutineTrigger(RoutineTriggerType routineTriggerType, string newRoutineTriggerData)
         {
-            var triggerDataObject = (Model)System.Text.Json.JsonSerializer.Deserialize(newRoutineTriggerData, IRoutinesService.RoutineTriggerTypeDataMap[routineTriggerType], new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web));
+            var triggerDataObject = (RoutineTriggerData)System.Text.Json.JsonSerializer.Deserialize(newRoutineTriggerData, IRoutinesService.RoutineTriggerTypeDataMap[routineTriggerType], new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web));
 
             var routineTrigger = new RoutineTrigger
             {
@@ -137,7 +138,7 @@ namespace HomeControl.Pages.Devices
 
         public async Task<IActionResult> OnPostCreateRoutineAction(ActionType actionType, string newRoutineActionData)
         {
-            var actionDataObject = (Model)System.Text.Json.JsonSerializer.Deserialize(newRoutineActionData, IRoutinesService.RoutineActionTypeDataMap[actionType], new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web));
+            var actionDataObject = (ActionData)System.Text.Json.JsonSerializer.Deserialize(newRoutineActionData, IRoutinesService.RoutineActionTypeDataMap[actionType], new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web));
 
             var routineAction = new RoutineAction
             {

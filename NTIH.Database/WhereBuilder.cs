@@ -113,9 +113,9 @@ namespace NTIH.Database
                 return Brackets(buildChild);
             }
 
-            public IStatement<T> Compare<TProperty>(Expression<Func<T, TProperty>> selectorExpression, ComparisonOperator comparisonOperator, TProperty value)
+            public IStatement<T> Compare<TProperty>(string propertyName, ComparisonOperator comparisonOperator, TProperty value)
             {
-                return SetNextElement(new ValueComparison<T, TProperty>(selectorExpression, comparisonOperator, value));
+                return SetNextElement(new ValueComparison<T, TProperty>(propertyName, comparisonOperator, value));
             }
 
             public static IStatement<T> Brackets(Action<ILogicalOperator<T>> buildChild)
@@ -249,11 +249,11 @@ namespace NTIH.Database
 
         private class ValueComparison<T, TProperty> : Statement<T> where T : Model
         {
-            public ValueComparison(Expression<Func<T, TProperty>> selectorExpression, ComparisonOperator comparisonOperator, TProperty value)
+            public ValueComparison(string propertyName, ComparisonOperator comparisonOperator, TProperty value)
             {
-                ArgumentNullException.ThrowIfNull(selectorExpression, nameof(selectorExpression));
+                ArgumentNullException.ThrowIfNullOrWhiteSpace(propertyName, nameof(propertyName));
 
-                _propertyName = LinqHelper.GetExpressionMemberName(selectorExpression);
+                _propertyName = propertyName;
                 _comparisonOperator = comparisonOperator;
                 _value = value;
             }
@@ -336,7 +336,7 @@ namespace NTIH.Database
 
     public interface ILogicalOperator<T> : ILogicalOperator where T : Model
     {
-        IStatement<T> Compare<TProperty>(Expression<Func<T, TProperty>> selectorExpression, ComparisonOperator comparisonOperator, TProperty value);
+        IStatement<T> Compare<TProperty>(string propertyName, ComparisonOperator comparisonOperator, TProperty value);
     }
 
     public interface IStatement : IWhereElement

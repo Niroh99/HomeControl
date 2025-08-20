@@ -2,6 +2,7 @@
 using NTIH.Database;
 using NTIH.Database.Metadata;
 using NTIH.Database.Modeling;
+using NTIH.Modeling;
 
 namespace HomeControl.Database
 {
@@ -51,7 +52,7 @@ namespace HomeControl.Database
         {
             var jsonField = await base.DeserializeJsonField(valueJson);
 
-            if (jsonField is Model modelValue) await modelValue.CreateDisplay(_serviceProvider);
+            if (jsonField is IDisplayable displayableJsonField) await displayableJsonField.CreateDisplay(_serviceProvider);
 
             return jsonField;
         }
