@@ -38,7 +38,7 @@ namespace HomeControl.Controllers
             return Json(await stockSelect.ExecuteAsync());
         }
 
-        [HttpPost("BookStock")]
+        [HttpPost(nameof(BookStock))]
         public async Task<IActionResult> BookStock([FromBody] BookStockRequest request)
         {
             var stockSelect = db.Select<Stock>();

@@ -62,13 +62,13 @@ namespace HomeInventory.ViewModels
             await Task.CompletedTask;
         }
 
-        protected void Busy(Action whiteBusy)
+        protected void Busy(Action whileBusy)
         {
             IsBusy = true;
 
             try
             {
-                whiteBusy();
+                whileBusy();
             }
             catch
             {
@@ -80,13 +80,13 @@ namespace HomeInventory.ViewModels
             }
         }
 
-        protected async Task Busy(Func<Task> whiteBusy)
+        protected async Task Busy(Func<Task> whileBusy)
         {
             IsBusy = true;
 
             try
             {
-                await whiteBusy();
+                await whileBusy();
             }
             catch
             {
