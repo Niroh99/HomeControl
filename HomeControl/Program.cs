@@ -11,6 +11,7 @@ using HomeControl.Weather;
 using HomeControl.Routines;
 using HomeControl.Actions;
 using HomeControl;
+using HomeControl.Models.ServicesInterfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -45,6 +46,8 @@ builder.Services.AddScoped<IDeviceService, DeviceService>();
 builder.Services.AddScoped<IActionsService, ActionsService>();
 
 var app = builder.Build();
+
+NTIH.Database.DatabaseConnection.RegisterDatabaseModelTypesFromAssembly(HomeControl.Models.AssemblyReference.Value);
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

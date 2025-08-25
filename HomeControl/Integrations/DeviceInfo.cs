@@ -1,5 +1,8 @@
 ﻿using HomeControl.Database;
-using HomeControl.DatabaseModels;
+using HomeControl.Models.DatabaseModels;
+using HomeControl.Models.Integrations;
+using HomeControl.Models.ServicesInterfaces;
+using NTIH.Database;
 
 namespace HomeControl.Integrations
 {

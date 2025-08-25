@@ -6,10 +6,9 @@ using System.Text;
 
 namespace NTIH.Database
 {
-    public static class WhereBuilder
+    internal static class WhereBuilder
     {
         public const char ParameterIndicator = '$';
-
 
         public class ParameterCollection
         {

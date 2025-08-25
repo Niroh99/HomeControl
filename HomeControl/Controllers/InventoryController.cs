@@ -1,6 +1,8 @@
 ﻿using HomeControl.Database;
-using HomeControl.DatabaseModels;
+using HomeControl.Models.DatabaseModels;
+using HomeControl.Models.ServicesInterfaces;
 using Microsoft.AspNetCore.Mvc;
+using NTIH.Database;
 
 namespace HomeControl.Controllers
 {

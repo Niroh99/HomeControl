@@ -1,4 +1,5 @@
 ﻿using HomeControl.Database;
+using HomeControl.Models.ServicesInterfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
 using NTIH.Database;
@@ -38,7 +39,7 @@ namespace HomeControl.Controllers
         [HttpPost]
         public async Task<IActionResult> OnPost([FromRoute] string modelName)
         {
-            if (!_db.TryGetMetadata(modelName, out var modelType, out _)) return NotFound();
+            if (!IDatabaseConnectionService.TryGetMetadata(modelName, out var modelType, out _)) return NotFound();
 
             object model;
 
@@ -72,7 +73,7 @@ namespace HomeControl.Controllers
         {
             if (id == null) return NotFound();
 
-            if (!_db.TryGetMetadata(modelName, out var modelType, out var metadata)) return NotFound();
+            if (!IDatabaseConnectionService.TryGetMetadata(modelName, out var modelType, out var metadata)) return NotFound();
 
             try
             {
@@ -93,11 +94,11 @@ namespace HomeControl.Controllers
         [HttpGet]
         public async Task<IActionResult> OnGet([FromRoute] string modelName)
         {
-            if (!_db.TryGetMetadata(modelName, out var modelType, out var metadata)) return NotFound();
+            if (!IDatabaseConnectionService.TryGetMetadata(modelName, out var modelType, out var metadata)) return NotFound();
 
             var genericSelect = _select.MakeGenericMethod(modelType);
 
-            var selectQuery = (ISelectQuery)genericSelect.Invoke(_db, []);
+            var selectQuery = (ISelectMany)genericSelect.Invoke(_db, []);
 
             if (Request.Query.Count > 0)
             {
@@ -129,7 +130,7 @@ namespace HomeControl.Controllers
                 }
             }
 
-            var result = await GetAsyncMethodResult(await selectQuery.ExecuteAsync());
+            var result = await selectQuery.ExecuteAsync();
 
             return Json(result);
         }
@@ -139,7 +140,7 @@ namespace HomeControl.Controllers
         {
             if (id == null) return NotFound();
 
-            if (!_db.TryGetMetadata(modelName, out var modelType, out var metadata)) return NotFound();
+            if (!IDatabaseConnectionService.TryGetMetadata(modelName, out var modelType, out var metadata)) return NotFound();
 
             try
             {
@@ -184,19 +185,7 @@ namespace HomeControl.Controllers
 
             var query = (IResultQuery)genericSelectSingle.Invoke(_db, [primaryKey]);
 
-            return await GetAsyncMethodResult(await query.ExecuteAsync());
-        }
-
-        private static async Task<object> GetAsyncMethodResult(object methodResult)
-        {
-            if (methodResult is Task taskResult)
-            {
-                await taskResult;
-
-                methodResult = methodResult.GetType().GetProperty(nameof(Task<DatabaseModel>.Result)).GetValue(methodResult, null);
-            }
-
-            return methodResult;
+            return await query.ExecuteAsync();
         }
 
         private static IEnumerable<(KeyValuePair<string, StringValues>, DatabaseColumnField)> EnumerateQueryFields(IQueryCollection query, DatabaseModelMetadata metadata)

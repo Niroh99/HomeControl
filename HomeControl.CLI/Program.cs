@@ -1,83 +1,58 @@
 ﻿using HomeControl.CLI.CommandHandlers;
+using HomeControl.CLI.Helpers;
 
 Queue<string> arguments;
 
 if (System.Diagnostics.Debugger.IsAttached)
 {
-    var debugArgumentsString = Console.ReadLine();
-
-    if (string.IsNullOrWhiteSpace(debugArgumentsString)) return;
-
-    arguments = new Queue<string>();
-
-    do
+    while (true)
     {
-        debugArgumentsString = debugArgumentsString.TrimStart();
-
-        if (string.IsNullOrEmpty(debugArgumentsString)) break;
-
-        string argument;
-
-        int argumentLengthOffset = 0;
-
-        if (debugArgumentsString[0] == '"')
-        {
-            debugArgumentsString = debugArgumentsString[1..];
-
-            var endQuoteIndex = debugArgumentsString.IndexOf('"');
-
-            if (endQuoteIndex >= 0)
-            {
-                argument = debugArgumentsString[..endQuoteIndex];
-                argumentLengthOffset = 1;
-            }
-            else argument = debugArgumentsString;
-        }
-        else
-        {
-            var whitespaceIndex = debugArgumentsString.IndexOf(' ');
-
-            if (whitespaceIndex >= 0) argument = debugArgumentsString[..whitespaceIndex];
-            else argument = debugArgumentsString;
-        }
-
-        arguments.Enqueue(argument);
-
-        debugArgumentsString = debugArgumentsString[(argument.Length + argumentLengthOffset)..];
+        arguments = DebugHelper.ReadConsoleArguments();
+        var exitCode = await ProcessCommand(arguments);
+        Console.WriteLine($"Exit code: {exitCode}");
     }
-    while (!string.IsNullOrEmpty(debugArgumentsString));
 }
 else
 {
-    if (args.Length == 0)
+    arguments = new Queue<string>(args);
+    var exitCode = await ProcessCommand(arguments);
+    Environment.Exit(exitCode);
+}
+
+static async Task<int> ProcessCommand(Queue<string> arguments)
+{
+    if (arguments.Count == 0)
     {
         Console.WriteLine("No command provided.");
         PrintAvailableCommands();
-        return;
+        return 1;
     }
 
-    arguments = new Queue<string>(args);
+    var command = arguments.Dequeue().ToLowerInvariant();
+
+    var commandHandlerTypes = CommandHandler.GetCommandHandlerTypes();
+
+    if (commandHandlerTypes.TryGetValue(command, out var commandHandlerType))
+    {
+        var commandHandler = (CommandHandler)Activator.CreateInstance(commandHandlerType, arguments)!;
+        var exitCode = await commandHandler.HandleAsync();
+
+        if (commandHandler is IDisposable disposableCommandHandler)
+        {
+            disposableCommandHandler.Dispose();
+        }
+
+        return exitCode;
+    }
+    else
+    {
+        Console.WriteLine($"Unknown command: {command}");
+        PrintAvailableCommands();
+        return 1;
+    }
 }
 
-var command = arguments.Dequeue().ToLowerInvariant();
-
-var commandHandlerTypes = CommandHandler.GetCommandHandlerTypes();
-
-if (commandHandlerTypes.TryGetValue(command, out var commandHandlerType))
-{
-    var commandHandler = (CommandHandler)Activator.CreateInstance(commandHandlerType)!;
-    var exitCode = await commandHandler.HandleAsync(arguments);
-
-    Environment.Exit(exitCode);
-    return;
-}
-else
-{
-    Console.WriteLine($"Unknown command: {command}");
-    PrintAvailableCommands();
-}
-
-void PrintAvailableCommands()
+static void PrintAvailableCommands()
 {
     Console.WriteLine("Available commands:");
     foreach (var availableCommand in CommandHandler.GetCommandHandlerTypes().Keys)

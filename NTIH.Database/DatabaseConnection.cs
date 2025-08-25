@@ -11,66 +11,8 @@ using NTIH.Database.Exceptions;
 
 namespace NTIH.Database
 {
-    public interface IDatabaseConnection : IDisposable
+    public class DatabaseConnection : IDisposable
     {
-        bool TryGetMetadata(string modelName, out Type modelType, out DatabaseModelMetadata metadata);
-
-        bool TryGetMetadata<T>(out DatabaseModelMetadata metadata) where T : DatabaseModel;
-
-        bool TryGetMetadata(Type modelType, out DatabaseModelMetadata metadata);
-
-        InsertQuery<T> Insert<T>(T instance) where T : DatabaseModel;
-
-        SelectSingleIdentityKeyModelQuery<T> SelectSingle<T>(int id) where T : IdentityKeyModel;
-
-        SelectSingleStringKeyModelQuery<T> SelectSingle<T>(string id) where T : StringKeyModel;
-
-        SelectQuery<T> Select<T>() where T : DatabaseModel;
-
-        UpdateQuery<T> Update<T>(T instance) where T : DatabaseModel;
-
-        DeleteQuery<T> Delete<T>(T instance) where T : DatabaseModel;
-
-        Task CommitTransactionAsync();
-    }
-
-    public class DatabaseConnection : IDatabaseConnection, IDisposable
-    {
-        static DatabaseConnection()
-        {
-            var assembly = Assembly.GetExecutingAssembly();
-
-            foreach (var modelType in assembly.DefinedTypes.Where(x => x.IsAssignableTo(typeof(DatabaseModel))))
-            {
-                var metadata = new DatabaseModelMetadata();
-
-                var tableAttribute = modelType.GetCustomAttribute(typeof(TableAttribute)) as TableAttribute;
-
-                if (tableAttribute != null) metadata.TableName = tableAttribute.Name;
-
-                foreach (var property in modelType.GetProperties().Where(x => x.CanRead))
-                {
-                    var columnAttribute = property.GetCustomAttribute(typeof(ColumnAttribute)) as ColumnAttribute;
-                    var foreignKeyAttribute = property.GetCustomAttribute(typeof(ForeignKeyAttribute)) as ForeignKeyAttribute;
-
-                    if (columnAttribute == null && foreignKeyAttribute == null) metadata.Fields.Add(new DatabaseField(property));
-                    if (columnAttribute != null)
-                    {
-                        var keyAttribute = property.GetCustomAttribute(typeof(KeyAttribute));
-
-                        if (keyAttribute == null) metadata.Fields.Add(new DatabaseColumnField(property, columnAttribute.Name));
-                        else metadata.Fields.Add(new PrimaryKeyField(property, columnAttribute.Name));
-                    }
-                    else if (foreignKeyAttribute != null)
-                    {
-                        metadata.Fields.Add(new DatabaseNavigationField(property, foreignKeyAttribute.Name));
-                    }
-                }
-
-                ModelMetadatas[modelType] = metadata;
-            }
-        }
-
         public const char JoinedFieldsAliasSeparator = '-';
 
         public const string BaseTableAlias = "-Base-";
@@ -90,7 +32,60 @@ namespace NTIH.Database
             _sqlTransaction = SqlConnection.BeginTransaction();
         }
 
-        public bool TryGetMetadata(string modelName, out Type modelType, out DatabaseModelMetadata metadata)
+        public static void RegisterModelType<T>()
+        {
+            var modelType = typeof(T);
+            RegisterDatabaseModelType(modelType);
+        }
+
+        public static void RegisterDatabaseModelType(Type databaseModelType)
+        {
+            if (ModelMetadatas.ContainsKey(databaseModelType)) return;
+
+            if (!databaseModelType.IsAssignableTo(typeof(DatabaseModel))) return;
+
+            ModelMetadatas[databaseModelType] = GenerateModelMetadata(databaseModelType);
+        }
+
+        public static void RegisterDatabaseModelTypesFromAssembly(Assembly assembly)
+        {
+            foreach (var databaseModelType in assembly.DefinedTypes.Where(x => x.IsAssignableTo(typeof(DatabaseModel)) && !ModelMetadatas.ContainsKey(x)))
+            {
+                ModelMetadatas[databaseModelType] = GenerateModelMetadata(databaseModelType);
+            }
+        }
+
+        private static DatabaseModelMetadata GenerateModelMetadata(Type databaseModelType)
+        {
+            var metadata = new DatabaseModelMetadata();
+
+            var tableAttribute = databaseModelType.GetCustomAttribute(typeof(TableAttribute)) as TableAttribute;
+
+            if (tableAttribute != null) metadata.TableName = tableAttribute.Name;
+
+            foreach (var property in databaseModelType.GetProperties().Where(x => x.CanRead))
+            {
+                var columnAttribute = property.GetCustomAttribute(typeof(ColumnAttribute)) as ColumnAttribute;
+                var foreignKeyAttribute = property.GetCustomAttribute(typeof(ForeignKeyAttribute)) as ForeignKeyAttribute;
+
+                if (columnAttribute == null && foreignKeyAttribute == null) metadata.Fields.Add(new DatabaseField(property));
+                if (columnAttribute != null)
+                {
+                    var keyAttribute = property.GetCustomAttribute(typeof(KeyAttribute));
+
+                    if (keyAttribute == null) metadata.Fields.Add(new DatabaseColumnField(property, columnAttribute.Name));
+                    else metadata.Fields.Add(new PrimaryKeyField(property, columnAttribute.Name));
+                }
+                else if (foreignKeyAttribute != null)
+                {
+                    metadata.Fields.Add(new DatabaseNavigationField(property, foreignKeyAttribute.Name));
+                }
+            }
+
+            return metadata;
+        }
+
+        public static bool TryGetMetadata(string modelName, out Type modelType, out DatabaseModelMetadata metadata)
         {
             var metadataKeyValuePair = ModelMetadatas.FirstOrDefault(x => x.Key.Name == modelName);
 
@@ -100,42 +95,42 @@ namespace NTIH.Database
             return modelType != null && metadata != null;
         }
 
-        public bool TryGetMetadata<T>(out DatabaseModelMetadata metadata) where T : DatabaseModel
+        public static bool TryGetMetadata<T>(out DatabaseModelMetadata metadata) where T : DatabaseModel
         {
             return TryGetMetadata(typeof(T), out metadata);
         }
 
-        public bool TryGetMetadata(Type modelType, out DatabaseModelMetadata metadata)
+        public static bool TryGetMetadata(Type modelType, out DatabaseModelMetadata metadata)
         {
             return ModelMetadatas.TryGetValue(modelType, out metadata);
         }
 
-        public InsertQuery<T> Insert<T>(T instance) where T : DatabaseModel
+        public IQuery Insert<T>(T instance) where T : DatabaseModel
         {
             return new InsertQuery<T>(instance, this);
         }
 
-        public SelectSingleStringKeyModelQuery<T> SelectSingle<T>(string id) where T : StringKeyModel
+        public ISelectSingle<T> SelectSingle<T>(string id) where T : StringKeyModel
         {
-            return new SelectSingleStringKeyModelQuery<T>(id, this);
+            return new SelectSingleStringKeyModel<T>(id, this);
         }
 
-        public SelectSingleIdentityKeyModelQuery<T> SelectSingle<T>(int id) where T : IdentityKeyModel
+        public ISelectSingle<T> SelectSingle<T>(int id) where T : IdentityKeyModel
         {
-            return new SelectSingleIdentityKeyModelQuery<T>(id, this);
+            return new SelectSingleIdentityKeyModel<T>(id, this);
         }
 
-        public SelectQuery<T> Select<T>() where T : DatabaseModel
+        public ISelectMany<T> Select<T>() where T : DatabaseModel
         {
-            return new SelectQuery<T>(this);
+            return new SelectMany<T>(this);
         }
 
-        public UpdateQuery<T> Update<T>(T instance) where T : DatabaseModel
+        public IQuery Update<T>(T instance) where T : DatabaseModel
         {
             return new UpdateQuery<T>(instance, this);
         }
 
-        public DeleteQuery<T> Delete<T>(T instance) where T : DatabaseModel
+        public IQuery Delete<T>(T instance) where T : DatabaseModel
         {
             return new DeleteQuery<T>(instance, this);
         }
@@ -209,7 +204,12 @@ namespace NTIH.Database
         Task<object> ExecuteAsync();
     }
 
-    public abstract class Query<T> where T : DatabaseModel
+    public interface IResultQuery<T> : IResultQuery
+    {
+        new Task<T> ExecuteAsync();
+    }
+
+    internal abstract class Query<T> where T : DatabaseModel
     {
         public Query(DatabaseConnection databaseConnection)
         {
@@ -340,7 +340,27 @@ namespace NTIH.Database
         }
     }
 
-    public abstract class SelectQueryBase<T>(DatabaseConnection databaseConnection) : Query<T>(databaseConnection) where T : DatabaseModel
+    public interface IJoinable
+    {
+        void LeftJoin(string propertyName);
+    }
+
+    public interface IJoinable<T> : IJoinable
+    {
+
+    }
+
+    public interface ISelectSingle : IJoinable, IResultQuery
+    {
+
+    }
+
+    public interface ISelectSingle<T> : ISelectSingle, IJoinable<T>, IResultQuery<T>
+    {
+
+    }
+
+    internal abstract class SelectQuery<T>(DatabaseConnection databaseConnection) : Query<T>(databaseConnection), IJoinable<T> where T : DatabaseModel
     {
         private class Join(DatabaseConnection databaseConnection, DatabaseNavigationField navigationField)
         {
@@ -545,7 +565,7 @@ namespace NTIH.Database
         }
     }
 
-    public abstract class SelectSingleQuery<T>(DatabaseConnection databaseConnection) : SelectQueryBase<T>(databaseConnection), IResultQuery where T : DatabaseModel
+    internal abstract class SelectSingle<T>(DatabaseConnection databaseConnection) : SelectQuery<T>(databaseConnection), ISelectSingle<T> where T : DatabaseModel
     {
         public abstract Task<T> ExecuteAsync();
 
@@ -576,70 +596,69 @@ namespace NTIH.Database
         }
     }
 
-    public sealed class SelectSingleIdentityKeyModelQuery<T>(int id, DatabaseConnection databaseConnection) : SelectSingleQuery<T>(databaseConnection) where T : DatabaseModel
+    internal sealed class SelectSingleIdentityKeyModel<T>(int id, DatabaseConnection databaseConnection) : SelectSingle<T>(databaseConnection) where T : DatabaseModel
     {
-        public int Id { get => id; }
+        public int Id => id;
 
-        public override async Task<T> ExecuteAsync()
-        {
-            return await SelectSingleAsync(Id);
-        }
+        public override async Task<T> ExecuteAsync() => await SelectSingleAsync(Id);
     }
 
-    public sealed class SelectSingleStringKeyModelQuery<T>(string id, DatabaseConnection databaseConnection) : SelectSingleQuery<T>(databaseConnection) where T : DatabaseModel
+    internal sealed class SelectSingleStringKeyModel<T>(string id, DatabaseConnection databaseConnection) : SelectSingle<T>(databaseConnection) where T : DatabaseModel
     {
-        public string Id { get => id; }
+        public string Id => id;
 
-        public override async Task<T> ExecuteAsync()
-        {
-            return await SelectSingleAsync(Id);
-        }
+        public override async Task<T> ExecuteAsync() => await SelectSingleAsync(Id);
     }
 
-    public abstract class SelectManyQuery<T>(DatabaseConnection databaseConnection) : SelectQueryBase<T>(databaseConnection), IResultQuery where T : DatabaseModel
+    public interface IResultsQuery
     {
-        public abstract Task<List<T>> ExecuteAsync();
+        Task<List<object>> ExecuteAsync();
 
-        async Task<object> IResultQuery.ExecuteAsync()
-        {
-            return await ExecuteAsync();
-        }
-
-        public abstract IAsyncEnumerable<T> Query();
+        IAsyncEnumerable<object> QueryAsync();
     }
 
-    public interface ISelectQuery : IResultQuery
+    public interface IResultsQuery<T> : IResultsQuery
+    {
+        new Task<List<T>> ExecuteAsync();
+
+        new IAsyncEnumerable<T> QueryAsync();
+    }
+
+    public interface ISelectMany : IJoinable, IResultsQuery
     {
         ILogicalOperator Where();
     }
 
-    public sealed class SelectQuery<T>(DatabaseConnection databaseConnection) : SelectManyQuery<T>(databaseConnection), ISelectQuery where T : DatabaseModel
+    public interface ISelectMany<T> : ISelectMany, IJoinable<T>, IResultsQuery<T> where T : DatabaseModel
+    {
+        new ILogicalOperator<T> Where();
+    }
+
+    internal sealed class SelectMany<T>(DatabaseConnection databaseConnection) : SelectQuery<T>(databaseConnection), ISelectMany<T> where T : DatabaseModel
     {
         private ILogicalOperator<T> _where;
 
-        public ILogicalOperator<T> Where()
-        {
-            return _where = WhereBuilder.Where<T>();
-        }
+        public ILogicalOperator<T> Where() => _where = WhereBuilder.Where<T>();
 
-        ILogicalOperator ISelectQuery.Where()
-        {
-            return Where();
-        }
+        ILogicalOperator ISelectMany.Where() => Where();
 
-        public override async Task<List<T>> ExecuteAsync()
+        public async Task<List<T>> ExecuteAsync()
         {
             CreateQueryData(out var modelType, out var command);
 
             return await ReadMany(modelType, command);
         }
 
-        public override async IAsyncEnumerable<T> Query()
+        async Task<List<object>> IResultsQuery.ExecuteAsync() => [.. await ExecuteAsync()];
+
+        public async IAsyncEnumerable<T> QueryAsync()
         {
             CreateQueryData(out var modelType, out var command);
 
             await foreach (var instance in QueryMany(modelType, command)) yield return instance;
         }
+
+        IAsyncEnumerable<object> IResultsQuery.QueryAsync() => QueryAsync();
 
         private void CreateQueryData(out Type modelType, out SqliteCommand command)
         {
@@ -660,7 +679,7 @@ namespace NTIH.Database
         }
     }
 
-    public abstract class ModifingQuery<T>(DatabaseConnection databaseConnection) : Query<T>(databaseConnection), IQuery where T : DatabaseModel
+    internal abstract class ModifingQuery<T>(DatabaseConnection databaseConnection) : Query<T>(databaseConnection), IQuery where T : DatabaseModel
     {
         protected void AppendInstanceWhere(StringBuilder commandStringBuilder, T instance, SqliteCommand command)
         {
@@ -729,7 +748,7 @@ namespace NTIH.Database
         public abstract Task ExecuteAsync();
     }
 
-    public sealed class InsertQuery<T>(T instance, DatabaseConnection databaseConnection) : ModifingQuery<T>(databaseConnection) where T : DatabaseModel
+    internal sealed class InsertQuery<T>(T instance, DatabaseConnection databaseConnection) : ModifingQuery<T>(databaseConnection) where T : DatabaseModel
     {
         public async override Task ExecuteAsync()
         {
@@ -784,7 +803,7 @@ namespace NTIH.Database
         }
     }
 
-    public sealed class UpdateQuery<T>(T instance, DatabaseConnection databaseConnection) : ModifingQuery<T>(databaseConnection) where T : DatabaseModel
+    internal sealed class UpdateQuery<T>(T instance, DatabaseConnection databaseConnection) : ModifingQuery<T>(databaseConnection) where T : DatabaseModel
     {
         public async override Task ExecuteAsync()
         {
@@ -828,7 +847,7 @@ namespace NTIH.Database
         }
     }
 
-    public sealed class DeleteQuery<T>(T instance, DatabaseConnection databaseConnection) : ModifingQuery<T>(databaseConnection) where T : DatabaseModel
+    internal sealed class DeleteQuery<T>(T instance, DatabaseConnection databaseConnection) : ModifingQuery<T>(databaseConnection) where T : DatabaseModel
     {
         public async override Task ExecuteAsync()
         {

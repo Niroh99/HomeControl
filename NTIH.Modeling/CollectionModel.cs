@@ -1,10 +1,11 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
 
 namespace NTIH.Modeling
 {
     public class CollectionModel<T> : Model, ICollection<T>
     {
-        private readonly List<T> _items = [];
+        private readonly List<T> _items = new List<T>();
 
         public int Count => _items.Count;
 

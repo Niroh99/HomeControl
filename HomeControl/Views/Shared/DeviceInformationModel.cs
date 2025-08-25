@@ -1,4 +1,4 @@
-﻿using HomeControl.Integrations;
+﻿using HomeControl.Models.Integrations;
 
 namespace HomeControl.Views.Shared
 {

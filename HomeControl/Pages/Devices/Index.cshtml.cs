@@ -1,10 +1,8 @@
 using HomeControl.Integrations;
-using HomeControl.Database;
 using Microsoft.AspNetCore.Mvc;
-using HomeControl.DatabaseModels;
 using HomeControl.Attributes;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using HomeControl.Modeling;
+using HomeControl.Models.ServicesInterfaces;
+using HomeControl.Models.DatabaseModels;
 
 namespace HomeControl.Pages.Devices
 {

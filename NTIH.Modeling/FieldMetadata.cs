@@ -1,22 +1,29 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Reflection;
 
 namespace NTIH.Modeling
 {
-    public class FieldMetadata(PropertyInfo propertyInfo)
+    public class FieldMetadata
     {
-        public PropertyInfo PropertyInfo { get; } = propertyInfo;
+        public FieldMetadata(PropertyInfo propertyInfo)
+        {
+            PropertyInfo = propertyInfo;
+            Name = propertyInfo.Name;
+        }
 
-        public string Name { get; } = propertyInfo.Name;
+        public PropertyInfo PropertyInfo { get; }
+
+        public string Name { get; }
 
         public object Get(Model model)
         {
-            var type = model.GetType();
+            var type = model?.GetType();
 
-            var property = type.GetProperty(Name);
+            var property = type?.GetProperty(Name);
 
-            var getMethod = property.GetGetMethod();
+            var getMethod = property?.GetGetMethod();
 
-            return getMethod.Invoke(model, []);
+            return getMethod?.Invoke(model, Array.Empty<object>());
         }
     }
 }

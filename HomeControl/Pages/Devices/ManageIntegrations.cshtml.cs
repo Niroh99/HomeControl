@@ -1,11 +1,9 @@
 using HomeControl.Database;
 using Microsoft.AspNetCore.Mvc;
-using HomeControl.DatabaseModels;
 using HomeControl.Attributes;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using HomeControl.Modeling;
-using HomeControl.Integrations;
-using System.Threading.Tasks;
+using HomeControl.Models.ServicesInterfaces;
+using HomeControl.Models.DatabaseModels;
+using NTIH.Database;
 
 namespace HomeControl.Pages.Devices
 {
@@ -31,7 +29,7 @@ namespace HomeControl.Pages.Devices
         {
             var databaseDevices = await db.Select<Device>().ExecuteAsync();
 
-            var tpLinkDevices = HomeControl.Integrations.TPLink.Discovery.Discover();
+            var tpLinkDevices = Integrations.TPLink.Discovery.Discover();
 
             var rediscoveredDeviceIds = new List<int>();
 

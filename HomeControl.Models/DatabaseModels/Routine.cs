@@ -1,0 +1,18 @@
+﻿using NTIH.Database.Modeling;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace HomeControl.Models.DatabaseModels
+{
+    [Table(nameof(Routine))]
+    public class Routine : IdentityKeyModel
+    {
+        [Column]
+        public string Name { get => Get<string>(); set => Set(value); }
+
+        [Column]
+        public bool IsActive { get => Get<bool>(); set => Set(value); }
+
+        [Column]
+        public DateTime? LastExecution { get => Get<DateTime?>(); set => Set(value); }
+    }
+}

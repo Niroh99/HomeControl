@@ -1,6 +1,6 @@
 using HomeControl.Attributes;
-using HomeControl.Database;
-using HomeControl.DatabaseModels;
+using HomeControl.Models.DatabaseModels;
+using HomeControl.Models.ServicesInterfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HomeControl.Pages.Devices

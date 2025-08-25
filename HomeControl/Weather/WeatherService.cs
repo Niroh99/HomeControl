@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc.Routing;
-
-namespace HomeControl.Weather
+﻿namespace HomeControl.Weather
 {
     public interface IWeatherService
     {

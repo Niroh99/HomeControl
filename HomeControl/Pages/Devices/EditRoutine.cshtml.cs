@@ -1,12 +1,11 @@
 using HomeControl.Attributes;
 using HomeControl.Database;
-using HomeControl.DatabaseModels;
-using HomeControl.Helpers;
 using HomeControl.Integrations;
-using HomeControl.Modeling;
+using HomeControl.Models.DatabaseModels;
+using HomeControl.Models.Extensions;
+using HomeControl.Models.ServicesInterfaces;
 using HomeControl.Routines;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using NTIH.Database;
 
@@ -42,7 +41,7 @@ namespace HomeControl.Pages.Devices
 
                 foreach (var triggerType in IRoutinesService.RoutineTriggerTypeDataMap.Keys)
                 {
-                    TriggerTypes.Add(new SelectListItem(EnumHelper.GetValueDescription(triggerType), triggerType.ToString()));
+                    TriggerTypes.Add(new SelectListItem(triggerType.GetValueDescription(), triggerType.ToString()));
                 }
 
                 var actionsSelect = db.Select<RoutineAction>();
@@ -52,7 +51,7 @@ namespace HomeControl.Pages.Devices
 
                 foreach (var actionType in IRoutinesService.RoutineActionTypeDataMap.Keys)
                 {
-                    ActionTypes.Add(new SelectListItem(EnumHelper.GetValueDescription(actionType), actionType.ToString()));
+                    ActionTypes.Add(new SelectListItem(actionType.GetValueDescription(), actionType.ToString()));
                 }
 
                 var devices = await db.Select<Device>().ExecuteAsync();

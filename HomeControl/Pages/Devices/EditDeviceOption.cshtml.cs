@@ -1,12 +1,12 @@
 using HomeControl.Attributes;
 using HomeControl.Database;
-using HomeControl.DatabaseModels;
-using HomeControl.Helpers;
-using HomeControl.Integrations;
-using HomeControl.Modeling;
+using HomeControl.Models.DatabaseModels;
+using HomeControl.Models.Extensions;
+using HomeControl.Models.Integrations;
+using HomeControl.Models.ServicesInterfaces;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using NTIH.Database;
 
 namespace HomeControl.Pages.Devices
 {
@@ -40,7 +40,7 @@ namespace HomeControl.Pages.Devices
                 DeviceOptionActions.AddRange((await deviceOptionActionsSelect.ExecuteAsync()).OrderBy(action => action.Index));
 
                 DeviceOptionActionTypes.AddRange(IDeviceService.DeviceOptionActionTypeDataMap
-                    .Select(type => new SelectListItem(EnumHelper.GetValueDescription(type.Key), type.Key.ToString())));
+                    .Select(type => new SelectListItem(type.Key.GetValueDescription(), type.Key.ToString())));
             }
         }
 
@@ -89,7 +89,7 @@ namespace HomeControl.Pages.Devices
 
         public async Task<IActionResult> OnPostCreateDeviceOptionAction(ActionType deviceOptionActionType, string newDeviceOptionActionData)
         {
-            var actionDataObject = (Model)System.Text.Json.JsonSerializer.Deserialize(newDeviceOptionActionData, IDeviceService.DeviceOptionActionTypeDataMap[deviceOptionActionType], new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web));
+            var actionDataObject = (ActionData)System.Text.Json.JsonSerializer.Deserialize(newDeviceOptionActionData, IDeviceService.DeviceOptionActionTypeDataMap[deviceOptionActionType], new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web));
 
             var deviceOptionAction = new DeviceOptionAction
             {

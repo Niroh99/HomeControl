@@ -8,7 +8,7 @@ namespace HomeControl.Database
 {
     public static class Extensions
     {
-        public static void LeftJoin<T, TProperty>(this SelectQueryBase<T> query, Expression<Func<T, TProperty>> selectorExpression) where T : DatabaseModel
+        public static void LeftJoin<T, TProperty>(this IJoinable<T> query, Expression<Func<T, TProperty>> selectorExpression) where T : DatabaseModel
         {
             ArgumentNullException.ThrowIfNull(selectorExpression, nameof(selectorExpression));
 

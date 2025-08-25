@@ -8,8 +8,13 @@ using System.Threading.Tasks;
 
 namespace HomeControl.CLI.CommandHandlers
 {
-    public abstract class CommandHandler
+    public abstract class CommandHandler(Queue<string> args)
     {
+        private readonly Queue<string> _args = args;
+        protected Queue<string> Args => _args;
+
+        protected abstract string[] Options { get; }
+
         public static Dictionary<string, Type> GetCommandHandlerTypes()
         {
             var commandHandlerTypes = new Dictionary<string, Type>();
@@ -40,6 +45,14 @@ namespace HomeControl.CLI.CommandHandlers
             return commandHandlerTypes;
         }
 
-        public abstract Task<int> HandleAsync(Queue<string> args);
+        public abstract Task<int> HandleAsync();
+
+        protected IEnumerable<string> GetCurrentCommandValues()
+        {
+            while (Args.Count > 0 && !Options.Contains(Args.Peek()))
+            {
+                yield return Args.Dequeue();
+            }
+        }
     }
 }

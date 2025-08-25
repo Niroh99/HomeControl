@@ -1,10 +1,9 @@
-﻿using HomeControl.Actions;
-using HomeControl.Database;
-using HomeControl.DatabaseModels;
+﻿using HomeControl.Database;
+using HomeControl.Models.DatabaseModels;
+using HomeControl.Models.ServicesInterfaces;
 using HomeControl.Weather;
 using NTIH.Database;
 using System.Collections.ObjectModel;
-using System.Timers;
 
 namespace HomeControl.Routines
 {

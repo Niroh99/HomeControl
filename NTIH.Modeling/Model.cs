@@ -1,4 +1,7 @@
-﻿namespace NTIH.Modeling
+﻿using System.Collections.Generic;
+using System.Linq;
+
+namespace NTIH.Modeling
 {
     public abstract class Model
     {
@@ -9,8 +12,8 @@
 
         public string TypeName { get; }
 
-        private readonly Dictionary<string, object> _properties = [];
-        private readonly Dictionary<string, object> _modifiedProperties = [];
+        private readonly Dictionary<string, object> _properties = new Dictionary<string, object>();
+        private readonly Dictionary<string, object> _modifiedProperties = new Dictionary<string, object>();
 
         public T Get<T>([System.Runtime.CompilerServices.CallerMemberName] string propertyName = null)
         {

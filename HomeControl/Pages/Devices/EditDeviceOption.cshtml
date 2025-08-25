@@ -1,4 +1,6 @@
 ﻿@page "{DeviceOptionId}"
+@using HomeControl.Models.DatabaseModels
+@using HomeControl.Models.ServicesInterfaces
 @using HomeControl.Views.Shared
 @using Microsoft.AspNetCore.Mvc.Razor
 @model HomeControl.Pages.Devices.EditDeviceOptionModel
@@ -6,11 +8,11 @@
 	Layout = "MenuPage_Layout";
 	ViewData["Title"] = "Edit Device Option";
 
-	var newDeviceOptionActionDataInformation = new Dictionary<string, DatabaseModels.DeviceActionData>();
+	var newDeviceOptionActionDataInformation = new Dictionary<string, DeviceActionData>();
 
-	foreach (var actionTypeMapItem in HomeControl.Integrations.IDeviceService.DeviceOptionActionTypeDataMap)
+	foreach (var actionTypeMapItem in IDeviceService.DeviceOptionActionTypeDataMap)
 	{
-		var actionData = (DatabaseModels.DeviceActionData)Activator.CreateInstance(actionTypeMapItem.Value);
+		var actionData = (DeviceActionData)Activator.CreateInstance(actionTypeMapItem.Value);
 
 		actionData.DeviceId = Model.ViewModel.Device.Id;
 

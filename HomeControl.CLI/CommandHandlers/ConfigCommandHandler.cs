@@ -8,19 +8,19 @@ using System.Threading.Tasks;
 namespace HomeControl.CLI.CommandHandlers
 {
     [CommandHandler]
-    public class ConfigCommandHandler : CommandHandler
+    public class ConfigCommandHandler(Queue<string> args) : CommandHandler(args)
     {
-        private const string HostUrlMember = "hosturl";
+        protected override string[] Options => [];
 
-        public override async Task<int> HandleAsync(Queue<string> args)
+        public override async Task<int> HandleAsync()
         {
-            if (args.Count == 0)
+            if (Args.Count == 0)
             {
                 Console.WriteLine("No member specified. Available members: hosturl");
                 return 1;
             }
 
-            if (args.Count % 2 != 0)
+            if (Args.Count % 2 != 0)
             {
                 Console.WriteLine("Invalid number of arguments. Each config member should be followed by its value.");
                 return 1;
@@ -28,14 +28,14 @@ namespace HomeControl.CLI.CommandHandlers
 
             var config = Config.Load();
 
-            while (args.Count > 0)
+            while (Args.Count > 0)
             {
-                var member = args.Dequeue().ToLowerInvariant();
-                var value = args.Dequeue();
+                var member = Args.Dequeue().ToLowerInvariant();
+                var value = Args.Dequeue();
 
                 switch (member)
                 {
-                    case HostUrlMember:
+                    case nameof(Config.HostUrl):
                         config.HostUrl = value;
                         Console.WriteLine($"Host URL set to: {value}");
                         break;

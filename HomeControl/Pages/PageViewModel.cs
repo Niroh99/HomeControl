@@ -1,5 +1,4 @@
-﻿using HomeControl.Modeling;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using NTIH.Modeling;
 
 namespace HomeControl.Pages
