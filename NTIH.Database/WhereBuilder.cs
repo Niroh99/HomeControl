@@ -3,6 +3,7 @@ using NTIH.Database.Metadata;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
+using NTIH.Database.Modeling;
 
 namespace NTIH.Database
 {
@@ -41,15 +42,15 @@ namespace NTIH.Database
             }
         }
 
-        public abstract class WhereElement : IWhereElement
+        private abstract class WhereElement<T> : IWhereElement where T : DatabaseModel
         {
-            private WhereElement _parent;
+            private WhereElement<T> _parent;
 
-            private WhereElement _nextElement;
+            private WhereElement<T> _nextElement;
 
-            public WhereElement Parent { get => _parent; }
+            public WhereElement<T> Parent { get => _parent; }
 
-            public WhereElement NextElement { get => _nextElement; }
+            public WhereElement<T> NextElement { get => _nextElement; }
 
             public string BuildWhere(out Dictionary<string, object> parameterValues)
             {
@@ -66,7 +67,7 @@ namespace NTIH.Database
                 return whereStringBuilder.ToString();
             }
 
-            protected TChild SetNextElement<TChild>(TChild child) where TChild : WhereElement
+            protected TChild SetNextElement<TChild>(TChild child) where TChild : WhereElement<T>
             {
                 child._parent = this;
 
@@ -78,43 +79,56 @@ namespace NTIH.Database
             public abstract void Append(StringBuilder builder, ParameterCollection parameters);
         }
 
-        private abstract class WhereElement<T> : WhereElement
+        private abstract class LogicalOperator<T> : WhereElement<T>, ILogicalOperator<T> where T : DatabaseModel
         {
+            IStatement ILogicalOperator.Compare(DatabaseColumnField databaseColumnField, ComparisonOperator comparisonOperator, object value) => Compare(databaseColumnField, comparisonOperator, value);
 
-        }
+            IStatement ILogicalOperator.Compare(string columnName, ComparisonOperator comparisonOperator, object value) => Compare(columnName, comparisonOperator, value);
 
-        private abstract class LogicalOperator : WhereElement, ILogicalOperator
-        {
-            public IStatement Compare(DatabaseColumnField databaseColumnField, ComparisonOperator comparisonOperator, object value)
+            IStatement ILogicalOperator.IsNull(DatabaseColumnField databaseColumnField) => IsNull(databaseColumnField);
+
+            IStatement ILogicalOperator.IsNull(string columnName) => IsNull(columnName);
+
+            IStatement ILogicalOperator.IsNotNull(DatabaseColumnField databaseColumnField) => IsNotNull(databaseColumnField);
+
+            IStatement ILogicalOperator.IsNotNull(string columnName) => IsNotNull(columnName);
+
+            IStatement ILogicalOperator.Brackets(Action<ILogicalOperator> buildChild) => Brackets(buildChild);
+
+            public IStatement<T> Compare<TProperty>(DatabaseColumnField databaseColumnField, ComparisonOperator comparisonOperator, TProperty value)
             {
-                return SetNextElement(new ValueComparison(databaseColumnField, comparisonOperator, value));
+                ArgumentNullException.ThrowIfNull(databaseColumnField, nameof(databaseColumnField));
+
+                return Compare(databaseColumnField.Name, comparisonOperator, value);
             }
 
-            public IStatement Brackets(Action<ILogicalOperator> buildChild)
+            public IStatement<T> Compare<TProperty>(string columnName, ComparisonOperator comparisonOperator, TProperty value)
             {
-                var brackets = new Brackets();
-
-                buildChild(brackets.Child);
-
-                return brackets;
-            }
-        }
-
-        private abstract class LogicalOperator<T> : WhereElement<T>, ILogicalOperator<T> where T : Model
-        {
-            IStatement ILogicalOperator.Compare(DatabaseColumnField databaseColumnField, ComparisonOperator comparisonOperator, object value)
-            {
-                return SetNextElement(new ValueComparison(databaseColumnField, comparisonOperator, value));
+                return SetNextElement(new ValueComparison<T>(columnName, comparisonOperator, value));
             }
 
-            IStatement ILogicalOperator.Brackets(Action<ILogicalOperator> buildChild)
+            public IStatement<T> IsNull(DatabaseColumnField databaseColumnField)
             {
-                return Brackets(buildChild);
+                ArgumentNullException.ThrowIfNull(databaseColumnField, nameof(databaseColumnField));
+
+                return IsNull(databaseColumnField.ColumnName);
             }
 
-            public IStatement<T> Compare<TProperty>(string propertyName, ComparisonOperator comparisonOperator, TProperty value)
+            public IStatement<T> IsNull(string columnName)
             {
-                return SetNextElement(new ValueComparison<T, TProperty>(propertyName, comparisonOperator, value));
+                return SetNextElement(new NullComparison<T>(columnName, false));
+            }
+
+            public IStatement<T> IsNotNull(DatabaseColumnField databaseColumnField)
+            {
+                ArgumentNullException.ThrowIfNull(databaseColumnField, nameof(databaseColumnField));
+
+                return IsNotNull(databaseColumnField.ColumnName);
+            }
+
+            public IStatement<T> IsNotNull(string columnName)
+            {
+                return SetNextElement(new NullComparison<T>(columnName, true));
             }
 
             public static IStatement<T> Brackets(Action<ILogicalOperator<T>> buildChild)
@@ -127,7 +141,7 @@ namespace NTIH.Database
             }
         }
 
-        private sealed class RootElement : LogicalOperator
+        private sealed class RootElement<T> : LogicalOperator<T> where T : DatabaseModel
         {
             public override void Append(StringBuilder builder, ParameterCollection parameters)
             {
@@ -135,54 +149,23 @@ namespace NTIH.Database
             }
         }
 
-        private sealed class RootElement<T> : LogicalOperator<T> where T : Model
+        private sealed class And<T> : LogicalOperator<T> where T : DatabaseModel
         {
             public override void Append(StringBuilder builder, ParameterCollection parameters)
             {
-
+                builder.Append(" AND ");
             }
         }
 
-        private sealed class And : LogicalOperator
+        private sealed class Or<T> : LogicalOperator<T> where T : DatabaseModel
         {
             public override void Append(StringBuilder builder, ParameterCollection parameters)
             {
-                AppendAnd(builder);
+                builder.Append(" OR ");
             }
         }
 
-        private sealed class And<T> : LogicalOperator<T> where T : Model
-        {
-            public override void Append(StringBuilder builder, ParameterCollection parameters)
-            {
-                AppendAnd(builder);
-            }
-        }
-
-        private sealed class Or : LogicalOperator
-        {
-            public override void Append(StringBuilder builder, ParameterCollection parameters)
-            {
-                AppendOr(builder);
-            }
-        }
-
-        private sealed class Or<T> : LogicalOperator<T> where T : Model
-        {
-            public override void Append(StringBuilder builder, ParameterCollection parameters)
-            {
-                AppendOr(builder);
-            }
-        }
-
-        private abstract class Statement : WhereElement, IStatement
-        {
-            public ILogicalOperator And() => SetNextElement(new And());
-
-            public ILogicalOperator Or() => SetNextElement(new Or());
-        }
-
-        private abstract class Statement<T> : WhereElement<T>, IStatement<T> where T : Model
+        private abstract class Statement<T> : WhereElement<T>, IStatement<T> where T : DatabaseModel
         {
             ILogicalOperator IStatement.And() => And();
 
@@ -193,23 +176,7 @@ namespace NTIH.Database
             public ILogicalOperator<T> Or() => SetNextElement(new Or<T>());
         }
 
-        private sealed class Brackets : Statement
-        {
-            public Brackets()
-            {
-                _child = new RootElement();
-            }
-
-            private readonly RootElement _child;
-            public ILogicalOperator Child { get => _child; }
-
-            public override void Append(StringBuilder builder, ParameterCollection parameters)
-            {
-                AppendBrackets(_child, builder, parameters);
-            }
-        }
-
-        private sealed class Brackets<T> : Statement<T>, IStatement<T> where T : Model
+        private sealed class Brackets<T> : Statement<T>, IStatement<T> where T : DatabaseModel
         {
             public Brackets()
             {
@@ -221,17 +188,19 @@ namespace NTIH.Database
 
             public override void Append(StringBuilder builder, ParameterCollection parameters)
             {
-                AppendBrackets(_child, builder, parameters);
+                builder.Append('(');
+                BuildWhereCore(_child, builder, parameters);
+                builder.Append(')');
             }
         }
 
-        private class ValueComparison : Statement
+        private class ValueComparison<T> : Statement<T> where T : DatabaseModel
         {
-            public ValueComparison(DatabaseColumnField databaseColumnField, ComparisonOperator comparisonOperator, object value)
+            public ValueComparison(string columnName, ComparisonOperator comparisonOperator, object value)
             {
-                ArgumentNullException.ThrowIfNull(databaseColumnField, nameof(databaseColumnField));
+                ArgumentException.ThrowIfNullOrWhiteSpace(columnName, nameof(columnName));
 
-                _columnName = databaseColumnField.ColumnName;
+                _columnName = columnName;
                 _comparisonOperator = comparisonOperator;
                 _value = value;
             }
@@ -242,76 +211,56 @@ namespace NTIH.Database
 
             public override void Append(StringBuilder builder, ParameterCollection parameters)
             {
-                AppendValueComparison(builder, parameters, _columnName, _comparisonOperator, _value);
+                builder.Append($"[{_columnName}] ");
+
+                switch (_comparisonOperator)
+                {
+                    case ComparisonOperator.Equals: builder.Append('='); break;
+                    case ComparisonOperator.NotEquals: builder.Append("<>"); break;
+                    case ComparisonOperator.GreaterThan: builder.Append('>'); break;
+                    case ComparisonOperator.GreaterThanOrEqual: builder.Append(">="); break;
+                    case ComparisonOperator.SmallerThan: builder.Append('<'); break;
+                    case ComparisonOperator.SmallerThanOrEqual: builder.Append("<="); break;
+                }
+
+                builder.Append($" {parameters.AddParameter(_value)}");
             }
         }
 
-        private class ValueComparison<T, TProperty> : Statement<T> where T : Model
+        private class NullComparison<T> : Statement<T> where T : DatabaseModel
         {
-            public ValueComparison(string propertyName, ComparisonOperator comparisonOperator, TProperty value)
+            public NullComparison(string columnName, bool isInverted)
             {
-                ArgumentNullException.ThrowIfNullOrWhiteSpace(propertyName, nameof(propertyName));
+                ArgumentException.ThrowIfNullOrWhiteSpace(columnName, nameof(columnName));
 
-                _propertyName = propertyName;
-                _comparisonOperator = comparisonOperator;
-                _value = value;
+                _columnName = columnName;
+                _isInverted = isInverted;
             }
 
-            private readonly string _propertyName;
-            private readonly ComparisonOperator _comparisonOperator;
-            private readonly object _value;
+            private readonly string _columnName;
+            private readonly bool _isInverted;
 
             public override void Append(StringBuilder builder, ParameterCollection parameters)
             {
-                AppendValueComparison(builder, parameters, _propertyName, _comparisonOperator, _value);
+                builder.Append($"[{_columnName}] IS ");
+
+                if (_isInverted) builder.Append("NOT ");
+
+                builder.Append("NULL");
             }
         }
 
         public static ILogicalOperator Where()
         {
-            return new RootElement();
+            return new RootElement<DatabaseModel>();
         }
 
-        public static ILogicalOperator<T> Where<T>() where T : Model
+        public static ILogicalOperator<T> Where<T>() where T : DatabaseModel
         {
             return new RootElement<T>();
         }
 
-        private static void AppendAnd(StringBuilder builder)
-        {
-            builder.Append(" AND ");
-        }
-
-        private static void AppendOr(StringBuilder builder)
-        {
-            builder.Append(" OR ");
-        }
-
-        private static void AppendBrackets(WhereElement child, StringBuilder builder, ParameterCollection parameters)
-        {
-            builder.Append('(');
-            BuildWhereCore(child, builder, parameters);
-            builder.Append(')');
-        }
-
-        private static void AppendValueComparison(StringBuilder builder, ParameterCollection parameters, string columnName, ComparisonOperator comparisonOperator, object value)
-        {
-            builder.Append($"[{columnName}] ");
-
-            switch (comparisonOperator)
-            {
-                case ComparisonOperator.Equals: builder.Append('='); break;
-                case ComparisonOperator.NotEquals: builder.Append("<>"); break;
-                case ComparisonOperator.GreaterThan: builder.Append('>'); break;
-                case ComparisonOperator.GreaterThanOrEqual: builder.Append(">="); break;
-                case ComparisonOperator.SmallerThan: builder.Append('<'); break;
-                case ComparisonOperator.SmallerThanOrEqual: builder.Append("<="); break;
-            }
-
-            builder.Append($" {parameters.AddParameter(value)}");
-        }
-
-        private static void BuildWhereCore(WhereElement element, StringBuilder whereStringBuilder, ParameterCollection parameters)
+        private static void BuildWhereCore<T>(WhereElement<T> element, StringBuilder whereStringBuilder, ParameterCollection parameters) where T : DatabaseModel
         {
             if (element == null) return;
 
@@ -324,18 +273,40 @@ namespace NTIH.Database
     public interface IWhereElement
     {
         string BuildWhere(out Dictionary<string, object> parameterValues);
+
+        
     }
 
     public interface ILogicalOperator : IWhereElement
     {
         IStatement Compare(DatabaseColumnField databaseColumnField, ComparisonOperator comparisonOperator, object value);
 
+        IStatement Compare(string columnName, ComparisonOperator comparisonOperator, object value);
+
         IStatement Brackets(Action<ILogicalOperator> buildChild);
+
+        IStatement IsNull(DatabaseColumnField databaseColumnField);
+
+        IStatement IsNull(string columnName);
+
+        IStatement IsNotNull(DatabaseColumnField databaseColumnField);
+
+        IStatement IsNotNull(string columnName);
     }
 
-    public interface ILogicalOperator<T> : ILogicalOperator where T : Model
+    public interface ILogicalOperator<T> : ILogicalOperator where T : DatabaseModel
     {
-        IStatement<T> Compare<TProperty>(string propertyName, ComparisonOperator comparisonOperator, TProperty value);
+        IStatement<T> Compare<TProperty>(DatabaseColumnField databaseColumnField, ComparisonOperator comparisonOperator, TProperty value);
+
+        IStatement<T> Compare<TProperty>(string columnName, ComparisonOperator comparisonOperator, TProperty value);
+
+        new IStatement<T> IsNull(DatabaseColumnField databaseColumnField);
+
+        new IStatement<T> IsNull(string columnName);
+
+        new IStatement<T> IsNotNull(DatabaseColumnField databaseColumnField);
+
+        new IStatement<T> IsNotNull(string columnName);
     }
 
     public interface IStatement : IWhereElement
@@ -345,7 +316,7 @@ namespace NTIH.Database
         ILogicalOperator Or();
     }
 
-    public interface IStatement<T> : IStatement where T : Model
+    public interface IStatement<T> : IStatement where T : DatabaseModel
     {
         new ILogicalOperator<T> And();
 

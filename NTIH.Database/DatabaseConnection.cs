@@ -3,10 +3,8 @@ using NTIH.Database.Metadata;
 using Microsoft.Data.Sqlite;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
-using System.Threading.Tasks;
 using NTIH.Database.Exceptions;
 
 namespace NTIH.Database
@@ -201,7 +199,7 @@ namespace NTIH.Database
 
     public interface IResultQuery
     {
-        Task<object> ExecuteAsync();
+        Task<DatabaseModel> ExecuteAsync();
     }
 
     public interface IResultQuery<T> : IResultQuery
@@ -569,7 +567,7 @@ namespace NTIH.Database
     {
         public abstract Task<T> ExecuteAsync();
 
-        async Task<object> IResultQuery.ExecuteAsync() => await ExecuteAsync();
+        async Task<DatabaseModel> IResultQuery.ExecuteAsync() => await ExecuteAsync();
 
         protected async Task<T> SelectSingleAsync<TKey>(TKey id)
         {
@@ -612,9 +610,9 @@ namespace NTIH.Database
 
     public interface IResultsQuery
     {
-        Task<List<object>> ExecuteAsync();
+        Task<List<DatabaseModel>> ExecuteAsync();
 
-        IAsyncEnumerable<object> QueryAsync();
+        IAsyncEnumerable<DatabaseModel> QueryAsync();
     }
 
     public interface IResultsQuery<T> : IResultsQuery
@@ -649,7 +647,7 @@ namespace NTIH.Database
             return await ReadMany(modelType, command);
         }
 
-        async Task<List<object>> IResultsQuery.ExecuteAsync() => [.. await ExecuteAsync()];
+        async Task<List<DatabaseModel>> IResultsQuery.ExecuteAsync() => [.. await ExecuteAsync()];
 
         public async IAsyncEnumerable<T> QueryAsync()
         {
@@ -658,7 +656,7 @@ namespace NTIH.Database
             await foreach (var instance in QueryMany(modelType, command)) yield return instance;
         }
 
-        IAsyncEnumerable<object> IResultsQuery.QueryAsync() => QueryAsync();
+        IAsyncEnumerable<DatabaseModel> IResultsQuery.QueryAsync() => QueryAsync();
 
         private void CreateQueryData(out Type modelType, out SqliteCommand command)
         {
