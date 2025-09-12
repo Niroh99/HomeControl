@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using HomeControl.Attributes;
 using HomeControl.Models.ServicesInterfaces;
 using HomeControl.Models.DatabaseModels;
+using HomeControl.ViewModels;
 
 namespace HomeControl.Pages.Devices
 {

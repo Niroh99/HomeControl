@@ -1,9 +1,37 @@
-﻿namespace HomeControl.Pages
-{
-    public abstract class ViewModelPageModel<T> : ViewModelPageModelBase where T : PageViewModel
-    {
-        public T ViewModel { get => (T)ViewModelBase; set => ViewModelBase = value; }
+﻿using HomeControl.ViewModels;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 
-        protected abstract override PageViewModel CreateViewModel();
+namespace HomeControl.Pages
+{
+    public abstract class ViewModelPageModel<T>(IServiceProvider serviceProvider) : PageModel where T : PageViewModel
+    {
+        public T ViewModel { get; private set; }
+
+        public override async Task OnPageHandlerExecutionAsync(PageHandlerExecutingContext context, PageHandlerExecutionDelegate next)
+        {
+            await CreateAndInitializeViewModel();
+            await base.OnPageHandlerExecutionAsync(context, next);
+        }
+
+        public async Task<IActionResult> ViewModelResponse()
+        {
+            await CreateAndInitializeViewModel();
+            return new JsonResult(ViewModel);
+        }
+
+        protected virtual Task InitializingViewModelAsync()
+        {
+            return Task.CompletedTask;
+        }
+
+        private async Task CreateAndInitializeViewModel()
+        {
+            ViewModel = serviceProvider.GetService<T>();
+            ViewModel.CreatePageInfo(this);
+            await InitializingViewModelAsync();
+            await ViewModel.Initialize();
+        }
     }
 }

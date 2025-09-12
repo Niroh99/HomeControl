@@ -1,37 +1,15 @@
 using HomeControl.Attributes;
-using HomeControl.Models.DatabaseModels;
-using HomeControl.Models.Integrations;
 using HomeControl.Models.ServicesInterfaces;
+using HomeControl.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HomeControl.Pages.Devices
 {
     [MenuPage(typeof(IndexModel), "Edit Device", null)]
-    public class EditDeviceModel(IDatabaseConnectionService db, IDeviceService deviceService) : ViewModelPageModel<EditDeviceModel.EditDeviceViewModel>
+    public partial class EditDeviceModel(IServiceProvider serviceProvider, IDatabaseConnectionService db) : ViewModelPageModel<EditDeviceViewModel>(serviceProvider)
     {
-        public class EditDeviceViewModel(EditDeviceModel page, IDatabaseConnectionService db, IDeviceService deviceService) : PageViewModel(page)
-        {
-            public Device Device { get; set; }
-
-            public IIntegrationDevice IntegrationDevice { get; set; }
-
-            public async override Task Initialize()
-            {
-                Device = await db.SelectSingle<Device>(page.DeviceId).ExecuteAsync();
-
-                if (Device == null) return;
-
-                IntegrationDevice = await deviceService.CreateAndInitializeIntegrationDeviceAsync(Device);
-            }
-        }
-
         [FromRoute]
         public int DeviceId { get; set; }
-
-        protected override PageViewModel CreateViewModel()
-        {
-            return new EditDeviceViewModel(this, db, deviceService);
-        }
 
         public void OnGet()
         {
@@ -54,6 +32,12 @@ namespace HomeControl.Pages.Devices
             await db.Delete(ViewModel.Device).ExecuteAsync();
 
             return RedirectToPage("/Devices/Index");
+        }
+
+        protected override Task InitializingViewModelAsync()
+        {
+            ViewModel.DeviceId = DeviceId;
+            return base.InitializingViewModelAsync();
         }
     }
 }

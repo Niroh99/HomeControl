@@ -46,7 +46,11 @@ namespace HomeControl.Models.DatabaseModels
         [Description("Schedule Feature Execution")]
         ScheduleFeatureExecution,
         [Description("Clear Devices Cache")]
-        ClearIntegrationDevicesCache
+        ClearIntegrationDevicesCache,
+        [Description("Activate Routine")]
+        ActivateRoutine,
+        [Description("Deactivate Routine")]
+        DeactivateRoutine
     }
 
     public abstract class ActionData : Model, IDisplayable
@@ -105,6 +109,18 @@ namespace HomeControl.Models.DatabaseModels
         public override string ToString()
         {
             return "Clear Devices Cache";
+        }
+    }
+
+    public class RoutineActionData : ActionData
+    {
+        public int RoutineId { get => Get<int>(); set => Set(value); }
+
+        public override async Task CreateDisplay(IServiceProvider serviceProvider)
+        {
+            var db = serviceProvider.GetService<IDatabaseConnectionService>();
+            var routine = await db.SelectSingle<Routine>(RoutineId).ExecuteAsync();
+            Display = $"{routine.Name}";
         }
     }
 }

@@ -4,6 +4,7 @@ using HomeControl.Models.DatabaseModels;
 using HomeControl.Models.Extensions;
 using HomeControl.Models.Integrations;
 using HomeControl.Models.ServicesInterfaces;
+using HomeControl.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using NTIH.Database;

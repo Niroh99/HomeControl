@@ -19,6 +19,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HomeControl.CLI", "HomeCont
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HomeControl.Models", "HomeControl.Models\HomeControl.Models.csproj", "{24BC4095-7771-4F49-88EF-4381A0B61E82}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NTIH.ViewModeling", "NTIH.ViewModeling\NTIH.ViewModeling.csproj", "{C7260535-9BF4-418A-A616-D458F060A2D8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -59,6 +61,10 @@ Global
 		{24BC4095-7771-4F49-88EF-4381A0B61E82}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{24BC4095-7771-4F49-88EF-4381A0B61E82}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{24BC4095-7771-4F49-88EF-4381A0B61E82}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C7260535-9BF4-418A-A616-D458F060A2D8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C7260535-9BF4-418A-A616-D458F060A2D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C7260535-9BF4-418A-A616-D458F060A2D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C7260535-9BF4-418A-A616-D458F060A2D8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

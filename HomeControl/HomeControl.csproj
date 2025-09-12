@@ -19,6 +19,6 @@
   <ItemGroup>
     <ProjectReference Include="..\HomeControl.Models\HomeControl.Models.csproj" />
     <ProjectReference Include="..\NTIH.Database\NTIH.Database.csproj" />
-    <ProjectReference Include="..\NTIH.Modeling\NTIH.Modeling.csproj" />
+    <ProjectReference Include="..\NTIH.ViewModeling\NTIH.ViewModeling.csproj" />
   </ItemGroup>
 </Project>

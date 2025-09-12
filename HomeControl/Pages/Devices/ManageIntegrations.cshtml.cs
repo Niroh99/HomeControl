@@ -4,6 +4,7 @@ using HomeControl.Attributes;
 using HomeControl.Models.ServicesInterfaces;
 using HomeControl.Models.DatabaseModels;
 using NTIH.Database;
+using HomeControl.ViewModels;
 
 namespace HomeControl.Pages.Devices
 {

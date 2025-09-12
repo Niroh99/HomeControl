@@ -30,10 +30,9 @@ namespace NTIH.Database
             _sqlTransaction = SqlConnection.BeginTransaction();
         }
 
-        public static void RegisterModelType<T>()
+        public static void RegisterDatabaseModelType<T>() where T : DatabaseModel
         {
-            var modelType = typeof(T);
-            RegisterDatabaseModelType(modelType);
+            RegisterDatabaseModelType(typeof(T));
         }
 
         public static void RegisterDatabaseModelType(Type databaseModelType)
