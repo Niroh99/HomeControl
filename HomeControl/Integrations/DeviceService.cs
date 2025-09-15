@@ -96,7 +96,7 @@ namespace HomeControl.Integrations
             var device = await db.SelectSingle<Device>(deviceOption.DeviceId).ExecuteAsync();
 
             var actionsSelect = db.Select<DeviceOptionAction>();
-            actionsSelect.Where().Compare(i => i.DeviceOptionId, ComparisonOperator.Equals, deviceOption.Id);
+            actionsSelect.StartWhere().Compare(i => i.DeviceOptionId, ComparisonOperator.Equals, deviceOption.Id);
 
             var actions = await actionsSelect.ExecuteAsync();
 

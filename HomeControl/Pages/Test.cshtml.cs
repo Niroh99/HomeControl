@@ -15,7 +15,11 @@ namespace HomeControl.Pages
 
         public async Task OnGet()
         {
-
+            var stock = await db.Select<Stock>()
+                .LeftJoin(i => i.Product)
+                .StartWhere()
+                .Compare(i => i.Id, NTIH.Database.ComparisonOperator.Equals, 3)
+                .EndWhere().ExecuteAsync();
         }
 
         public async Task<IActionResult> OnPostTestAjaxPost(string id)

@@ -337,27 +337,21 @@ namespace NTIH.Database
         }
     }
 
-    public interface IJoinable
+    public interface ISelectSingle : IResultQuery
     {
-        void LeftJoin(string propertyName);
+        ISelectSingle LeftJoin(string propertyName);
+
+        ISelectSingle LeftJoin(DatabaseNavigationField databaseNavigationField);
     }
 
-    public interface IJoinable<T> : IJoinable
+    public interface ISelectSingle<T> : ISelectSingle, IResultQuery<T>
     {
+        new ISelectSingle<T> LeftJoin(string propertyName);
 
+        new ISelectSingle<T> LeftJoin(DatabaseNavigationField databaseNavigationField);
     }
 
-    public interface ISelectSingle : IJoinable, IResultQuery
-    {
-
-    }
-
-    public interface ISelectSingle<T> : ISelectSingle, IJoinable<T>, IResultQuery<T>
-    {
-
-    }
-
-    internal abstract class SelectQuery<T>(DatabaseConnection databaseConnection) : Query<T>(databaseConnection), IJoinable<T> where T : DatabaseModel
+    internal abstract class SelectQuery<T>(DatabaseConnection databaseConnection) : Query<T>(databaseConnection) where T : DatabaseModel
     {
         private class Join(DatabaseConnection databaseConnection, DatabaseNavigationField navigationField)
         {
@@ -389,7 +383,7 @@ namespace NTIH.Database
 
         private readonly HashSet<Join> _joins = [];
 
-        public void LeftJoin(string propertyName)
+        protected void LeftJoinCore(string propertyName)
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(propertyName, nameof(propertyName));
 
@@ -564,6 +558,24 @@ namespace NTIH.Database
 
     internal abstract class SelectSingle<T>(DatabaseConnection databaseConnection) : SelectQuery<T>(databaseConnection), ISelectSingle<T> where T : DatabaseModel
     {
+        public ISelectSingle<T> LeftJoin(string propertyName)
+        {
+            LeftJoinCore(propertyName);
+
+            return this;
+        }
+
+        public ISelectSingle<T> LeftJoin(DatabaseNavigationField databaseNavigationField)
+        {
+            ArgumentNullException.ThrowIfNull(nameof(databaseNavigationField));
+
+            return LeftJoin(databaseNavigationField.Name);
+        }
+
+        ISelectSingle ISelectSingle.LeftJoin(string propertyName) => LeftJoin(propertyName);
+
+        ISelectSingle ISelectSingle.LeftJoin(DatabaseNavigationField databaseNavigationField) => LeftJoin(databaseNavigationField);
+
         public abstract Task<T> ExecuteAsync();
 
         async Task<DatabaseModel> IResultQuery.ExecuteAsync() => await ExecuteAsync();
@@ -621,23 +633,49 @@ namespace NTIH.Database
         new IAsyncEnumerable<T> QueryAsync();
     }
 
-    public interface ISelectMany : IJoinable, IResultsQuery
+    public interface ISelectMany : IResultsQuery
     {
-        ILogicalOperator Where();
+        ISelectMany LeftJoin(string propertyName);
+
+        ISelectMany LeftJoin(DatabaseNavigationField databaseNavigationField);
+
+        ILogicalOperator<ISelectMany> StartWhere();
     }
 
-    public interface ISelectMany<T> : ISelectMany, IJoinable<T>, IResultsQuery<T> where T : DatabaseModel
+    public interface ISelectMany<T> : ISelectMany, IResultsQuery<T> where T : DatabaseModel
     {
-        new ILogicalOperator<T> Where();
+        new ISelectMany<T> LeftJoin(string propertyName);
+
+        new ISelectMany<T> LeftJoin(DatabaseNavigationField databaseNavigationField);
+
+        new ILogicalOperator<T, ISelectMany<T>> StartWhere();
     }
 
     internal sealed class SelectMany<T>(DatabaseConnection databaseConnection) : SelectQuery<T>(databaseConnection), ISelectMany<T> where T : DatabaseModel
     {
-        private ILogicalOperator<T> _where;
+        public ISelectMany<T> LeftJoin(string propertyName)
+        {
+            LeftJoinCore(propertyName);
 
-        public ILogicalOperator<T> Where() => _where = WhereBuilder.Where<T>();
+            return this;
+        }
 
-        ILogicalOperator ISelectMany.Where() => Where();
+        public ISelectMany<T> LeftJoin(DatabaseNavigationField databaseNavigationField)
+        {
+            ArgumentNullException.ThrowIfNull(nameof(databaseNavigationField));
+
+            return LeftJoin(databaseNavigationField.Name);
+        }
+
+        ISelectMany ISelectMany.LeftJoin(string propertyName) => LeftJoin(propertyName);
+
+        private ILogicalOperator<T, ISelectMany<T>> _where;
+
+        public ILogicalOperator<T, ISelectMany<T>> StartWhere() => _where = WhereBuilder.Where<T, ISelectMany<T>>(this);
+
+        ISelectMany ISelectMany.LeftJoin(DatabaseNavigationField databaseNavigationField) => LeftJoin(databaseNavigationField);
+
+        ILogicalOperator<ISelectMany> ISelectMany.StartWhere() => (ILogicalOperator<ISelectMany>)StartWhere();
 
         public async Task<List<T>> ExecuteAsync()
         {
@@ -720,7 +758,7 @@ namespace NTIH.Database
 
                 var select = DatabaseConnection.Select<T>();
 
-                var where = select.Where().Compare(uniqueField, ComparisonOperator.Equals, value);
+                var where = select.StartWhere().Compare(uniqueField, ComparisonOperator.Equals, value);
 
                 if (instance.IsTracked) where.And().Compare(primaryKey, ComparisonOperator.NotEquals, primaryKey.Get(instance));
 

@@ -102,7 +102,7 @@ namespace HomeControl.Controllers
 
             if (Request.Query.Count > 0)
             {
-                var where = selectQuery.Where();
+                var where = selectQuery.StartWhere();
 
                 var queryfields = EnumerateQueryFields(Request.Query, metadata);
 
@@ -110,7 +110,7 @@ namespace HomeControl.Controllers
 
                 foreach (var (queryParameter, field) in queryfields)
                 {
-                    IStatement whereStatement;
+                    IStatement<ISelectMany> whereStatement;
 
                     switch (queryParameter.Key[field.Name.Length..].ToLowerInvariant())
                     {

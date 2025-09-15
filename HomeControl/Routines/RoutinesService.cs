@@ -27,7 +27,7 @@ namespace HomeControl.Routines
         public async Task ExecuteActiveRoutinesAsync()
         {
             var routinesSelect = db.Select<Routine>();
-            routinesSelect.Where().Compare(i => i.IsActive, ComparisonOperator.Equals, true);
+            routinesSelect.StartWhere().Compare(i => i.IsActive, ComparisonOperator.Equals, true);
 
             foreach (var routine in await routinesSelect.ExecuteAsync())
             {
@@ -36,7 +36,7 @@ namespace HomeControl.Routines
                     try
                     {
                         var actionsSelect = db.Select<RoutineAction>();
-                        actionsSelect.Where().Compare(i => i.RoutineId, ComparisonOperator.Equals, routine.Id);
+                        actionsSelect.StartWhere().Compare(i => i.RoutineId, ComparisonOperator.Equals, routine.Id);
 
                         var actions = await actionsSelect.ExecuteAsync();
 
@@ -57,7 +57,7 @@ namespace HomeControl.Routines
         private async Task<bool> ShouldExecuteRoutine(Routine routine)
         {
             var triggersSelect = db.Select<RoutineTrigger>();
-            triggersSelect.Where().Compare(i => i.RoutineId, ComparisonOperator.Equals, routine.Id);
+            triggersSelect.StartWhere().Compare(i => i.RoutineId, ComparisonOperator.Equals, routine.Id);
 
             foreach (var trigger in await triggersSelect.ExecuteAsync())
             {

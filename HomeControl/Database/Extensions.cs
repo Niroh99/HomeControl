@@ -8,14 +8,26 @@ namespace HomeControl.Database
 {
     public static class Extensions
     {
-        public static void LeftJoin<T, TProperty>(this IJoinable<T> query, Expression<Func<T, TProperty>> selectorExpression) where T : DatabaseModel
+        public static ISelectSingle<T> LeftJoin<T, TProperty>(this ISelectSingle<T> query, Expression<Func<T, TProperty>> selectorExpression) where T : DatabaseModel
         {
             ArgumentNullException.ThrowIfNull(selectorExpression, nameof(selectorExpression));
 
-            query.LeftJoin(LinqHelper.GetExpressionMemberName(selectorExpression));
+            return query.LeftJoin(LinqHelper.GetExpressionMemberName(selectorExpression));
         }
 
-        public static IStatement<T> Compare<T, TProperty>(this ILogicalOperator<T> logicalOperator, Expression<Func<T, TProperty>> selectorExpression, ComparisonOperator comparisonOperator, TProperty value) where T : DatabaseModel
+        public static ISelectMany<T> LeftJoin<T, TProperty>(this ISelectMany<T> query, Expression<Func<T, TProperty>> selectorExpression) where T : DatabaseModel
+        {
+            ArgumentNullException.ThrowIfNull(selectorExpression, nameof(selectorExpression));
+
+            return query.LeftJoin(LinqHelper.GetExpressionMemberName(selectorExpression));
+        }
+
+        public static IStatement<T, ISelectSingle<T>> Compare<T, TProperty>(this ILogicalOperator<T, ISelectSingle<T>> logicalOperator, Expression<Func<T, TProperty>> selectorExpression, ComparisonOperator comparisonOperator, TProperty value) where T : DatabaseModel
+        {
+            return logicalOperator.Compare(LinqHelper.GetExpressionMemberName(selectorExpression), comparisonOperator, value);
+        }
+
+        public static IStatement<T, ISelectMany<T>> Compare<T, TProperty>(this ILogicalOperator<T, ISelectMany<T>> logicalOperator, Expression<Func<T, TProperty>> selectorExpression, ComparisonOperator comparisonOperator, TProperty value) where T : DatabaseModel
         {
             return logicalOperator.Compare(LinqHelper.GetExpressionMemberName(selectorExpression), comparisonOperator, value);
         }
