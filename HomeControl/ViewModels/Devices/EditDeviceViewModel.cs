@@ -2,7 +2,7 @@ using HomeControl.Models.DatabaseModels;
 using HomeControl.Models.Integrations;
 using HomeControl.Models.ServicesInterfaces;
 
-namespace HomeControl.ViewModels
+namespace HomeControl.ViewModels.Devices
 {
     public class EditDeviceViewModel(IDatabaseConnectionService db, IDeviceService deviceService) : PageViewModel
     {

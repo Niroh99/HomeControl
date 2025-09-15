@@ -4,23 +4,13 @@ using HomeControl.Attributes;
 using HomeControl.Models.ServicesInterfaces;
 using HomeControl.Models.DatabaseModels;
 using NTIH.Database;
-using HomeControl.ViewModels;
+using HomeControl.ViewModels.Devices;
 
 namespace HomeControl.Pages.Devices
 {
     [MenuPage(typeof(IndexModel), "Manage Integrations", "/Devices/ManageIntegrations")]
-    public class ManageIntegrationsModel(IDatabaseConnectionService db, IDeviceService deviceService) : ViewModelPageModel<ManageIntegrationsModel.ManageIntegrationsViewModel>
+    public partial class ManageIntegrationsModel(IServiceProvider serviceProvider, IDatabaseConnectionService db, IDeviceService deviceService) : ViewModelPageModel<ManageIntegrationsViewModel>(serviceProvider)
     {
-        public class ManageIntegrationsViewModel(ViewModelPageModelBase page) : PageViewModel(page)
-        {
-
-        }
-
-        protected override PageViewModel CreateViewModel()
-        {
-            return new ManageIntegrationsViewModel(this);
-        }
-
         public void OnGet()
         {
 
@@ -77,7 +67,7 @@ namespace HomeControl.Pages.Devices
 
         public void OnPostClearTPLinkDevicesCache()
         {
-            if (deviceService.TryGetIntegrationDeviceCache<HomeControl.Integrations.TPLink.DeviceCache>(out var cache))
+            if (deviceService.TryGetIntegrationDeviceCache<Integrations.TPLink.DeviceCache>(out var cache))
             {
                 cache.InvalidateAll();
             }

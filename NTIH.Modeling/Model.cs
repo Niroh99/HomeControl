@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace NTIH.Modeling
@@ -20,6 +22,24 @@ namespace NTIH.Modeling
             if (TryGetModifiedPropertyValue<T>(propertyName, out var modifiedValue)) return modifiedValue;
 
             return GetPropertyValue<T>(propertyName);
+        }
+
+        public List<T> GetList<T>([System.Runtime.CompilerServices.CallerMemberName] string propertyName = null)
+        {
+            return GetCollectionCore<List<T>>(propertyName);
+        }
+
+        protected T GetCollectionCore<T>([System.Runtime.CompilerServices.CallerMemberName] string propertyName = null) where T : ICollection
+        {
+            var propertyValue = Get<T>(propertyName);
+
+            if (propertyValue == null)
+            {
+                propertyValue = (T)Activator.CreateInstance(typeof(T));
+                Set(propertyValue, propertyName);
+            }
+
+            return propertyValue;
         }
 
         public void Set<T>(T value, [System.Runtime.CompilerServices.CallerMemberName] string propertyName = null)

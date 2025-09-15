@@ -6,16 +6,11 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace HomeControl.Pages
 {
-    public class TestModel(IDatabaseConnectionService db) : ViewModelPageModel<TestModel.TestViewModel>
+    public class TestModel(IServiceProvider serviceProvider, IDatabaseConnectionService db) : ViewModelPageModel<TestModel.TestViewModel>(serviceProvider)
     {
-        public class TestViewModel(ViewModelPageModelBase page) : PageViewModel(page)
+        public class TestViewModel : PageViewModel
         {
 
-        }
-
-        protected override PageViewModel CreateViewModel()
-        {
-            return new TestViewModel(this);
         }
 
         public async Task OnGet()

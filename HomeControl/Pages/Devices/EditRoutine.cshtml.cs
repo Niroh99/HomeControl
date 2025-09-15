@@ -1,68 +1,15 @@
 using HomeControl.Attributes;
-using HomeControl.Database;
-using HomeControl.Integrations;
 using HomeControl.Models.DatabaseModels;
-using HomeControl.Models.Extensions;
 using HomeControl.Models.ServicesInterfaces;
 using HomeControl.Routines;
 using HomeControl.ViewModels;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using NTIH.Database;
 
 namespace HomeControl.Pages.Devices
 {
     [MenuPage(typeof(RoutinesModel), "Edit Routine", null)]
-    public class EditRoutineModel(IDatabaseConnectionService db, IDeviceService deviceService) : ViewModelPageModel<EditRoutineModel.EditRoutineViewModel>
+    public partial class EditRoutineModel(IDatabaseConnectionService db, IDeviceService deviceService) : ViewModelPageModel<EditRoutineModel.EditRoutineViewModel>
     {
-        public class EditRoutineViewModel(EditRoutineModel page, IDatabaseConnectionService db, IDeviceService deviceService) : PageViewModel(page)
-        {
-            public Routine Routine { get; set; }
-
-            public List<RoutineTrigger> RoutineTriggers { get; } = [];
-
-            public List<SelectListItem> TriggerTypes { get; } = [];
-
-            public List<RoutineAction> RoutineActions { get; } = [];
-
-            public List<SelectListItem> ActionTypes { get; } = [];
-
-            public List<DeviceInfo> Devices { get; } = [];
-
-            public async override Task Initialize()
-            {
-                Routine = await db.SelectSingle<Routine>(page.RoutineId).ExecuteAsync();
-
-                if (Routine == null) return;
-
-                var triggersSelect = db.Select<RoutineTrigger>();
-                triggersSelect.Where().Compare(i => i.RoutineId, ComparisonOperator.Equals, Routine.Id);
-
-                RoutineTriggers.AddRange(await triggersSelect.ExecuteAsync());
-
-                foreach (var triggerType in IRoutinesService.RoutineTriggerTypeDataMap.Keys)
-                {
-                    TriggerTypes.Add(new SelectListItem(triggerType.GetValueDescription(), triggerType.ToString()));
-                }
-
-                var actionsSelect = db.Select<RoutineAction>();
-                actionsSelect.Where().Compare(i => i.RoutineId, ComparisonOperator.Equals, Routine.Id);
-
-                RoutineActions.AddRange((await actionsSelect.ExecuteAsync()).OrderBy(action => action.Index));
-
-                foreach (var actionType in IRoutinesService.RoutineActionTypeDataMap.Keys)
-                {
-                    ActionTypes.Add(new SelectListItem(actionType.GetValueDescription(), actionType.ToString()));
-                }
-
-                var devices = await db.Select<Device>().ExecuteAsync();
-
-                foreach (var device in devices)
-                {
-                    Devices.Add(await DeviceInfo.CreateAsync(device, deviceService, db));
-                }
-            }
-        }
 
         [FromRoute]
         public int RoutineId { get; set; }

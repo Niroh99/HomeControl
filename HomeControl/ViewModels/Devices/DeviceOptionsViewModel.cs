@@ -4,7 +4,7 @@ using HomeControl.Models.Integrations;
 using HomeControl.Models.ServicesInterfaces;
 using NTIH.Database;
 
-namespace HomeControl.ViewModels
+namespace HomeControl.ViewModels.Devices
 {
     public class DeviceOptionsViewModel(IDatabaseConnectionService db, IDeviceService deviceService) : PageViewModel
     {
@@ -14,7 +14,7 @@ namespace HomeControl.ViewModels
 
         public IIntegrationDevice IntegrationDevice { get => Get<IIntegrationDevice>(); set => Set(value); }
 
-        public List<DeviceOption> DeviceOptions { get => Get<List<DeviceOption>>(); set => Set(value); }
+        public List<DeviceOption> DeviceOptions { get => GetList<DeviceOption>(); }
 
         public async override Task Initialize()
         {
@@ -25,7 +25,7 @@ namespace HomeControl.ViewModels
             var deviceOptionsSelect = db.Select<DeviceOption>();
             deviceOptionsSelect.Where().Compare(i => i.DeviceId, ComparisonOperator.Equals, Device.Id);
 
-            DeviceOptions = [.. await deviceOptionsSelect.ExecuteAsync()];
+            DeviceOptions.AddRange(await deviceOptionsSelect.ExecuteAsync());
 
             IntegrationDevice = await deviceService.CreateAndInitializeIntegrationDeviceAsync(Device);
         }

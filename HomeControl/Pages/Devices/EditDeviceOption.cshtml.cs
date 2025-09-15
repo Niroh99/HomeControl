@@ -1,50 +1,14 @@
 using HomeControl.Attributes;
-using HomeControl.Database;
 using HomeControl.Models.DatabaseModels;
-using HomeControl.Models.Extensions;
-using HomeControl.Models.Integrations;
 using HomeControl.Models.ServicesInterfaces;
-using HomeControl.ViewModels;
+using HomeControl.ViewModels.Devices;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using NTIH.Database;
 
 namespace HomeControl.Pages.Devices
 {
     [MenuPage(typeof(EditDeviceModel), "Edit Device Option", null)]
-    public class EditDeviceOptionModel(IDatabaseConnectionService db, IDeviceService deviceService) : ViewModelPageModel<EditDeviceOptionModel.EditDeviceOptionViewModel>
+    public partial class EditDeviceOptionModel(IServiceProvider serviceProvider, IDatabaseConnectionService db, IDeviceService deviceService) : ViewModelPageModel<EditDeviceOptionViewModel>(serviceProvider)
     {
-        public class EditDeviceOptionViewModel(EditDeviceOptionModel page, IDatabaseConnectionService db, IDeviceService deviceService) : PageViewModel(page)
-        {
-            public Device Device { get; set; }
-
-            public IIntegrationDevice IntegrationDevice { get; set; }
-
-            public DeviceOption DeviceOption { get; set; }
-
-            public List<DeviceOptionAction> DeviceOptionActions { get; } = [];
-
-            public List<SelectListItem> DeviceOptionActionTypes { get; } = [];
-
-            public async override Task Initialize()
-            {
-                DeviceOption = await db.SelectSingle<DeviceOption>(page.DeviceOptionId).ExecuteAsync();
-
-                if (DeviceOption == null) return;
-
-                Device = await db.SelectSingle<Device>(DeviceOption.DeviceId).ExecuteAsync();
-                IntegrationDevice = await deviceService.CreateAndInitializeIntegrationDeviceAsync(Device);
-
-                var deviceOptionActionsSelect = db.Select<DeviceOptionAction>();
-                deviceOptionActionsSelect.Where().Compare(i => i.DeviceOptionId, ComparisonOperator.Equals, DeviceOption.Id);
-
-                DeviceOptionActions.AddRange((await deviceOptionActionsSelect.ExecuteAsync()).OrderBy(action => action.Index));
-
-                DeviceOptionActionTypes.AddRange(IDeviceService.DeviceOptionActionTypeDataMap
-                    .Select(type => new SelectListItem(type.Key.GetValueDescription(), type.Key.ToString())));
-            }
-        }
-
         [FromRoute]
         public int DeviceOptionId { get; set; }
 
@@ -53,9 +17,10 @@ namespace HomeControl.Pages.Devices
             return "TestStringValue";
         }
 
-        protected override PageViewModel CreateViewModel()
+        protected override Task InitializingViewModelAsync()
         {
-            return new EditDeviceOptionViewModel(this, db, deviceService);
+            ViewModel.DeviceOptionId = DeviceOptionId;
+            return base.InitializingViewModelAsync();
         }
 
         public void OnGet()

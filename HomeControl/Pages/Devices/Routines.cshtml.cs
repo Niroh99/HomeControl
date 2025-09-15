@@ -1,24 +1,13 @@
 using HomeControl.Attributes;
 using HomeControl.Models.DatabaseModels;
 using HomeControl.Models.ServicesInterfaces;
-using HomeControl.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HomeControl.Pages.Devices
 {
     [MenuPage(typeof(IndexModel), "Routines", "/Devices/Routines")]
-    public class RoutinesModel(IDatabaseConnectionService db) : ViewModelPageModel<RoutinesModel.RoutinesViewModel>
+    public partial class RoutinesModel(IServiceProvider serviceProvider, IDatabaseConnectionService db) : ViewModelPageModel<RoutinesModel.RoutinesViewModel>(serviceProvider)
     {
-        public class RoutinesViewModel(RoutinesModel page, IDatabaseConnectionService db) : PageViewModel(page)
-        {
-            public List<Routine> Routines { get; } = [];
-
-            public override async Task Initialize()
-            {
-                Routines.AddRange(await db.Select<Routine>().ExecuteAsync());
-            }
-        }
-
         public void OnGet()
         {
 
@@ -37,11 +26,6 @@ namespace HomeControl.Pages.Devices
             await db.Insert(routine).ExecuteAsync();
 
             return RedirectToPage("/Devices/EditRoutine", new { RoutineId = routine.Id });
-        }
-
-        protected override PageViewModel CreateViewModel()
-        {
-            return new RoutinesViewModel(this, db);
         }
     }
 }
