@@ -23,7 +23,7 @@ namespace HomeControl.ViewModels.Devices
             if (Device == null) return;
 
             var deviceOptionsSelect = db.Select<DeviceOption>();
-            deviceOptionsSelect.Where().Compare(i => i.DeviceId, ComparisonOperator.Equals, Device.Id);
+            deviceOptionsSelect.BeginWhere().Compare(i => i.DeviceId, ComparisonOperator.Equals, Device.Id);
 
             DeviceOptions.AddRange(await deviceOptionsSelect.ExecuteAsync());
 

@@ -1,8 +1,8 @@
 ﻿using HomeControl.Models.Extensions;
 using HomeControl.Models.Modeling;
+using Microsoft.Extensions.DependencyInjection;
 using NTIH.Database.Modeling;
 using NTIH.Database.Modeling.Attributes;
-using NTIH.Modeling;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -28,7 +28,9 @@ namespace HomeControl.Models.DatabaseModels
         {
             if (routineTrigger.Data is IDisplayable displayableData)
             {
-                var display = await displayableData.CreateDisplayAsync(serviceProvider);
+                var displayFactory = serviceProvider.GetService<IDisplayFactory>();
+
+                var display = await displayFactory.CreateDisplayAsync(displayableData);
                 Display = display.Display;
                 AdditionalInfo = display.AdditionalInfo;
             }
@@ -47,7 +49,7 @@ namespace HomeControl.Models.DatabaseModels
         Sunset,
     }
 
-    public abstract class RoutineTriggerData : Model, IDisplayable
+    public abstract class RoutineTriggerData : DatabaseModel, IDisplayable
     {
         public virtual async Task<(string display, string additionalInfo)> CreateDisplay(IServiceProvider serviceProvider)
         {

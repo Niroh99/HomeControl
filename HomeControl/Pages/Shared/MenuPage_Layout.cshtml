@@ -41,6 +41,8 @@
                         {
                             var breadcrumbs = new List<Breadcrumb>();
 
+                            System.Diagnostics.Debug.WriteLine(Model);
+
                             var provideBreadcrumbInfo = Model as IProvideBreadcrumbInfo;
 
                             void InsertBreadcrumb(string name, string url)
@@ -50,13 +52,20 @@
 
                             InsertBreadcrumb(provideBreadcrumbInfo?.GetPageTitle() ?? hirarchyPageAttribute.Title, null);
 
-                            hirarchyPageAttribute = hirarchyPageAttribute.ParentPageType?.GetCustomAttribute<HirarchyPageAttribute>();
+                            void SetParentHirarchyPageAttribute()
+                            {
+                                hirarchyPageAttribute = hirarchyPageAttribute.ParentPageType?.GetCustomAttribute<HirarchyPageAttribute>();
+                            }
+
+                            SetParentHirarchyPageAttribute();
 
                             while (hirarchyPageAttribute != null)
                             {
                                 var name = provideBreadcrumbInfo?.GetParentPageTitle(hirarchyPageAttribute) ?? hirarchyPageAttribute.Title;
 
                                 InsertBreadcrumb(name, hirarchyPageAttribute.Url);
+
+                                SetParentHirarchyPageAttribute();
                             }
 
                             var breadcrumbModel = new BreadcrumbModel("TitleBreadcrumb", ">", ["h1", "lesser"]);
@@ -135,6 +144,7 @@
     <script src="~/js/Breadcrumb.js"></script>
     <script src="~/js/commands.js"></script>
     <script src="~/js/Binding.js"></script>
+    <script src="~/js/cookies.js"></script>
     <script src="~/js/cardElement.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
 

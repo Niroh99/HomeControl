@@ -43,7 +43,7 @@ builder.Services.AddScoped<IEventService, EventService>();
 builder.Services.AddScoped<IRoutinesService, RoutinesService>();
 builder.Services.AddScoped<IDeviceService, DeviceService>();
 builder.Services.AddScoped<IActionsService, ActionsService>();
-builder.Services.RegisterDisplayTypesFromAssembly(HomeControl.Models.AssemblyReference.Value);
+builder.Services.AddTransient<IDisplayFactory, DisplayFactory>();
 builder.Services.RegisterViewModelsFromAssembly(typeof(Program).Assembly);
 
 var app = builder.Build();

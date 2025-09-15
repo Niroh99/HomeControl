@@ -1,30 +1,13 @@
-﻿using System.Text.Json.Serialization;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace NTIH.Database.Modeling
 {
     public abstract class DatabaseModel : NTIH.Modeling.Model
     {
-        [JsonIgnore]
-        public bool IsTracked { get => DB != null; }
-
-        [JsonIgnore]
-        public DatabaseConnection DB { get; private set; }
-
-        internal void Track(DatabaseConnection db) => DB = db;
-
-        public virtual void OnInserting()
-        {
-
-        }
-
-        public virtual void OnUpdating()
-        {
-
-        }
-
-        public virtual void OnDeleting()
-        {
-
-        }
+        
     }
 }

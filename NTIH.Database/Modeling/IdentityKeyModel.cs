@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace NTIH.Database.Modeling
 {
-    public abstract class IdentityKeyModel : DatabaseModel
+    public abstract class IdentityKeyModel : DatabaseTableModel
     {
         [Key]
         [Column]

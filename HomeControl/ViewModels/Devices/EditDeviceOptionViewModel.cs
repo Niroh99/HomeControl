@@ -32,10 +32,12 @@ namespace HomeControl.ViewModels.Devices
             Device = await db.SelectSingle<Device>(DeviceOption.DeviceId).ExecuteAsync();
             IntegrationDevice = await deviceService.CreateAndInitializeIntegrationDeviceAsync(Device);
 
-            var deviceOptionActionsSelect = db.Select<DeviceOptionAction>();
-            deviceOptionActionsSelect.Where().Compare(i => i.DeviceOptionId, ComparisonOperator.Equals, DeviceOption.Id);
+            var deviceOptions = await db.Select<DeviceOptionAction>()
+                .BeginWhere().Compare(i => i.DeviceOptionId, ComparisonOperator.Equals, DeviceOption.Id)
+                .EndWhere()
+                .ExecuteAsync();
 
-            DeviceOptionActions.AddRange((await deviceOptionActionsSelect.ExecuteAsync()).OrderBy(action => action.Index));
+            DeviceOptionActions.AddRange(deviceOptions.OrderBy(action => action.Index));
 
             DeviceOptionActionTypes.AddRange(IDeviceService.DeviceOptionActionTypeDataMap
                     .Select(type => new SelectListItem(type.Key.GetValueDescription(), type.Key.ToString())));

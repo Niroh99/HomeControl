@@ -30,7 +30,7 @@ namespace HomeControl.CLI.CommandHandlers
 
             DatabaseConnection.RegisterDatabaseModelTypesFromAssembly(Models.AssemblyReference.Value);
 
-            if (!DatabaseConnection.TryGetMetadata(modelName, out var modelType, out var modelMetadata))
+            if (!DatabaseConnection.TryGetTableModelMetadata(modelName, out var modelType, out var modelMetadata))
             {
                 Console.WriteLine($"Unknown modelType {modelName}.");
                 return 1;
@@ -89,7 +89,7 @@ namespace HomeControl.CLI.CommandHandlers
             return listType.MakeGenericType(modelType);
         }
 
-        private int HandleQueryCommand(NTIH.Database.Metadata.DatabaseModelMetadata modelMetadata, out string query)
+        private int HandleQueryCommand(NTIH.Database.Metadata.DatabaseTableModelMetadata modelMetadata, out string query)
         {
             query = null;
 

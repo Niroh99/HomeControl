@@ -39,7 +39,7 @@ namespace HomeControl.Controllers
         [HttpPost]
         public async Task<IActionResult> OnPost([FromRoute] string modelName)
         {
-            if (!IDatabaseConnectionService.TryGetMetadata(modelName, out var modelType, out _)) return NotFound();
+            if (!IDatabaseConnectionService.TryGetTableModelMetadata(modelName, out var modelType, out _)) return NotFound();
 
             object model;
 
@@ -73,7 +73,7 @@ namespace HomeControl.Controllers
         {
             if (id == null) return NotFound();
 
-            if (!IDatabaseConnectionService.TryGetMetadata(modelName, out var modelType, out var metadata)) return NotFound();
+            if (!IDatabaseConnectionService.TryGetTableModelMetadata(modelName, out var modelType, out var metadata)) return NotFound();
 
             try
             {
@@ -94,7 +94,7 @@ namespace HomeControl.Controllers
         [HttpGet]
         public async Task<IActionResult> OnGet([FromRoute] string modelName)
         {
-            if (!IDatabaseConnectionService.TryGetMetadata(modelName, out var modelType, out var metadata)) return NotFound();
+            if (!IDatabaseConnectionService.TryGetTableModelMetadata(modelName, out var modelType, out var metadata)) return NotFound();
 
             var genericSelect = _select.MakeGenericMethod(modelType);
 
@@ -140,7 +140,7 @@ namespace HomeControl.Controllers
         {
             if (id == null) return NotFound();
 
-            if (!IDatabaseConnectionService.TryGetMetadata(modelName, out var modelType, out var metadata)) return NotFound();
+            if (!IDatabaseConnectionService.TryGetTableModelMetadata(modelName, out var modelType, out var metadata)) return NotFound();
 
             try
             {
@@ -162,7 +162,7 @@ namespace HomeControl.Controllers
             }
         }
 
-        private async Task<object> SelectSingle(string id, Type modelType, DatabaseModelMetadata metadata)
+        private async Task<object> SelectSingle(string id, Type modelType, DatabaseTableModelMetadata metadata)
         {
             var primaryKeyField = metadata.Fields.OfType<PrimaryKeyField>().FirstOrDefault() ?? throw new Exception("Invalid Model Metadata.");
 
@@ -188,7 +188,7 @@ namespace HomeControl.Controllers
             return await query.ExecuteAsync();
         }
 
-        private static IEnumerable<(KeyValuePair<string, StringValues>, DatabaseColumnField)> EnumerateQueryFields(IQueryCollection query, DatabaseModelMetadata metadata)
+        private static IEnumerable<(KeyValuePair<string, StringValues>, DatabaseColumnField)> EnumerateQueryFields(IQueryCollection query, DatabaseTableModelMetadata metadata)
         {
             foreach (var queryParameter in query)
             {

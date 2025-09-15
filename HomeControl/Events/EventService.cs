@@ -37,7 +37,7 @@ namespace HomeControl.Events
             var db = serviceProvider.GetService<IDatabaseConnectionService>();
 
             var eventsToExecuteSelect = db.Select<Event>();
-            eventsToExecuteSelect.StartWhere().Compare(@event => @event.Handled, ComparisonOperator.Equals, false);
+            eventsToExecuteSelect.BeginWhere().Compare(@event => @event.Handled, ComparisonOperator.Equals, false);
 
             foreach (var eventToExecute in await eventsToExecuteSelect.ExecuteAsync())
             {

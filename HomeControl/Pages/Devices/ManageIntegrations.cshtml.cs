@@ -27,7 +27,7 @@ namespace HomeControl.Pages.Devices
             foreach (var tpLinkDevice in tpLinkDevices)
             {
                 var databaseDeviceSelect = db.Select<Device>();
-                databaseDeviceSelect.StartWhere().Compare(i => i.Hostname, ComparisonOperator.Equals, tpLinkDevice.Hostname);
+                databaseDeviceSelect.BeginWhere().Compare(i => i.Hostname, ComparisonOperator.Equals, tpLinkDevice.Hostname);
 
                 var databaseDevice = (await databaseDeviceSelect.ExecuteAsync()).FirstOrDefault();
 

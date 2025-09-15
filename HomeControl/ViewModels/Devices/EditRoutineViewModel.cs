@@ -32,7 +32,7 @@ namespace HomeControl.ViewModels.Devices
             if (Routine == null) return;
 
             var triggersSelect = db.Select<RoutineTrigger>();
-            triggersSelect.Where().Compare(i => i.RoutineId, ComparisonOperator.Equals, Routine.Id);
+            triggersSelect.BeginWhere().Compare(i => i.RoutineId, ComparisonOperator.Equals, Routine.Id);
 
             RoutineTriggers.AddRange(await triggersSelect.ExecuteAsync());
 
@@ -42,7 +42,7 @@ namespace HomeControl.ViewModels.Devices
             }
 
             var actionsSelect = db.Select<RoutineAction>();
-            actionsSelect.Where().Compare(i => i.RoutineId, ComparisonOperator.Equals, Routine.Id);
+            actionsSelect.BeginWhere().Compare(i => i.RoutineId, ComparisonOperator.Equals, Routine.Id);
 
             RoutineActions.AddRange((await actionsSelect.ExecuteAsync()).OrderBy(action => action.Index));
 

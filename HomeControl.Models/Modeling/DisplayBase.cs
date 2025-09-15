@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace HomeControl.Models.Modeling
 {
-    public abstract class DisplayBase<T> : IDisplay<T> where T : IDisplayable
+    public abstract class DisplayBase<T> : IDisplay<T>
     {
         public string Display { get; protected set; }
 

@@ -3,14 +3,13 @@ using HomeControl.Models.ServicesInterfaces;
 using Microsoft.Extensions.DependencyInjection;
 using NTIH.Database.Modeling;
 using NTIH.Database.Modeling.Attributes;
-using NTIH.Modeling;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Threading.Tasks;
 
 namespace HomeControl.Models.DatabaseModels
 {
-    public abstract class Action : IdentityKeyModel, IIndexedObject, IDisplayable
+    public abstract class Action : IdentityKeyModel, IIndexedObject, IDisplayable<ActionDisplay>
     {
         [Column]
         public int Index { get => Get<int>(); set { Set(value); } }
@@ -43,14 +42,16 @@ namespace HomeControl.Models.DatabaseModels
         {
             if (action.Data is IDisplayable displayableData)
             {
-                var display = await displayableData.CreateDisplayAsync(serviceProvider);
+                var displayFactory = serviceProvider.GetService<IDisplayFactory>();
+
+                var display = await displayFactory.CreateDisplayAsync(displayableData);
                 Display = display.Display;
                 AdditionalInfo = display.AdditionalInfo;
             }
         }
     }
 
-    public abstract class ActionData : Model, IDisplayable
+    public abstract class ActionData : DatabaseModel, IDisplayable<ActionDataDisplay>
     {
         public virtual async Task<(string display, string additionalInfo)> CreateDisplay(IServiceProvider serviceProvider)
         {
@@ -59,7 +60,7 @@ namespace HomeControl.Models.DatabaseModels
         }
     }
 
-    public abstract class ActionDataDisplay : DisplayBase<ActionData>
+    public class ActionDataDisplay : DisplayBase<ActionData>
     {
         public override async Task Create(ActionData actionData, IServiceProvider serviceProvider)
         {

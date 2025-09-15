@@ -17,7 +17,7 @@ namespace HomeControl.Pages
         {
             var stock = await db.Select<Stock>()
                 .LeftJoin(i => i.Product)
-                .StartWhere()
+                .BeginWhere()
                 .Compare(i => i.Id, NTIH.Database.ComparisonOperator.Equals, 3)
                 .EndWhere().ExecuteAsync();
         }

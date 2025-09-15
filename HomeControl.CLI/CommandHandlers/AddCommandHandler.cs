@@ -1,5 +1,6 @@
 ﻿using HomeControl.CLI.Attributes;
 using NTIH.Database;
+using NTIH.Database.Metadata;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -42,7 +43,7 @@ namespace HomeControl.CLI.CommandHandlers
 
             DatabaseConnection.RegisterDatabaseModelTypesFromAssembly(Models.AssemblyReference.Value);
 
-            if (!DatabaseConnection.TryGetMetadata(modelName, out var modelType, out var metadata))
+            if (!DatabaseConnection.TryGetTableModelMetadata(modelName, out var modelType, out var metadata))
             {
                 Console.WriteLine($"Unknown modelType {modelName}.");
                 return 1;
@@ -55,7 +56,7 @@ namespace HomeControl.CLI.CommandHandlers
                 var member = Args.Dequeue();
                 var value = Args.Dequeue();
 
-                var field = metadata.Fields.FirstOrDefault(field => string.Compare(field.Name, member, StringComparison.OrdinalIgnoreCase) == 0);
+                var field = metadata.Fields.OfType<DatabaseColumnField>().FirstOrDefault(field => string.Compare(field.Name, member, StringComparison.OrdinalIgnoreCase) == 0);
 
                 if (field == null)
                 {

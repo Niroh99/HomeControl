@@ -4,4 +4,9 @@
     {
         
     }
+
+    public interface IDisplayable<T> : IDisplayable where T : IDisplay
+    {
+
+    }
 }

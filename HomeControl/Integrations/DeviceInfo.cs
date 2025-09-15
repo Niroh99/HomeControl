@@ -30,7 +30,7 @@ namespace HomeControl.Integrations
             };
 
             var optionsSelect = db.Select<DeviceOption>();
-            optionsSelect.StartWhere().Compare(i => i.DeviceId, ComparisonOperator.Equals, device.Id);
+            optionsSelect.BeginWhere().Compare(i => i.DeviceId, ComparisonOperator.Equals, device.Id);
 
             instance.Options.AddRange(await optionsSelect.ExecuteAsync());
 

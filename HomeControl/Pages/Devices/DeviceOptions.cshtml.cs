@@ -7,10 +7,25 @@ using Microsoft.AspNetCore.Mvc;
 namespace HomeControl.Pages.Devices
 {
     [HirarchyPage(typeof(DeviceOptionsModel), typeof(EditDeviceModel), "Device Options", "/Devices/DeviceOptions")]
-    public class DeviceOptionsModel(IServiceProvider serviceProvider, IDatabaseConnectionService db) : ViewModelPageModel<DeviceOptionsViewModel>(serviceProvider)
+    public class DeviceOptionsModel(IServiceProvider serviceProvider, IDatabaseConnectionService db) : ViewModelPageModel<DeviceOptionsViewModel>(serviceProvider), IProvideBreadcrumbInfo
     {
         [FromRoute]
         public int DeviceId { get; set; }
+
+        public string GetPageTitle()
+        {
+            return null;
+        }
+
+        public string GetParentPageTitle(HirarchyPageAttribute hirarchyPageAttribute)
+        {
+            if (hirarchyPageAttribute.PageType == typeof(EditDeviceModel))
+            {
+                return ViewModel?.IntegrationDevice?.DisplayName;
+            }
+
+            return null;
+        }
 
         public void OnGet()
         {

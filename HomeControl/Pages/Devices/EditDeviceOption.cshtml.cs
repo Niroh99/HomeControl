@@ -27,11 +27,6 @@ namespace HomeControl.Pages.Devices
             return null;
         }
 
-        public string TestString()
-        {
-            return "TestStringValue";
-        }
-
         protected override Task InitializingViewModelAsync()
         {
             ViewModel.DeviceOptionId = DeviceOptionId;

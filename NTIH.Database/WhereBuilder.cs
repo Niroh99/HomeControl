@@ -42,7 +42,7 @@ namespace NTIH.Database
             }
         }
 
-        private abstract class WhereElement<T, TQuery>(TQuery query) : IWhereElement<TQuery> where T : DatabaseModel
+        private abstract class WhereElement<T, TQuery>(TQuery query) : IWhereElement<TQuery> where T : DatabaseTableModel where TQuery : IQueryInfo
         {
             private WhereElement<T, TQuery> _parent;
 
@@ -52,15 +52,17 @@ namespace NTIH.Database
 
             public WhereElement<T, TQuery> NextElement { get => _nextElement; }
 
+            protected TQuery Query { get; } = query;
+
             public string BuildWhere(out Dictionary<string, object> parameterValues)
             {
-                if (Parent != null) return Parent.BuildWhere(out parameterValues);
+                var root = FindRoot();
 
                 var whereStringBuilder = new StringBuilder();
 
                 var parameters = new ParameterCollection();
 
-                BuildWhereCore(this, whereStringBuilder, parameters);
+                BuildWhereCore(root, whereStringBuilder, parameters);
 
                 parameterValues = parameters.GetParameterValues();
 
@@ -69,7 +71,7 @@ namespace NTIH.Database
 
             public TQuery EndWhere()
             {
-                return query;
+                return Query;
             }
 
             protected TChild SetNextElement<TChild>(TChild child) where TChild : WhereElement<T, TQuery>
@@ -81,10 +83,17 @@ namespace NTIH.Database
                 return child;
             }
 
+            private WhereElement<T, TQuery> FindRoot()
+            {
+                if (Parent == null) return this;
+
+                return Parent.FindRoot();
+            }
+
             public abstract void Append(StringBuilder builder, ParameterCollection parameters);
         }
 
-        private abstract class LogicalOperator<T, TQuery>(TQuery query) : WhereElement<T, TQuery>(query), ILogicalOperator<T, TQuery> where T : DatabaseModel
+        private abstract class LogicalOperator<T, TQuery>(TQuery query) : WhereElement<T, TQuery>(query), ILogicalOperator<T, TQuery> where T : DatabaseTableModel where TQuery : IQueryInfo
         {
             IStatement<TQuery> ILogicalOperator<TQuery>.Compare(DatabaseColumnField databaseColumnField, ComparisonOperator comparisonOperator, object value) => Compare(databaseColumnField, comparisonOperator, value);
 
@@ -109,7 +118,7 @@ namespace NTIH.Database
 
             public IStatement<T, TQuery> Compare<TProperty>(string columnName, ComparisonOperator comparisonOperator, TProperty value)
             {
-                return SetNextElement(new ValueComparison<T, TQuery>(query, columnName, comparisonOperator, value));
+                return SetNextElement(new ValueComparison<T, TQuery>(Query, columnName, comparisonOperator, value));
             }
 
             public IStatement<T, TQuery> IsNull(DatabaseColumnField databaseColumnField)
@@ -121,7 +130,7 @@ namespace NTIH.Database
 
             public IStatement<T, TQuery> IsNull(string columnName)
             {
-                return SetNextElement(new NullComparison<T, TQuery>(query, columnName, false));
+                return SetNextElement(new NullComparison<T, TQuery>(Query, columnName, false));
             }
 
             public IStatement<T, TQuery> IsNotNull(DatabaseColumnField databaseColumnField)
@@ -133,12 +142,12 @@ namespace NTIH.Database
 
             public IStatement<T, TQuery> IsNotNull(string columnName)
             {
-                return SetNextElement(new NullComparison<T, TQuery>(query, columnName, true));
+                return SetNextElement(new NullComparison<T, TQuery>(Query, columnName, true));
             }
 
             public IStatement<T, TQuery> Brackets(Action<ILogicalOperator<TQuery>> buildChild)
             {
-                var brackets = new Brackets<T, TQuery>(query);
+                var brackets = new Brackets<T, TQuery>(Query);
 
                 buildChild(brackets.Child);
 
@@ -146,7 +155,7 @@ namespace NTIH.Database
             }
         }
 
-        private sealed class RootElement<T, TQuery>(TQuery query) : LogicalOperator<T, TQuery>(query) where T : DatabaseModel
+        private sealed class RootElement<T, TQuery>(TQuery query) : LogicalOperator<T, TQuery>(query) where T : DatabaseTableModel where TQuery : IQueryInfo
         {
             public override void Append(StringBuilder builder, ParameterCollection parameters)
             {
@@ -154,7 +163,7 @@ namespace NTIH.Database
             }
         }
 
-        private sealed class And<T, TQuery>(TQuery query) : LogicalOperator<T, TQuery>(query) where T : DatabaseModel
+        private sealed class And<T, TQuery>(TQuery query) : LogicalOperator<T, TQuery>(query) where T : DatabaseTableModel where TQuery : IQueryInfo
         {
             public override void Append(StringBuilder builder, ParameterCollection parameters)
             {
@@ -162,7 +171,7 @@ namespace NTIH.Database
             }
         }
 
-        private sealed class Or<T, TQuery>(TQuery query) : LogicalOperator<T, TQuery>(query) where T : DatabaseModel
+        private sealed class Or<T, TQuery>(TQuery query) : LogicalOperator<T, TQuery>(query) where T : DatabaseTableModel where TQuery : IQueryInfo
         {
             public override void Append(StringBuilder builder, ParameterCollection parameters)
             {
@@ -170,7 +179,7 @@ namespace NTIH.Database
             }
         }
 
-        private abstract class Statement<T, TQuery>(TQuery query) : WhereElement<T, TQuery>(query), IStatement<T, TQuery> where T : DatabaseModel
+        private abstract class Statement<T, TQuery>(TQuery query) : WhereElement<T, TQuery>(query), IStatement<T, TQuery> where T : DatabaseTableModel where TQuery : IQueryInfo
         {
             ILogicalOperator<TQuery> IStatement<TQuery>.And() => And();
 
@@ -181,11 +190,11 @@ namespace NTIH.Database
             public ILogicalOperator<T, TQuery> Or() => SetNextElement(new Or<T, TQuery>(query));
         }
 
-        private sealed class Brackets<T, TQuery> : Statement<T, TQuery>, IStatement<T, TQuery> where T : DatabaseModel
+        private sealed class Brackets<T, TQuery> : Statement<T, TQuery>, IStatement<T, TQuery> where T : DatabaseTableModel where TQuery : IQueryInfo
         {
             public Brackets(TQuery query) : base(query)
             {
-                _child = new RootElement<T, TQuery>(query);
+                _child = new RootElement<T, TQuery>(Query);
             }
 
             private readonly RootElement<T, TQuery> _child;
@@ -199,7 +208,7 @@ namespace NTIH.Database
             }
         }
 
-        private class ValueComparison<T, TQuery> : Statement<T, TQuery> where T : DatabaseModel
+        private class ValueComparison<T, TQuery> : Statement<T, TQuery> where T : DatabaseTableModel where TQuery : IQueryInfo
         {
             public ValueComparison(TQuery query, string columnName, ComparisonOperator comparisonOperator, object value) : base(query)
             {
@@ -216,6 +225,8 @@ namespace NTIH.Database
 
             public override void Append(StringBuilder builder, ParameterCollection parameters)
             {
+                if (Query.HasJoin) builder.Append($"[{DatabaseConnection.BaseTableAlias}].");
+                
                 builder.Append($"[{_columnName}] ");
 
                 switch (_comparisonOperator)
@@ -232,7 +243,7 @@ namespace NTIH.Database
             }
         }
 
-        private class NullComparison<T, TQuery> : Statement<T, TQuery> where T : DatabaseModel
+        private class NullComparison<T, TQuery> : Statement<T, TQuery> where T : DatabaseTableModel where TQuery : IQueryInfo
         {
             public NullComparison(TQuery query, string columnName, bool isInverted) : base(query)
             {
@@ -247,6 +258,8 @@ namespace NTIH.Database
 
             public override void Append(StringBuilder builder, ParameterCollection parameters)
             {
+                if (Query.HasJoin) builder.Append($"[{DatabaseConnection.BaseTableAlias}].");
+
                 builder.Append($"[{_columnName}] IS ");
 
                 if (_isInverted) builder.Append("NOT ");
@@ -255,12 +268,12 @@ namespace NTIH.Database
             }
         }
 
-        public static ILogicalOperator<T, TQuery> Where<T, TQuery>(TQuery query) where T : DatabaseModel
+        public static ILogicalOperator<T, TQuery> Where<T, TQuery>(TQuery query) where T : DatabaseTableModel where TQuery : IQueryInfo
         {
             return new RootElement<T, TQuery>(query);
         }
 
-        private static void BuildWhereCore<T, TQuery>(WhereElement<T, TQuery> element, StringBuilder whereStringBuilder, ParameterCollection parameters) where T : DatabaseModel
+        private static void BuildWhereCore<T, TQuery>(WhereElement<T, TQuery> element, StringBuilder whereStringBuilder, ParameterCollection parameters) where T : DatabaseTableModel where TQuery : IQueryInfo
         {
             if (element == null) return;
 
@@ -270,14 +283,14 @@ namespace NTIH.Database
         }
     }
 
-    public interface IWhereElement<TQuery>
+    public interface IWhereElement<TQuery> where TQuery : IQueryInfo
     {
         string BuildWhere(out Dictionary<string, object> parameterValues);
 
         TQuery EndWhere();
     }
 
-    public interface ILogicalOperator<TQuery> : IWhereElement<TQuery>
+    public interface ILogicalOperator<TQuery> : IWhereElement<TQuery> where TQuery : IQueryInfo
     {
         IStatement<TQuery> Compare(DatabaseColumnField databaseColumnField, ComparisonOperator comparisonOperator, object value);
 
@@ -294,7 +307,7 @@ namespace NTIH.Database
         IStatement<TQuery> IsNotNull(string columnName);
     }
 
-    public interface ILogicalOperator<T, TQuery> : ILogicalOperator<TQuery> where T : DatabaseModel
+    public interface ILogicalOperator<T, TQuery> : ILogicalOperator<TQuery> where T : DatabaseTableModel where TQuery : IQueryInfo
     {
         IStatement<T, TQuery> Compare<TProperty>(DatabaseColumnField databaseColumnField, ComparisonOperator comparisonOperator, TProperty value);
 
@@ -309,14 +322,14 @@ namespace NTIH.Database
         new IStatement<T, TQuery> IsNotNull(string columnName);
     }
 
-    public interface IStatement<TQuery> : IWhereElement<TQuery>
+    public interface IStatement<TQuery> : IWhereElement<TQuery> where TQuery : IQueryInfo
     {
         ILogicalOperator<TQuery> And();
 
         ILogicalOperator<TQuery> Or();
     }
 
-    public interface IStatement<T, TQuery> : IStatement<TQuery> where T : DatabaseModel
+    public interface IStatement<T, TQuery> : IStatement<TQuery> where T : DatabaseTableModel where TQuery : IQueryInfo
     {
         new ILogicalOperator<T, TQuery> And();
 
