@@ -1,24 +1,25 @@
 ﻿using HomeControl.Helpers;
-using Microsoft.AspNetCore.Html;
+using HomeControl.Models.Modeling;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.AspNetCore.Mvc.TagHelpers;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
-using Microsoft.AspNetCore.Razor.Runtime.TagHelpers;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using System.Text.Encodings.Web;
 
 namespace HomeControl.TagHelpers
 {
     [HtmlTargetElement("card-element")]
-    public class CardElementTagHelper(IFileVersionProvider fileVersionProvider, IUrlHelperFactory urlHelperFactory) : TagHelper
+    public class CardElementTagHelper(IServiceProvider serviceProvider, IFileVersionProvider fileVersionProvider, IUrlHelperFactory urlHelperFactory) : TagHelper
     {
         [ViewContext]
         public ViewContext ViewContext { get; set; } = default!;
 
         public string IconSource { get; set; }
 
-        public override void Process(TagHelperContext context, TagHelperOutput output)
+        public IDisplayable Displayable { get; set; }
+
+        public override async Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
         {
             output.AddClass("centered-content", HtmlEncoder.Default);
 
@@ -55,6 +56,14 @@ namespace HomeControl.TagHelpers
             errorText.Attributes.Add("name", "ErrorText");
 
             headerContainer.InnerHtml.AppendHtml(errorText);
+
+            if (Displayable != null)
+            {
+                var display = await Displayable.CreateDisplayAsync(serviceProvider);
+
+                header.InnerHtml.Append(display.Display);
+                infoText.InnerHtml.Append(display.AdditionalInfo);
+            }
 
             output.PreContent.AppendHtml(headerContainer);
         }

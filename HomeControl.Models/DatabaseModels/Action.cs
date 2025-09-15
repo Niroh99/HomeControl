@@ -21,22 +21,6 @@ namespace HomeControl.Models.DatabaseModels
         [Column]
         [JsonField]
         public ActionData Data { get => Get<ActionData>(); set => Set(value); }
-
-        private string _display;
-        public string Display => _display;
-
-        private string _additionalInfo;
-        public string AdditionalInfo => _additionalInfo;
-
-        public async Task CreateDisplay(IServiceProvider serviceProvider)
-        {
-            if (Data is IDisplayable displayableData)
-            {
-                await displayableData.CreateDisplay(serviceProvider);
-                _display = displayableData.Display;
-                _additionalInfo = displayableData.AdditionalInfo;
-            }
-        }
     }
 
     public enum ActionType
@@ -53,17 +37,33 @@ namespace HomeControl.Models.DatabaseModels
         DeactivateRoutine
     }
 
+    public class ActionDisplay : DisplayBase<Action>
+    {
+        public override async Task Create(Action action, IServiceProvider serviceProvider)
+        {
+            if (action.Data is IDisplayable displayableData)
+            {
+                var display = await displayableData.CreateDisplayAsync(serviceProvider);
+                Display = display.Display;
+                AdditionalInfo = display.AdditionalInfo;
+            }
+        }
+    }
+
     public abstract class ActionData : Model, IDisplayable
     {
-        public string Display { get; protected set; }
-
-        private string _additionalInfo;
-        public string AdditionalInfo => _additionalInfo;
-
-        public virtual async Task CreateDisplay(IServiceProvider serviceProvider)
+        public virtual async Task<(string display, string additionalInfo)> CreateDisplay(IServiceProvider serviceProvider)
         {
-            Display = ToString();
-            await Task.CompletedTask;
+            await Task.CompletedTask.ConfigureAwait(false);
+            return (ToString(), null);
+        }
+    }
+
+    public abstract class ActionDataDisplay : DisplayBase<ActionData>
+    {
+        public override async Task Create(ActionData actionData, IServiceProvider serviceProvider)
+        {
+            (Display, AdditionalInfo) = await actionData.CreateDisplay(serviceProvider).ConfigureAwait(false);
         }
     }
 
@@ -71,16 +71,16 @@ namespace HomeControl.Models.DatabaseModels
     {
         public int DeviceId { get => Get<int>(); set => Set(value); }
 
-        public override async Task CreateDisplay(IServiceProvider serviceProvider)
+        public override async Task<(string display, string additionalInfo)> CreateDisplay(IServiceProvider serviceProvider)
         {
             var db = serviceProvider.GetService<IDatabaseConnectionService>();
             var deviceService = serviceProvider.GetService<IDeviceService>();
             
-            var device = await db.SelectSingle<Device>(DeviceId).ExecuteAsync();
+            var device = await db.SelectSingle<Device>(DeviceId).ExecuteAsync().ConfigureAwait(false);
 
-            var integrationDevice = await deviceService.CreateAndInitializeIntegrationDeviceAsync(device);
+            var integrationDevice = await deviceService.CreateAndInitializeIntegrationDeviceAsync(device).ConfigureAwait(false);
 
-            Display = $"{integrationDevice.DisplayName}: {ToString()}";
+            return ($"{integrationDevice.DisplayName}: {ToString()}", null);
         }
     }
 
@@ -116,11 +116,11 @@ namespace HomeControl.Models.DatabaseModels
     {
         public int RoutineId { get => Get<int>(); set => Set(value); }
 
-        public override async Task CreateDisplay(IServiceProvider serviceProvider)
+        public override async Task<(string display, string additionalInfo)> CreateDisplay(IServiceProvider serviceProvider)
         {
             var db = serviceProvider.GetService<IDatabaseConnectionService>();
-            var routine = await db.SelectSingle<Routine>(RoutineId).ExecuteAsync();
-            Display = $"{routine.Name}";
+            var routine = await db.SelectSingle<Routine>(RoutineId).ExecuteAsync().ConfigureAwait(false);
+            return ($"{routine.Name}", null);
         }
     }
 }

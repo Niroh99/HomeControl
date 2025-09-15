@@ -140,7 +140,7 @@
 				{
 					var deviceOptionAction = Model.ViewModel.DeviceOptionActions[i];
 
-					<card-element class="card-padding bound" data-binding-header="deviceOptionActions[@(i)].display">
+					<card-element class="card-padding bound" displayable="deviceOptionAction">
 						<button onclick="openRemoveDeviceOptionActionQuestionDialog('@deviceOptionAction.Id')">Remove</button>
 					</card-element>
 				}

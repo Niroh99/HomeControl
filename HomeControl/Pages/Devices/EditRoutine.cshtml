@@ -252,11 +252,9 @@
 		else
 		{
 			<div class="card card-children-separator">
-				@for (int i = 0; i < Model.ViewModel.RoutineTriggers.Count; i++)
+				@foreach (var routineTrigger in Model.ViewModel.RoutineTriggers)
 				{
-					var routineTrigger = Model.ViewModel.RoutineTriggers[i];
-
-					<card-element class="bound card-padding" data-binding-header="routineTriggers[@(i)].display" data-binding-info-text="routineTriggers[@(i)].additionalInfo">
+					<card-element class="bound card-padding" displayable="routineTrigger">
 						<button onclick="openRemoveRoutineTriggerQuestionDialog('@routineTrigger.Id')">Remove</button>
 					</card-element>
 				}
@@ -278,11 +276,9 @@
 		else
 		{
 			<div class="card card-children-separator">
-				@for (int i = 0; i < Model.ViewModel.RoutineActions.Count; i++)
+				@foreach (var routineAction in Model.ViewModel.RoutineActions)
 				{
-					var routineAction = Model.ViewModel.RoutineActions[i];
-
-					<card-element class="bound card-padding" data-binding-header="routineActions[@(i)].display">
+					<card-element class="bound card-padding" displayable="routineAction">
 						<button onclick="openRemoveRoutineActionQuestionDialog('@routineAction.Id')">Remove</button>
 					</card-element>
 				}

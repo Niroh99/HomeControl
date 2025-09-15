@@ -1,17 +1,18 @@
-using HomeControl.Helpers;
+using System.Net;
+using HomeControl;
+using HomeControl.Actions;
 using HomeControl.Database;
+using HomeControl.Events;
+using HomeControl.Helpers;
+using HomeControl.Integrations;
+using HomeControl.Models.Modeling;
+using HomeControl.Models.ServicesInterfaces;
+using HomeControl.Routines;
+using HomeControl.Weather;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.FileProviders;
-using System.Net;
-using HomeControl.Events;
-using HomeControl.Integrations;
-using HomeControl.Weather;
-using HomeControl.Routines;
-using HomeControl.Actions;
-using HomeControl;
-using HomeControl.Models.ServicesInterfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -39,7 +40,7 @@ builder.Services.AddSession(options =>
 builder.Services.AddSingleton<IFileProvider>(new PhysicalFileProvider(HomeControl.Pages.Media.IndexModel.BasePath));
 builder.Services.AddSingleton<IWeatherService, WeatherService>();
 
-builder.Services.AddScoped<IDatabaseConnectionService>((serviceProvider) => new DatabaseConnectionService(connectionString, serviceProvider));
+builder.Services.AddScoped<IDatabaseConnectionService>((serviceProvider) => new DatabaseConnectionService(connectionString));
 builder.Services.AddScoped<IEventService, EventService>();
 builder.Services.AddScoped<IRoutinesService, RoutinesService>();
 builder.Services.AddScoped<IDeviceService, DeviceService>();
@@ -48,6 +49,7 @@ builder.Services.AddScoped<IActionsService, ActionsService>();
 var app = builder.Build();
 
 NTIH.Database.DatabaseConnection.RegisterDatabaseModelTypesFromAssembly(HomeControl.Models.AssemblyReference.Value);
+builder.Services.RegisterDisplayTypesFromAssembly(HomeControl.Models.AssemblyReference.Value);
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

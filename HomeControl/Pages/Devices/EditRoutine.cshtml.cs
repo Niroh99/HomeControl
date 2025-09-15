@@ -3,25 +3,20 @@ using HomeControl.Models.DatabaseModels;
 using HomeControl.Models.ServicesInterfaces;
 using HomeControl.Routines;
 using HomeControl.ViewModels;
+using HomeControl.ViewModels.Devices;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HomeControl.Pages.Devices
 {
     [MenuPage(typeof(RoutinesModel), "Edit Routine", null)]
-    public partial class EditRoutineModel(IDatabaseConnectionService db, IDeviceService deviceService) : ViewModelPageModel<EditRoutineModel.EditRoutineViewModel>
+    public partial class EditRoutineModel(IServiceProvider serviceProvider, IDatabaseConnectionService db) : ViewModelPageModel<EditRoutineViewModel>(serviceProvider)
     {
-
         [FromRoute]
         public int RoutineId { get; set; }
 
         public string TestString()
         {
             return "TestStringValue";
-        }
-
-        protected override PageViewModel CreateViewModel()
-        {
-            return new EditRoutineViewModel(this, db, deviceService);
         }
 
         public void OnGet()
@@ -105,6 +100,12 @@ namespace HomeControl.Pages.Devices
             await db.Delete(await db.SelectSingle<RoutineAction>(actionIdToRemove).ExecuteAsync()).ExecuteAsync();
 
             return RedirectToPage();
+        }
+
+        protected override Task InitializingViewModelAsync()
+        {
+            ViewModel.RoutineId = RoutineId;
+            return base.InitializingViewModelAsync();
         }
     }
 }

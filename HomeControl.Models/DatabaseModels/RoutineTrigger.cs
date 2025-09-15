@@ -20,20 +20,17 @@ namespace HomeControl.Models.DatabaseModels
         [Column]
         [JsonField]
         public RoutineTriggerData Data { get => Get<RoutineTriggerData>(); set => Set(value); }
+    }
 
-        private string _display;
-        public string Display => _display;
-
-        private string _additionalInfo;
-        public string AdditionalInfo => _additionalInfo;
-
-        public async Task CreateDisplay(IServiceProvider serviceProvider)
+    public class RoutineTriggerDisplay : DisplayBase<RoutineTrigger>
+    {
+        public override async Task Create(RoutineTrigger routineTrigger, IServiceProvider serviceProvider)
         {
-            if (Data is IDisplayable displayableData)
+            if (routineTrigger.Data is IDisplayable displayableData)
             {
-                await displayableData.CreateDisplay(serviceProvider);
-                _display = displayableData.Display;
-                _additionalInfo = displayableData.AdditionalInfo;
+                var display = await displayableData.CreateDisplayAsync(serviceProvider);
+                Display = display.Display;
+                AdditionalInfo = display.AdditionalInfo;
             }
         }
     }
@@ -52,20 +49,18 @@ namespace HomeControl.Models.DatabaseModels
 
     public abstract class RoutineTriggerData : Model, IDisplayable
     {
-        private string _display;
-        public string Display => _display;
-        private string _additionalInfo;
-        public string AdditionalInfo => _additionalInfo;
-        public virtual async Task CreateDisplay(IServiceProvider serviceProvider)
+        public virtual async Task<(string display, string additionalInfo)> CreateDisplay(IServiceProvider serviceProvider)
         {
-            _display = ToString();
-            _additionalInfo = GetAdditionalInfo(serviceProvider);
             await Task.CompletedTask;
+            return (ToString(), null);
         }
+    }
 
-        protected virtual string GetAdditionalInfo(IServiceProvider serviceProvider)
+    public class RoutineTriggerDataDisplay : DisplayBase<RoutineTriggerData>
+    {
+        public override async Task Create(RoutineTriggerData data, IServiceProvider serviceProvider)
         {
-            return null;
+            (Display, AdditionalInfo) = await data.CreateDisplay(serviceProvider);
         }
     }
 
@@ -73,9 +68,10 @@ namespace HomeControl.Models.DatabaseModels
     {
         public HashSet<DayOfWeek> ActiveWeekDays { get; set; }
 
-        protected override string GetAdditionalInfo(IServiceProvider serviceProvider)
+        public override async Task<(string display, string additionalInfo)> CreateDisplay(IServiceProvider serviceProvider)
         {
-            return string.Join(", ", ActiveWeekDays.Select(dayOfWeek => dayOfWeek.ToShortDayOfWeek()));
+            await Task.CompletedTask;
+            return (ToString(), string.Join(", ", ActiveWeekDays.Select(dayOfWeek => dayOfWeek.ToShortDayOfWeek())));
         }
     }
 
