@@ -6,11 +6,26 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace HomeControl.Pages.Devices
 {
-    [MenuPage(typeof(EditDeviceModel), "Edit Device Option", null)]
-    public partial class EditDeviceOptionModel(IServiceProvider serviceProvider, IDatabaseConnectionService db, IDeviceService deviceService) : ViewModelPageModel<EditDeviceOptionViewModel>(serviceProvider)
+    [HirarchyPage(typeof(EditDeviceOptionModel), typeof(EditDeviceModel), "Edit Device Option", null)]
+    public partial class EditDeviceOptionModel(IServiceProvider serviceProvider, IDatabaseConnectionService db, IDeviceService deviceService) : ViewModelPageModel<EditDeviceOptionViewModel>(serviceProvider), IProvideBreadcrumbInfo
     {
         [FromRoute]
         public int DeviceOptionId { get; set; }
+
+        public string GetPageTitle()
+        {
+            return ViewModel.DeviceOption?.Name ?? "Edit Device Option";
+        }
+
+        public string GetParentPageTitle(HirarchyPageAttribute hirarchyPageAttribute)
+        {
+            if (hirarchyPageAttribute.PageType == typeof(EditDeviceModel))
+            {
+                return ViewModel.IntegrationDevice?.DisplayName ?? "Edit Device";
+            }
+
+            return null;
+        }
 
         public string TestString()
         {

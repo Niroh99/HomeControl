@@ -5,7 +5,7 @@ using HomeControl.ViewModels.Devices;
 
 namespace HomeControl.Pages.Devices
 {
-    [MenuPage(null, "Devices", "/Devices/Index")]
+    [HirarchyPage(typeof(IndexModel), null, "Devices", "/Devices/Index")]
     public partial class IndexModel(IServiceProvider serviceProvider, IDeviceService deviceService) : ViewModelPageModel<DevicesViewModel>(serviceProvider)
     {
         public void OnGet()

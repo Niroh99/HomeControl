@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace HomeControl.Pages.Devices
 {
-    [MenuPage(typeof(IndexModel), "Routines", "/Devices/Routines")]
+    [HirarchyPage(typeof(RoutinesModel), typeof(IndexModel), "Routines", "/Devices/Routines")]
     public partial class RoutinesModel(IServiceProvider serviceProvider, IDatabaseConnectionService db) : ViewModelPageModel<RoutinesViewModel>(serviceProvider)
     {
         public void OnGet()

@@ -3,7 +3,7 @@ using HomeControl.Attributes;
 
 namespace HomeControl.Pages
 {
-    [MenuPage(null, "Home", "/Index")]
+    [HirarchyPage(typeof(IndexModel), null, "Home", "/Index")]
     public class IndexModel : PageModel
     {
         

@@ -8,8 +8,8 @@ using HomeControl.ViewModels.Devices;
 
 namespace HomeControl.Pages.Devices
 {
-    [MenuPage(typeof(IndexModel), "Manage Integrations", "/Devices/ManageIntegrations")]
-    public partial class ManageIntegrationsModel(IServiceProvider serviceProvider, IDatabaseConnectionService db, IDeviceService deviceService) : ViewModelPageModel<ManageIntegrationsViewModel>(serviceProvider)
+    [HirarchyPage(typeof(ManageIntegrationsModel), typeof(IndexModel), "Manage Integrations", "/Devices/ManageIntegrations")]
+    public class ManageIntegrationsModel(IServiceProvider serviceProvider, IDatabaseConnectionService db, IDeviceService deviceService) : ViewModelPageModel<ManageIntegrationsViewModel>(serviceProvider)
     {
         public void OnGet()
         {

@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace HomeControl.Pages.Devices
 {
-    [MenuPage(typeof(EditDeviceModel), "Device Options", "/Devices/DeviceOptions")]
+    [HirarchyPage(typeof(DeviceOptionsModel), typeof(EditDeviceModel), "Device Options", "/Devices/DeviceOptions")]
     public class DeviceOptionsModel(IServiceProvider serviceProvider, IDatabaseConnectionService db) : ViewModelPageModel<DeviceOptionsViewModel>(serviceProvider)
     {
         [FromRoute]

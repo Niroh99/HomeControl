@@ -8,11 +8,21 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace HomeControl.Pages.Devices
 {
-    [MenuPage(typeof(RoutinesModel), "Edit Routine", null)]
-    public partial class EditRoutineModel(IServiceProvider serviceProvider, IDatabaseConnectionService db) : ViewModelPageModel<EditRoutineViewModel>(serviceProvider)
+    [HirarchyPage(typeof(EditRoutineModel), typeof(RoutinesModel), "Edit Routine", null)]
+    public partial class EditRoutineModel(IServiceProvider serviceProvider, IDatabaseConnectionService db) : ViewModelPageModel<EditRoutineViewModel>(serviceProvider), IProvideBreadcrumbInfo
     {
         [FromRoute]
         public int RoutineId { get; set; }
+
+        public string GetPageTitle()
+        {
+            return ViewModel.Routine?.Name ?? "Edit Routine";
+        }
+
+        public string GetParentPageTitle(HirarchyPageAttribute hirarchyPageAttribute)
+        {
+            return null;
+        }
 
         public string TestString()
         {
