@@ -1,6 +1,5 @@
 ﻿@using System.Reflection;
 @using HomeControl.Views.Shared
-@model ViewModelPageModelBase
 @inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
 @{
 	ViewData["Title"] = "JavaScript";
@@ -46,9 +45,6 @@
 
 		@await RenderSectionAsync("Dialogs", false)
 	</div>
-	<script>
-		var model = @(Json.Serialize(Model.ViewModelBase))
-	</script>
 
 	<script src="~/lib/jquery/dist/jquery.min.js"></script>
 	<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
@@ -58,6 +54,7 @@
 	<script src="~/js/Breadcrumb.js"></script>
 	<script src="~/js/cardElement.js"></script>
 	<script src="~/js/Binding.js"></script>
+	<script src="~/js/cookies.js"></script>
 	<script src="~/js/site.js" asp-append-version="true"></script>
 	<script src="~/js/Test.js"></script>
 

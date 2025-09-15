@@ -10,7 +10,7 @@ namespace NTIH.ViewModeling
     {
         public static void RegisterViewModelsFromAssembly(this IServiceCollection services, Assembly assembly)
         {
-            foreach (var type in assembly.GetTypes().Where(t => t.IsAssignableTo(typeof(ViewModel))))
+            foreach (var type in assembly.GetTypes().Where(t => !t.IsAbstract && t.IsAssignableTo(typeof(ViewModel))))
             {
                 services.AddTransient(type);
             }

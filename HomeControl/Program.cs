@@ -9,10 +9,8 @@ using HomeControl.Models.Modeling;
 using HomeControl.Models.ServicesInterfaces;
 using HomeControl.Routines;
 using HomeControl.Weather;
-using Microsoft.AspNetCore.Http.Features;
-using Microsoft.AspNetCore.Mvc.Formatters;
-using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.FileProviders;
+using NTIH.ViewModeling;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -45,11 +43,12 @@ builder.Services.AddScoped<IEventService, EventService>();
 builder.Services.AddScoped<IRoutinesService, RoutinesService>();
 builder.Services.AddScoped<IDeviceService, DeviceService>();
 builder.Services.AddScoped<IActionsService, ActionsService>();
+builder.Services.RegisterDisplayTypesFromAssembly(HomeControl.Models.AssemblyReference.Value);
+builder.Services.RegisterViewModelsFromAssembly(typeof(Program).Assembly);
 
 var app = builder.Build();
 
 NTIH.Database.DatabaseConnection.RegisterDatabaseModelTypesFromAssembly(HomeControl.Models.AssemblyReference.Value);
-builder.Services.RegisterDisplayTypesFromAssembly(HomeControl.Models.AssemblyReference.Value);
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

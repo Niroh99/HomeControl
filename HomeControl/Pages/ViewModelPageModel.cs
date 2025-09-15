@@ -15,6 +15,13 @@ namespace HomeControl.Pages
             await base.OnPageHandlerExecutionAsync(context, next);
         }
 
+        public override void OnPageHandlerExecuted(PageHandlerExecutedContext context)
+        {
+            context.HttpContext.Response.Cookies.Append("ViewModel", System.Text.Json.JsonSerializer.Serialize(ViewModel));
+
+            base.OnPageHandlerExecuted(context);
+        }
+
         public async Task<IActionResult> ViewModelResponse()
         {
             await CreateAndInitializeViewModel();

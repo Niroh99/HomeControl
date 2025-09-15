@@ -80,4 +80,6 @@ function bindFromModel() {
     bindFromSource(model, document);
 }
 
+var model = JSON.parse(getCookie("ViewModel"));
+
 bindFromModel();

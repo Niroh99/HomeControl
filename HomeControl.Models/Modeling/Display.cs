@@ -13,8 +13,12 @@ namespace HomeControl.Models.Modeling
     {
         public static void RegisterDisplayTypesFromAssembly(this IServiceCollection services, Assembly assembly)
         {
-            foreach (var displayType in assembly.DefinedTypes.Where(x => x.IsAssignableTo(typeof(IDisplay<>))))
+            foreach (var displayType in assembly.DefinedTypes.Where(x => !x.IsAbstract && !x.IsInterface && x.IsAssignableTo(typeof(IDisplay))))
             {
+                if (displayType == typeof(IDisplay)) continue;
+                if (displayType == typeof(IDisplay<>)) continue;
+                if (displayType == typeof(DisplayBase<>)) continue;
+
                 services.AddTransient(displayType);
             }
         }
