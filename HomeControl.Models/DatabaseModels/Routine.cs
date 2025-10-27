@@ -1,9 +1,9 @@
 ﻿using NTIH.Database.Modeling;
-using System.ComponentModel.DataAnnotations.Schema;
+using NTIH.Database.Modeling.Attributes;
 
 namespace HomeControl.Models.DatabaseModels
 {
-    [Table(nameof(Routine))]
+    [Table]
     public class Routine : IdentityKeyModel
     {
         [Column]

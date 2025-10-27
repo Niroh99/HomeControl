@@ -1,10 +1,9 @@
 ﻿using NTIH.Database.Modeling;
 using NTIH.Database.Modeling.Attributes;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HomeControl.Models.DatabaseModels
 {
-    [Table(nameof(Product))]
+    [Table]
     public class Product : IdentityKeyModel
     {
         [Column]

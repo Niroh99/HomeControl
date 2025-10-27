@@ -1,9 +1,9 @@
 ﻿using NTIH.Database.Modeling;
-using System.ComponentModel.DataAnnotations.Schema;
+using NTIH.Database.Modeling.Attributes;
 
 namespace HomeControl.Models.DatabaseModels
 {
-    [Table(nameof(DeviceOption))]
+    [Table]
     public class DeviceOption : IdentityKeyModel
     {
         [Column]
@@ -11,5 +11,8 @@ namespace HomeControl.Models.DatabaseModels
 
         [Column]
         public string Name { get => Get<string>(); set => Set(value); }
+
+        [System.ComponentModel.DataAnnotations.Schema.ForeignKey(nameof(DeviceId))]
+        public Device Device { get => Get<Device>(); }
     }
 }

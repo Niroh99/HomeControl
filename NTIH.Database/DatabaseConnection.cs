@@ -1,11 +1,12 @@
-﻿using NTIH.Database.Modeling;
-using NTIH.Database.Metadata;
-using Microsoft.Data.Sqlite;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.Linq;
 using System.Reflection;
 using System.Text;
+using Microsoft.Data.Sqlite;
 using NTIH.Database.Exceptions;
+using NTIH.Database.Metadata;
+using NTIH.Database.Modeling;
+using NTIH.Database.Modeling.Attributes;
+using NTIH.Modeling;
 
 namespace NTIH.Database
 {
@@ -39,7 +40,7 @@ namespace NTIH.Database
 
         public static void RegisterDatabaseModelType(Type databaseModelType)
         {
-            if (TableModelMetadatas.ContainsKey(databaseModelType)) return;
+            if (ModelMetadatas.ContainsKey(databaseModelType)) return;
 
             if (!databaseModelType.IsAssignableTo(typeof(DatabaseModel))) return;
 
@@ -61,33 +62,57 @@ namespace NTIH.Database
             }
         }
 
+        private static bool TryDetermineTableName(Type databaseModelType, out string tableName)
+        {
+            if (databaseModelType.TryGetCustomAttribute<TableAttribute>(out var tableAttribute))
+            {
+                tableName = tableAttribute.Name ?? databaseModelType.Name;
+                return true;
+            }
+            else if (databaseModelType.TryGetCustomAttribute<System.ComponentModel.DataAnnotations.Schema.TableAttribute>(out var dataAnnotationsTableAttribute))
+            {
+                tableName = dataAnnotationsTableAttribute.Name;
+                return true;
+            }
+
+            tableName = null;
+            return false;
+        }
+
+        private static bool IsColumnProperty(PropertyInfo propertyInfo, out string columnName, out ColumnSize columnSize)
+        {
+            if (propertyInfo.TryGetCustomAttribute<ColumnAttribute>(out var columnAttribute))
+            {
+                columnName = columnAttribute.Name ?? propertyInfo.Name;
+                columnSize = columnAttribute.Size;
+                return true;
+            }
+            else if (propertyInfo.TryGetCustomAttribute<System.ComponentModel.DataAnnotations.Schema.ColumnAttribute>(out var dataAnnotationsColumnAttribute))
+            {
+                columnName = dataAnnotationsColumnAttribute.Name;
+                columnSize = default;
+                return true;
+            }
+
+            columnName = null;
+            columnSize = default;
+            return false;
+        }
+
         private static DatabaseModelMetadata GenerateModelMetadata(Type databaseModelType)
         {
-            DatabaseModelMetadata metadata;
-
-            if (databaseModelType.GetCustomAttribute(typeof(TableAttribute)) is TableAttribute tableAttribute)
-            {
-                metadata = new DatabaseTableModelMetadata()
-                {
-                    TableName = tableAttribute.Name,
-                };
-            }
-            else metadata = new DatabaseModelMetadata();
+            DatabaseModelMetadata metadata = TryDetermineTableName(databaseModelType, out var tableName)
+                ? new DatabaseTableModelMetadata(tableName, databaseModelType)
+                : new DatabaseModelMetadata(databaseModelType);
 
             foreach (var property in databaseModelType.GetProperties().Where(x => x.CanRead))
             {
-                var columnAttribute = property.GetCustomAttribute(typeof(ColumnAttribute)) as ColumnAttribute;
-                var foreignKeyAttribute = property.GetCustomAttribute(typeof(ForeignKeyAttribute)) as ForeignKeyAttribute;
-
-                if (columnAttribute == null && foreignKeyAttribute == null) metadata.Fields.Add(new DatabaseField(property));
-                if (columnAttribute != null)
+                if (IsColumnProperty(property, out var columnName, out var columnSize))
                 {
-                    var keyAttribute = property.GetCustomAttribute(typeof(KeyAttribute));
-
-                    if (keyAttribute == null) metadata.Fields.Add(new DatabaseColumnField(property, columnAttribute.Name));
-                    else metadata.Fields.Add(new PrimaryKeyField(property, columnAttribute.Name));
+                    if (property.TryGetCustomAttribute<System.ComponentModel.DataAnnotations.KeyAttribute>(out var keyAttribute)) metadata.Fields.Add(new PrimaryKeyField(property, columnName, columnSize));
+                    else metadata.Fields.Add(new DatabaseColumnField(property, columnName, columnSize));
                 }
-                else if (foreignKeyAttribute != null)
+                else if (property.TryGetCustomAttribute<System.ComponentModel.DataAnnotations.Schema.ForeignKeyAttribute>(out var foreignKeyAttribute))
                 {
                     metadata.Fields.Add(new DatabaseNavigationField(property, foreignKeyAttribute.Name));
                 }
@@ -134,6 +159,158 @@ namespace NTIH.Database
         public static bool TryGetModelMetadata(Type modelType, out DatabaseModelMetadata metadata)
         {
             return ModelMetadatas.TryGetValue(modelType, out metadata);
+        }
+
+        internal static bool UnboxIfNullable(ref Type type)
+        {
+            if (!type.IsGenericType)
+                return false;
+
+            var genericTypeDefinition = type.GetGenericTypeDefinition();
+
+            if (genericTypeDefinition != typeof(Nullable<>))
+                return false;
+
+            type = type.GetGenericArguments()[0];
+            return true;
+        }
+
+        private static string GetDatabaseTypeName(DatabaseColumnField field)
+        {
+            if (field.IsJson) return "TEXT";
+
+            var propertyType = field.PropertyInfo.PropertyType;
+
+            var appendNotNull = !UnboxIfNullable(ref propertyType);
+
+            string typeName;
+
+            if (propertyType == typeof(int)) typeName = "INTEGER";
+            else if (propertyType == typeof(string)) typeName = "TEXT";
+            else if (propertyType == typeof(bool)) typeName = "BOOLEAN";
+            else if (propertyType == typeof(DateTime)) typeName = "DATETIME";
+            else if (propertyType == typeof(decimal)) typeName = "REAL";
+            else if (propertyType.IsEnum) typeName = "TEXT";
+            else throw new NotSupportedException($"Unsupported field type: {propertyType.Name}");
+
+            if (appendNotNull) typeName += " NOT NULL";
+
+            return typeName;
+        }
+
+        private static void GenerateParentCreateScriptFromRelationTreeRecursive(DatabaseTableModelMetadata childMetadata, StringBuilder queryStringBuilder, HashSet<Type> generatedTypes, HashSet<Type> treeRunTypes)
+        {
+            if (generatedTypes.Contains(childMetadata.ModelType)) return;
+
+            if (!treeRunTypes.Add(childMetadata.ModelType)) throw new Exception($"Circular reference detected on Type {childMetadata.ModelType}.");
+
+            foreach (var navigationFieldMetadata in childMetadata.Fields.OfType<DatabaseNavigationField>())
+            {
+                var navigationModelMetadata = TryGetModelMetadataAndThrow(navigationFieldMetadata.PropertyInfo.PropertyType);
+
+                GenerateParentCreateScriptFromRelationTreeRecursive(navigationModelMetadata, queryStringBuilder, generatedTypes, treeRunTypes);
+            }
+
+            AppendCreateTableQueryIfRequired(childMetadata, queryStringBuilder, generatedTypes);
+        }
+
+        private static string GenerateDatabaseStructureQuery()
+        {
+            var queryStringBuilder = new StringBuilder();
+            var generatedTypes = new HashSet<Type>();
+
+            foreach (var tableModelMetadataKeyValuePair in TableModelMetadatas)
+            {
+                var metadata = tableModelMetadataKeyValuePair.Value;
+
+                var treeRunTypes = new HashSet<Type>();
+
+                GenerateParentCreateScriptFromRelationTreeRecursive(metadata, queryStringBuilder, generatedTypes, treeRunTypes);
+
+                AppendCreateTableQueryIfRequired(metadata, queryStringBuilder, generatedTypes);
+            }
+
+            return queryStringBuilder.ToString();
+        }
+
+        private static void AppendCreateTableQueryIfRequired(DatabaseTableModelMetadata metadata, StringBuilder queryStringBuilder, HashSet<Type> generatedTypes)
+        {
+            if (generatedTypes.Contains(metadata.ModelType)) return;
+
+            if (generatedTypes.Count > 0) queryStringBuilder.AppendLine();
+
+            queryStringBuilder.Append("CREATE TABLE [");
+            queryStringBuilder.Append(metadata.TableName);
+            queryStringBuilder.AppendLine("]");
+
+            queryStringBuilder.Append('(');
+            bool isFirst = true;
+
+            foreach (var fieldMetadata in metadata.Fields.OrderBy(field => field.Priority))
+            {
+                if (isFirst) isFirst = false;
+                else queryStringBuilder.AppendLine(",");
+
+                if (fieldMetadata is DatabaseColumnField columnFieldMetadata)
+                {
+                    queryStringBuilder.Append('[')
+                        .Append(columnFieldMetadata.ColumnName)
+                        .Append("] ")
+                        .Append(GetDatabaseTypeName(columnFieldMetadata));
+
+                    if (columnFieldMetadata is PrimaryKeyField primaryKeyField)
+                    {
+                        queryStringBuilder.Append(" PRIMARY KEY");
+                        if (primaryKeyField.IsIdentity) queryStringBuilder.Append(" AUTOINCREMENT");
+                    }
+                }
+                else if (fieldMetadata is DatabaseNavigationField navigationFieldMetadata)
+                {
+                    var navigationModelMetadata = TryGetModelMetadataAndThrow(navigationFieldMetadata.PropertyInfo.PropertyType);
+
+                    queryStringBuilder.Append("CONSTRAINT [")
+                        .Append(metadata.TableName)
+                        .Append('_')
+                        .Append(navigationFieldMetadata.Name)
+                        .Append("] FOREIGN KEY ([")
+                        .Append(navigationFieldMetadata.ForeignKeyFieldName)
+                        .Append("]) REFERENCES [")
+                        .Append(navigationModelMetadata.TableName)
+                        .Append("]([")
+                        .Append(GetPrimaryKey(navigationModelMetadata).ColumnName)
+                        .Append("])");
+                }
+            }
+
+            queryStringBuilder.AppendLine(");");
+
+            generatedTypes.Add(metadata.ModelType);
+        }
+
+        internal static DatabaseTableModelMetadata TryGetModelMetadataAndThrow<T>() where T : DatabaseTableModel
+        {
+            return TryGetModelMetadataAndThrow(typeof(T));
+        }
+
+        internal static DatabaseTableModelMetadata TryGetModelMetadataAndThrow(Type modeType)
+        {
+            if (!TryGetTableModelMetadata(modeType, out var modelMetadata)) throw new Exception("Unable to find Model Metadata.");
+
+            return modelMetadata;
+        }
+
+        internal static PrimaryKeyField GetPrimaryKey(DatabaseTableModelMetadata modelMetadata)
+        {
+            return modelMetadata?.Fields.OfType<PrimaryKeyField>().FirstOrDefault();
+        }
+
+        public async Task CreateDatabaseStructure()
+        {
+            var sqlCommand = SqlConnection.CreateCommand();
+
+            sqlCommand.CommandText = GenerateDatabaseStructureQuery();
+
+            await sqlCommand.ExecuteNonQueryAsync();
         }
 
         public IQuery Insert<T>(T instance) where T : DatabaseTableModel
@@ -251,23 +428,11 @@ namespace NTIH.Database
 
         protected DatabaseConnection DatabaseConnection { get; } = databaseConnection;
 
-        protected DatabaseTableModelMetadata ModelMetadata { get; } = TryGetModelMetadataAndThrow();
-
-        private static DatabaseTableModelMetadata TryGetModelMetadataAndThrow()
-        {
-            if (!DatabaseConnection.TryGetTableModelMetadata<T>(out var modelMetadata)) throw new Exception("Unable to find Model Metadata.");
-
-            return modelMetadata;
-        }
+        protected DatabaseTableModelMetadata ModelMetadata { get; } = DatabaseConnection.TryGetModelMetadataAndThrow<T>();
 
         protected PrimaryKeyField GetPrimaryKey()
         {
-            return GetPrimaryKey(ModelMetadata);
-        }
-
-        protected static PrimaryKeyField GetPrimaryKey(DatabaseTableModelMetadata modelMetadata)
-        {
-            return modelMetadata?.Fields.OfType<PrimaryKeyField>().FirstOrDefault();
+            return DatabaseConnection.GetPrimaryKey(ModelMetadata);
         }
 
         protected async Task<object> ConvertDatabaseValue(DatabaseColumnField field, object databaseValue)
@@ -279,17 +444,7 @@ namespace NTIH.Database
 
             var propertyType = field.PropertyInfo.PropertyType;
 
-            if (propertyType.IsGenericType)
-            {
-                var genericTypeDefinition = propertyType.GetGenericTypeDefinition();
-
-                if (genericTypeDefinition == typeof(Nullable<>))
-                {
-                    if (databaseValue == null) return null;
-
-                    propertyType = propertyType.GetGenericArguments()[0];
-                }
-            }
+            if (DatabaseConnection.UnboxIfNullable(ref propertyType) && databaseValue == null) return null;
 
             if (valueType == propertyType) return databaseValue;
 
@@ -449,7 +604,7 @@ namespace NTIH.Database
 
                 var foreignKeyField = ModelMetadata.Fields.OfType<DatabaseColumnField>().FirstOrDefault(x => x.Name == join.NavigationField.ForeignKeyFieldName) ?? throw new Exception($"Unable to join {join.NavigationField.Name}");
 
-                var joinedModelPrimaryKey = GetPrimaryKey(joinedModelMetadata);
+                var joinedModelPrimaryKey = DatabaseConnection.GetPrimaryKey(joinedModelMetadata);
 
                 joinsStringBuilder.Append(" LEFT JOIN [")
                     .Append(joinedModelMetadata.TableName)

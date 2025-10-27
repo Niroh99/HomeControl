@@ -54,7 +54,7 @@ namespace HomeControl.Helpers
 
             if (_pageModelTypeMenutItems.ContainsKey(pageModelType)) return false;
 
-            var menuPageAttribute = pageModelType.GetCustomAttribute(typeof(HirarchyPageAttribute)) as HirarchyPageAttribute;
+            var menuPageAttribute = pageModelType.GetCustomAttribute<HirarchyPageAttribute>();
 
             if (menuPageAttribute == null) return false;
 
@@ -83,7 +83,7 @@ namespace HomeControl.Helpers
         {
             if (typeMenuItems.ContainsKey(menuPageModelType)) return;
 
-            var menuPageAttribute = menuPageModelType.GetCustomAttribute(typeof(HirarchyPageAttribute)) as HirarchyPageAttribute;
+            var menuPageAttribute = menuPageModelType.GetCustomAttribute<HirarchyPageAttribute>();
 
             if (menuPageAttribute == null) return;
 

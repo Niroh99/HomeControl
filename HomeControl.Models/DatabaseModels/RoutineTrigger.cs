@@ -1,14 +1,13 @@
-﻿using HomeControl.Models.Extensions;
+﻿using System.ComponentModel;
+using HomeControl.Models.Extensions;
 using HomeControl.Models.Modeling;
 using Microsoft.Extensions.DependencyInjection;
 using NTIH.Database.Modeling;
 using NTIH.Database.Modeling.Attributes;
-using System.ComponentModel;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HomeControl.Models.DatabaseModels
 {
-    [Table(nameof(RoutineTrigger))]
+    [Table]
     public class RoutineTrigger : IdentityKeyModel, IDisplayable
     {
         [Column]
@@ -20,6 +19,9 @@ namespace HomeControl.Models.DatabaseModels
         [Column]
         [JsonField]
         public RoutineTriggerData Data { get => Get<RoutineTriggerData>(); set => Set(value); }
+
+        [System.ComponentModel.DataAnnotations.Schema.ForeignKey(nameof(RoutineId))]
+        public Routine Routine { get => Get<Routine>(); }
     }
 
     public class RoutineTriggerDisplay : DisplayBase<RoutineTrigger>

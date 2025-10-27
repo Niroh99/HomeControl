@@ -1,9 +1,9 @@
 ﻿using NTIH.Database.Modeling;
-using System.ComponentModel.DataAnnotations.Schema;
+using NTIH.Database.Modeling.Attributes;
 
 namespace HomeControl.Models.DatabaseModels
 {
-    [Table(nameof(EventError))]
+    [Table]
     public class EventError : IdentityKeyModel
     {
         [Column]
@@ -11,5 +11,8 @@ namespace HomeControl.Models.DatabaseModels
 
         [Column]
         public string Error { get => Get<string>(); set => Set(value); }
+
+        [System.ComponentModel.DataAnnotations.Schema.ForeignKey(nameof(EventId))]
+        public Event Event { get => Get<Event>(); }
     }
 }

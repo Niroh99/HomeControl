@@ -1,9 +1,9 @@
 ﻿using NTIH.Database.Modeling;
-using System.ComponentModel.DataAnnotations.Schema;
+using NTIH.Database.Modeling.Attributes;
 
 namespace HomeControl.Models.DatabaseModels
 {
-    [Table(nameof(Stock))]
+    [Table]
     public class Stock : IdentityKeyModel
     {
         [Column]
@@ -12,13 +12,13 @@ namespace HomeControl.Models.DatabaseModels
         [Column]
         public int LocationId { get => Get<int>(); set => Set(value); }
 
-        [Column]
+        [Column(20, 3)]
         public decimal Quantity { get => Get<decimal>(); set => Set(value); }
 
-        [ForeignKey(nameof(ProductId))]
+        [System.ComponentModel.DataAnnotations.Schema.ForeignKey(nameof(ProductId))]
         public Product Product { get => Get<Product>(); }
 
-        [ForeignKey(nameof(LocationId))]
+        [System.ComponentModel.DataAnnotations.Schema.ForeignKey(nameof(LocationId))]
         public Location Location { get => Get<Location>(); }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using HomeControl.CLI.Attributes;
+using NTIH.Modeling;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,7 +24,7 @@ namespace HomeControl.CLI.CommandHandlers
 
             foreach (var commandHandlerType in assembly.DefinedTypes.Where(x => x.IsAssignableTo(typeof(CommandHandler))))
             {
-                if (commandHandlerType.GetCustomAttribute(typeof(CommandHandlerAttribute)) is not CommandHandlerAttribute commandHandlerAttribute) continue;
+                if (!commandHandlerType.TryGetCustomAttribute<CommandHandlerAttribute>(out var commandHandlerAttribute)) continue;
 
                 var commandName = commandHandlerAttribute.Command;
 

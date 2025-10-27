@@ -4,7 +4,8 @@ using System.Reflection;
 
 namespace NTIH.Database.Metadata
 {
-    public class DatabaseField(PropertyInfo propertyInfo) : FieldMetadata(propertyInfo)
+    public abstract class DatabaseField(PropertyInfo propertyInfo) : FieldMetadata(propertyInfo)
     {
+        public abstract int Priority { get; }
     }
 }

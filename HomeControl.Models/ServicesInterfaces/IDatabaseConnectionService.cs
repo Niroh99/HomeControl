@@ -21,6 +21,8 @@ namespace HomeControl.Models.ServicesInterfaces
             return DatabaseConnection.TryGetTableModelMetadata(modelType, out metadata);
         }
 
+        Task CreateDatabaseStructure();
+
         IQuery Insert<T>(T instance) where T : DatabaseTableModel;
 
         ISelectSingle<T> SelectSingle<T>(int id) where T : IdentityKeyModel;

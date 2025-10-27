@@ -1,7 +1,7 @@
 ﻿namespace NTIH.Database.Metadata
 {
-    public class DatabaseTableModelMetadata : DatabaseModelMetadata
+    public class DatabaseTableModelMetadata(string tableName, Type modelType) : DatabaseModelMetadata(modelType)
     {
-        public string TableName { get; set; }
+        public string TableName { get; set; } = tableName;
     }
 }

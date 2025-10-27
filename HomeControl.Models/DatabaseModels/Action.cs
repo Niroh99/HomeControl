@@ -4,7 +4,6 @@ using Microsoft.Extensions.DependencyInjection;
 using NTIH.Database.Modeling;
 using NTIH.Database.Modeling.Attributes;
 using System.ComponentModel;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Threading.Tasks;
 
 namespace HomeControl.Models.DatabaseModels

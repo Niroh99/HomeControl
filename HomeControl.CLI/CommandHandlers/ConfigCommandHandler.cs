@@ -16,7 +16,7 @@ namespace HomeControl.CLI.CommandHandlers
         {
             if (Args.Count == 0)
             {
-                Console.WriteLine("No member specified. Available members: hosturl");
+                Console.WriteLine($"No member specified. Available members: {nameof(Config.HostUrl)}");
                 return 1;
             }
 
@@ -30,7 +30,7 @@ namespace HomeControl.CLI.CommandHandlers
 
             while (Args.Count > 0)
             {
-                var member = Args.Dequeue().ToLowerInvariant();
+                var member = Args.Dequeue();
                 var value = Args.Dequeue();
 
                 switch (member)
