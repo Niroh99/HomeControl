@@ -198,17 +198,22 @@ namespace NTIH.Database
             return typeName;
         }
 
-        private static void GenerateParentCreateScriptFromRelationTreeRecursive(DatabaseTableModelMetadata childMetadata, StringBuilder queryStringBuilder, HashSet<Type> generatedTypes, HashSet<Type> treeRunTypes)
+        private static void GenerateParentCreateScriptFromRelationTreeRecursive(DatabaseTableModelMetadata childMetadata, DatabaseTableModelMetadata parentMetadata, StringBuilder queryStringBuilder, HashSet<Type> generatedTypes, HashSet<Type> treeRunTypes)
         {
             if (generatedTypes.Contains(childMetadata.ModelType)) return;
 
-            if (!treeRunTypes.Add(childMetadata.ModelType)) throw new Exception($"Circular reference detected on Type {childMetadata.ModelType}.");
+            if (!treeRunTypes.Add(childMetadata.ModelType))
+            {
+                if (childMetadata.ModelType == parentMetadata?.ModelType) return;
+
+                throw new Exception($"Circular reference detected on Type {childMetadata.ModelType}.");
+            }
 
             foreach (var navigationFieldMetadata in childMetadata.Fields.OfType<DatabaseNavigationField>())
             {
                 var navigationModelMetadata = TryGetModelMetadataAndThrow(navigationFieldMetadata.PropertyInfo.PropertyType);
 
-                GenerateParentCreateScriptFromRelationTreeRecursive(navigationModelMetadata, queryStringBuilder, generatedTypes, treeRunTypes);
+                GenerateParentCreateScriptFromRelationTreeRecursive(navigationModelMetadata, childMetadata, queryStringBuilder, generatedTypes, treeRunTypes);
             }
 
             AppendCreateTableQueryIfRequired(childMetadata, queryStringBuilder, generatedTypes);
@@ -219,13 +224,11 @@ namespace NTIH.Database
             var queryStringBuilder = new StringBuilder();
             var generatedTypes = new HashSet<Type>();
 
-            foreach (var tableModelMetadataKeyValuePair in TableModelMetadatas)
+            foreach (var metadata in TableModelMetadatas.Values)
             {
-                var metadata = tableModelMetadataKeyValuePair.Value;
-
                 var treeRunTypes = new HashSet<Type>();
 
-                GenerateParentCreateScriptFromRelationTreeRecursive(metadata, queryStringBuilder, generatedTypes, treeRunTypes);
+                GenerateParentCreateScriptFromRelationTreeRecursive(metadata, null, queryStringBuilder, generatedTypes, treeRunTypes);
 
                 AppendCreateTableQueryIfRequired(metadata, queryStringBuilder, generatedTypes);
             }
