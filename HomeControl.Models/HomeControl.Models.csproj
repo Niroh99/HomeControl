@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
 	<Nullable>disable</Nullable>
   </PropertyGroup>
@@ -11,7 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\NTIH.Database\NTIH.Database.csproj" />
+    <ProjectReference Include="..\..\..\NTIH.Libraries\NTIH.Database\NTIH.Database.csproj" />
   </ItemGroup>
 
 </Project>
