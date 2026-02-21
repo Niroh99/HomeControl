@@ -1,9 +1,10 @@
 using HomeControl.Models.DatabaseModels;
 using HomeControl.Models.ServicesInterfaces;
+using NTIH.ViewModeling;
 
 namespace HomeControl.ViewModels.Devices
 {
-    public class RoutinesViewModel(IDatabaseConnectionService db) : PageViewModel
+    public class RoutinesViewModel(IDatabaseConnectionService db) : ViewModel
     {
         public List<Routine> Routines { get => GetList<Routine>(); }
 

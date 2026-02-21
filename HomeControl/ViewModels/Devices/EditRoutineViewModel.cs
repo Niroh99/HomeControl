@@ -6,10 +6,11 @@ using HomeControl.Models.ServicesInterfaces;
 using HomeControl.Routines;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using NTIH.Database;
+using NTIH.ViewModeling;
 
 namespace HomeControl.ViewModels.Devices
 {
-    public class EditRoutineViewModel(IDatabaseConnectionService db, IDeviceService deviceService) : PageViewModel
+    public class EditRoutineViewModel(IDatabaseConnectionService db, IDeviceService deviceService) : ViewModel
     {
         public int RoutineId { get => Get<int>(); set => Set(value); }
 

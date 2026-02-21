@@ -78,14 +78,16 @@ namespace HomeControl.Routines
                     case RoutineTriggerType.Sunrise:
                         var sunriseTriggerData = (SunriseRoutineTriggerData)trigger.Data;
 
-                        await weatherService.EnsureValidTodaysForecastAsync();
+                        if (!await weatherService.TryGetTodaysForecastAsync())
+                            return false;
 
                         if (ShouldExecuteFromDailyTrigger(routine, sunriseTriggerData, weatherService.Today.Sunrise)) return true;
                         break;
                     case RoutineTriggerType.Sunset:
                         var sunsetTriggerData = (SunsetRoutineTriggerData)trigger.Data;
 
-                        await weatherService.EnsureValidTodaysForecastAsync();
+                        if (!await weatherService.TryGetTodaysForecastAsync())
+                            return false;
 
                         if (ShouldExecuteFromDailyTrigger(routine, sunsetTriggerData, weatherService.Today.Sunset)) return true;
                         break;

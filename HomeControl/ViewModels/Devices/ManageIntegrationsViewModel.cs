@@ -1,6 +1,8 @@
+using NTIH.ViewModeling;
+
 namespace HomeControl.ViewModels.Devices
 {
-    public class ManageIntegrationsViewModel : PageViewModel
+    public class ManageIntegrationsViewModel : ViewModel
     {
 
     }

@@ -9,7 +9,7 @@
         Task Create(object displayable, IServiceProvider serviceProvider);
     }
 
-    public interface IDisplay<T> : IDisplay
+    public interface IDisplay<T> : IDisplay where T : IDisplayable
     {
 
     }

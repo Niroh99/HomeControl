@@ -1,10 +1,11 @@
 using HomeControl.Models.DatabaseModels;
 using HomeControl.Models.Integrations;
 using HomeControl.Models.ServicesInterfaces;
+using NTIH.ViewModeling;
 
 namespace HomeControl.ViewModels.Devices
 {
-    public class EditDeviceViewModel(IDatabaseConnectionService db, IDeviceService deviceService) : PageViewModel
+    public class EditDeviceViewModel(IDatabaseConnectionService db, IDeviceService deviceService) : ViewModel
     {
         public int DeviceId { get => Get<int>(); set => Set(value); }
 

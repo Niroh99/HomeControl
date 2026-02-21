@@ -6,10 +6,11 @@ using HomeControl.Models.ServicesInterfaces;
 using HomeControl.ViewModels;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using NTIH.Database;
+using NTIH.ViewModeling;
 
 namespace HomeControl.ViewModels.Devices
 {
-    public class EditDeviceOptionViewModel(IDatabaseConnectionService db, IDeviceService deviceService) : PageViewModel
+    public class EditDeviceOptionViewModel(IDatabaseConnectionService db, IDeviceService deviceService) : ViewModel
     {
         public int DeviceOptionId { get => Get<int>(); set => Set(value); }
 

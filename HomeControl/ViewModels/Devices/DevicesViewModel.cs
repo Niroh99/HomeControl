@@ -1,10 +1,11 @@
 using HomeControl.Integrations;
 using HomeControl.Models.ServicesInterfaces;
 using HomeControl.Models.DatabaseModels;
+using NTIH.ViewModeling;
 
 namespace HomeControl.ViewModels.Devices
 {
-    public class DevicesViewModel(IDatabaseConnectionService db, IDeviceService deviceService) : PageViewModel
+    public class DevicesViewModel(IDatabaseConnectionService db, IDeviceService deviceService) : ViewModel
     {
         public List<DeviceInfo> Devices { get => GetList<DeviceInfo>(); }
 

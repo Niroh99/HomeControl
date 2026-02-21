@@ -2,11 +2,12 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using NTIH.ViewModeling;
 using System.Text.Json;
 
 namespace HomeControl.Pages
 {
-    public abstract class ViewModelPageModel<T>(IServiceProvider serviceProvider) : PageModel where T : PageViewModel
+    public abstract class ViewModelPageModel<T>(IServiceProvider serviceProvider) : PageModel where T : ViewModel
     {
         public static readonly JsonSerializerOptions WebSerializationOptions = new(JsonSerializerDefaults.Web);
 
@@ -20,9 +21,14 @@ namespace HomeControl.Pages
 
         public override void OnPageHandlerExecuted(PageHandlerExecutedContext context)
         {
-            context.HttpContext.Response.Cookies.Append("ViewModel", JsonSerializer.Serialize(ViewModel, WebSerializationOptions));
+            context.HttpContext.Response.Cookies.Append("PageInfo", JsonSerializer.Serialize(new PageInfo(Url.PageLink()), WebSerializationOptions));
 
             base.OnPageHandlerExecuted(context);
+        }
+
+        public IActionResult OnGetViewModel()
+        {
+            return new JsonResult(ViewModel);
         }
 
         public async Task<IActionResult> ViewModelResponse()
@@ -39,7 +45,6 @@ namespace HomeControl.Pages
         private async Task CreateAndInitializeViewModel()
         {
             ViewModel = serviceProvider.GetService<T>();
-            ViewModel.CreatePageInfo(this);
             await InitializingViewModelAsync();
             await ViewModel.Initialize();
         }

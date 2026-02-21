@@ -28,7 +28,7 @@ namespace HomeControl.TagHelpers
                 var display = await displayFactory.CreateDisplayAsync(Displayable);
 
                 output.Attributes.Add("header", display.Display);
-                output.Attributes.Add("InfoText", display.AdditionalInfo);
+                output.Attributes.Add("info-text", display.AdditionalInfo);
             }
 
             if (!string.IsNullOrWhiteSpace(IconSource))

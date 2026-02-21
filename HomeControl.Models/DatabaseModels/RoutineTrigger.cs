@@ -51,7 +51,7 @@ namespace HomeControl.Models.DatabaseModels
         Sunset,
     }
 
-    public abstract class RoutineTriggerData : DatabaseModel, IDisplayable
+    public abstract class RoutineTriggerData : DatabaseModel, IDisplayable<RoutineTriggerDataDisplay>
     {
         public virtual async Task<(string display, string additionalInfo)> CreateDisplay(IServiceProvider serviceProvider)
         {

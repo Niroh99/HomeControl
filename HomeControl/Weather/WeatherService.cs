@@ -6,7 +6,7 @@
 
         bool IsTodaysForecastValid();
 
-        Task EnsureValidTodaysForecastAsync();
+        Task<bool> TryGetTodaysForecastAsync();
     }
 
     public class WeatherService : IWeatherService
@@ -45,13 +45,18 @@
             return _today != null && _today.Date == DateOnly.FromDateTime(DateTime.Today);
         }
 
-        public async Task EnsureValidTodaysForecastAsync()
+        public async Task<bool> TryGetTodaysForecastAsync()
         {
-            if (IsTodaysForecastValid()) return;
+            if (IsTodaysForecastValid()) return true;
 
             var today = DateOnly.FromDateTime(DateTime.Today);
 
-            _today = (await GetForecastsAsync(today, today)).First();
+            var forecasts = await GetForecastsAsync(today, today);
+
+            if (forecasts.Count == 0) return false;
+
+            _today = forecasts[0];
+            return true;
         }
 
         private async Task<List<Forecast>> GetForecastsAsync(DateOnly from, DateOnly to)

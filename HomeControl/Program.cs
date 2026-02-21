@@ -49,6 +49,7 @@ builder.Services.RegisterViewModelsFromAssembly(typeof(Program).Assembly);
 var app = builder.Build();
 
 NTIH.Database.DatabaseConnection.RegisterDatabaseModelTypesFromAssembly(HomeControl.Models.AssemblyReference.Value);
+DisplayFactory.RegisterDisplaysFromAssembly(HomeControl.Models.AssemblyReference.Value);
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

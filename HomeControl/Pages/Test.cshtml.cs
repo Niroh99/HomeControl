@@ -1,14 +1,14 @@
 using HomeControl.Database;
 using HomeControl.Models.DatabaseModels;
 using HomeControl.Models.ServicesInterfaces;
-using HomeControl.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using NTIH.ViewModeling;
 
 namespace HomeControl.Pages
 {
     public class TestModel(IServiceProvider serviceProvider, IDatabaseConnectionService db) : ViewModelPageModel<TestModel.TestViewModel>(serviceProvider)
     {
-        public class TestViewModel : PageViewModel
+        public class TestViewModel : ViewModel
         {
 
         }
