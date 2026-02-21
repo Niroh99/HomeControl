@@ -1,6 +1,5 @@
-﻿using HomeControl.DatabaseModels;
-using HomeControl.Integrations;
-using Microsoft.AspNetCore.Mvc.Rendering;
+﻿using HomeControl.Models.DatabaseModels;
+using HomeControl.Models.Integrations;
 
 namespace HomeControl.Views.Shared
 {

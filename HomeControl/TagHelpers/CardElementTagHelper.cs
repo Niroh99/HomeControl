@@ -1,26 +1,35 @@
 ﻿using HomeControl.Helpers;
-using Microsoft.AspNetCore.Html;
+using HomeControl.Models.Modeling;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.AspNetCore.Mvc.TagHelpers;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
-using Microsoft.AspNetCore.Razor.Runtime.TagHelpers;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using System.Text.Encodings.Web;
 
 namespace HomeControl.TagHelpers
 {
     [HtmlTargetElement("card-element")]
-    public class CardElementTagHelper(IFileVersionProvider fileVersionProvider, IUrlHelperFactory urlHelperFactory) : TagHelper
+    public class CardElementTagHelper(IDisplayFactory displayFactory, IFileVersionProvider fileVersionProvider, IUrlHelperFactory urlHelperFactory) : TagHelper
     {
         [ViewContext]
         public ViewContext ViewContext { get; set; } = default!;
 
         public string IconSource { get; set; }
 
-        public override void Process(TagHelperContext context, TagHelperOutput output)
+        public IDisplayable Displayable { get; set; }
+
+        public override async Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
         {
             output.AddClass("centered-content", HtmlEncoder.Default);
+
+            if (Displayable != null)
+            {
+                var display = await displayFactory.CreateDisplayAsync(Displayable);
+
+                output.Attributes.Add("header", display.Display);
+                output.Attributes.Add("info-text", display.AdditionalInfo);
+            }
 
             if (!string.IsNullOrWhiteSpace(IconSource))
             {

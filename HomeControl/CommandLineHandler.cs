@@ -1,5 +1,5 @@
-﻿using HomeControl.Database;
-using HomeControl.DatabaseModels;
+﻿using HomeControl.Models.DatabaseModels;
+using NTIH.Database;
 
 namespace HomeControl
 {

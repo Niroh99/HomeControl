@@ -1,79 +1,32 @@
 using HomeControl.Attributes;
-using HomeControl.Database;
-using HomeControl.DatabaseModels;
-using HomeControl.Helpers;
-using HomeControl.Integrations;
-using HomeControl.Modeling;
+using HomeControl.Models.DatabaseModels;
+using HomeControl.Models.ServicesInterfaces;
 using HomeControl.Routines;
+using HomeControl.ViewModels;
+using HomeControl.ViewModels.Devices;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace HomeControl.Pages.Devices
 {
-    [MenuPage(typeof(RoutinesModel), "Edit Routine", null)]
-    public class EditRoutineModel(IDatabaseConnectionService db, IDeviceService deviceService) : ViewModelPageModel<EditRoutineModel.EditRoutineViewModel>
+    [HirarchyPage(typeof(EditRoutineModel), typeof(RoutinesModel), "Edit Routine", null)]
+    public partial class EditRoutineModel(IServiceProvider serviceProvider, IDatabaseConnectionService db) : ViewModelPageModel<EditRoutineViewModel>(serviceProvider), IProvideBreadcrumbInfo
     {
-        public class EditRoutineViewModel(EditRoutineModel page, IDatabaseConnectionService db, IDeviceService deviceService) : PageViewModel(page)
-        {
-            public Routine Routine { get; set; }
-
-            public List<RoutineTrigger> RoutineTriggers { get; } = [];
-
-            public List<SelectListItem> TriggerTypes { get; } = [];
-
-            public List<RoutineAction> RoutineActions { get; } = [];
-
-            public List<SelectListItem> ActionTypes { get; } = [];
-
-            public List<DeviceInfo> Devices { get; } = [];
-
-            public async override Task Initialize()
-            {
-                Routine = await db.SelectSingle<Routine>(page.RoutineId).ExecuteAsync();
-
-                if (Routine == null) return;
-
-                var triggersSelect = db.Select<RoutineTrigger>();
-                triggersSelect.Where().Compare(i => i.RoutineId, ComparisonOperator.Equals, Routine.Id);
-
-                RoutineTriggers.AddRange(await triggersSelect.ExecuteAsync());
-
-                foreach (var triggerType in IRoutinesService.RoutineTriggerTypeDataMap.Keys)
-                {
-                    TriggerTypes.Add(new SelectListItem(EnumHelper.GetValueDescription(triggerType), triggerType.ToString()));
-                }
-
-                var actionsSelect = db.Select<RoutineAction>();
-                actionsSelect.Where().Compare(i => i.RoutineId, ComparisonOperator.Equals, Routine.Id);
-
-                RoutineActions.AddRange((await actionsSelect.ExecuteAsync()).OrderBy(action => action.Index));
-
-                foreach (var actionType in IRoutinesService.RoutineActionTypeDataMap.Keys)
-                {
-                    ActionTypes.Add(new SelectListItem(EnumHelper.GetValueDescription(actionType), actionType.ToString()));
-                }
-
-                var devices = await db.Select<Device>().ExecuteAsync();
-
-                foreach (var device in devices)
-                {
-                    Devices.Add(await DeviceInfo.CreateAsync(device, deviceService, db));
-                }
-            }
-        }
-
         [FromRoute]
         public int RoutineId { get; set; }
+
+        public string GetPageTitle()
+        {
+            return ViewModel.Routine?.Name ?? "Edit Routine";
+        }
+
+        public string GetParentPageTitle(HirarchyPageAttribute hirarchyPageAttribute)
+        {
+            return null;
+        }
 
         public string TestString()
         {
             return "TestStringValue";
-        }
-
-        protected override PageViewModel CreateViewModel()
-        {
-            return new EditRoutineViewModel(this, db, deviceService);
         }
 
         public void OnGet()
@@ -114,7 +67,7 @@ namespace HomeControl.Pages.Devices
 
         public async Task<IActionResult> OnPostCreateRoutineTrigger(RoutineTriggerType routineTriggerType, string newRoutineTriggerData)
         {
-            var triggerDataObject = (Model)System.Text.Json.JsonSerializer.Deserialize(newRoutineTriggerData, IRoutinesService.RoutineTriggerTypeDataMap[routineTriggerType], new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web));
+            var triggerDataObject = (RoutineTriggerData)System.Text.Json.JsonSerializer.Deserialize(newRoutineTriggerData, IRoutinesService.RoutineTriggerTypeDataMap[routineTriggerType], new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web));
 
             var routineTrigger = new RoutineTrigger
             {
@@ -137,7 +90,7 @@ namespace HomeControl.Pages.Devices
 
         public async Task<IActionResult> OnPostCreateRoutineAction(ActionType actionType, string newRoutineActionData)
         {
-            var actionDataObject = (Model)System.Text.Json.JsonSerializer.Deserialize(newRoutineActionData, IRoutinesService.RoutineActionTypeDataMap[actionType], new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web));
+            var actionDataObject = (ActionData)System.Text.Json.JsonSerializer.Deserialize(newRoutineActionData, IRoutinesService.RoutineActionTypeDataMap[actionType], new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web));
 
             var routineAction = new RoutineAction
             {
@@ -157,6 +110,12 @@ namespace HomeControl.Pages.Devices
             await db.Delete(await db.SelectSingle<RoutineAction>(actionIdToRemove).ExecuteAsync()).ExecuteAsync();
 
             return RedirectToPage();
+        }
+
+        protected override Task InitializingViewModelAsync()
+        {
+            ViewModel.RoutineId = RoutineId;
+            return base.InitializingViewModelAsync();
         }
     }
 }

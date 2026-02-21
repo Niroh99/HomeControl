@@ -8,7 +8,7 @@ using Microsoft.Extensions.FileProviders;
 
 namespace HomeControl.Pages.Media
 {
-    [MenuPage(null, "Media", "/Media/Index")]
+    [HirarchyPage(typeof(IndexModel), null, "Media", "/Media/Index")]
     public class IndexModel : PageModel
     {
         public const string PageUrl = "/Media";

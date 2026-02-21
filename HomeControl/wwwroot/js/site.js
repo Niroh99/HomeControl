@@ -45,12 +45,12 @@ function buildPageHandlerRequestData(dataset) {
     return data;
 }
 
-function executePageHandler(pageHandler, dataset) {
+function executePageHandler(pageHandler, dataset, method = "POST") {
     let data = buildPageHandlerRequestData(dataset);
 
     return $.ajax({
-        method: "POST",
-        url: model.pageInfo.url + "?handler=" + pageHandler,
+        method: method,
+        url: pageInfo.url + "?handler=" + pageHandler,
         data: data,
         headers: { RequestVerificationToken: document.getElementById("RequestVerificationToken").value }
     }).done(function (responseModel) {
@@ -66,7 +66,7 @@ function executePageHandlerAndRefresh(pageHandler, dataset) {
 
     return $.ajax({
         method: "POST",
-        url: model.pageInfo.url + "?handler=" + pageHandler,
+        url: pageInfo.url + "?handler=" + pageHandler,
         data: data,
         headers: { RequestVerificationToken: document.getElementById("RequestVerificationToken").value }
     }).done(function () {
@@ -80,4 +80,8 @@ function bindFromModel() {
     bindFromSource(model, document);
 }
 
-bindFromModel();
+console.log(getCookie("PageInfo"));
+
+var pageInfo = JSON.parse(getCookie("PageInfo"));
+
+executePageHandler("ViewModel", null, "GET");

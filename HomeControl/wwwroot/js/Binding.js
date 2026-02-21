@@ -43,7 +43,6 @@ function* iterateBoundPropertiesWithPrefix(source, dataset, prefix) {
             if (converterFunctionIndex >= 0) {
                 converterFunctionName = sourcePropertyPath.substring(converterFunctionIndex + 1);
                 sourcePropertyPath = sourcePropertyPath.substring(0, converterFunctionIndex);
-                console.log(sourcePropertyPath);
             }
 
             let boundPropertyValue = resolveBinding(source, sourcePropertyPath);
@@ -72,7 +71,7 @@ function bindFromSource(source, context) {
 }
 
 function setPropertyValueRecursive(target, pathElements, newValue) {
-    var pathElement = pathElements.shift();
+    let pathElement = pathElements.shift();
 
     let indexerIndex = pathElement.indexOf("[");
 

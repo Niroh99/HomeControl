@@ -1,4 +1,6 @@
 ﻿@page "{DeviceOptionId}"
+@using HomeControl.Models.DatabaseModels
+@using HomeControl.Models.ServicesInterfaces
 @using HomeControl.Views.Shared
 @using Microsoft.AspNetCore.Mvc.Razor
 @model HomeControl.Pages.Devices.EditDeviceOptionModel
@@ -6,11 +8,11 @@
 	Layout = "MenuPage_Layout";
 	ViewData["Title"] = "Edit Device Option";
 
-	var newDeviceOptionActionDataInformation = new Dictionary<string, DatabaseModels.DeviceActionData>();
+	var newDeviceOptionActionDataInformation = new Dictionary<string, DeviceActionData>();
 
-	foreach (var actionTypeMapItem in HomeControl.Integrations.IDeviceService.DeviceOptionActionTypeDataMap)
+	foreach (var actionTypeMapItem in IDeviceService.DeviceOptionActionTypeDataMap)
 	{
-		var actionData = (DatabaseModels.DeviceActionData)Activator.CreateInstance(actionTypeMapItem.Value);
+		var actionData = (DeviceActionData)Activator.CreateInstance(actionTypeMapItem.Value);
 
 		actionData.DeviceId = Model.ViewModel.Device.Id;
 
@@ -101,8 +103,6 @@
 	}
 	else
 	{
-		<h2 class="lesser bound" data-binding-inner="deviceOption.name"></h2>
-
 		<div class="card card-children-separator">
 			<card-element class="card-padding" header="Execute">
 				<button onclick="executePageHandler('Execute')">Execute</button>
@@ -134,11 +134,9 @@
 		else
 		{
 			<div class="card card-children-separator">
-				@for (int i = 0; i < Model.ViewModel.DeviceOptionActions.Count; i++)
+				@foreach (var deviceOptionAction in Model.ViewModel.DeviceOptionActions)
 				{
-					var deviceOptionAction = Model.ViewModel.DeviceOptionActions[i];
-
-					<card-element class="card-padding bound" data-binding-header="deviceOptionActions[@(i)].display">
+					<card-element class="card-padding bound" displayable="deviceOptionAction">
 						<button onclick="openRemoveDeviceOptionActionQuestionDialog('@deviceOptionAction.Id')">Remove</button>
 					</card-element>
 				}

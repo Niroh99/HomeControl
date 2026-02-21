@@ -1,27 +1,16 @@
 using HomeControl.Database;
 using Microsoft.AspNetCore.Mvc;
-using HomeControl.DatabaseModels;
 using HomeControl.Attributes;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using HomeControl.Modeling;
-using HomeControl.Integrations;
-using System.Threading.Tasks;
+using HomeControl.Models.ServicesInterfaces;
+using HomeControl.Models.DatabaseModels;
+using NTIH.Database;
+using HomeControl.ViewModels.Devices;
 
 namespace HomeControl.Pages.Devices
 {
-    [MenuPage(typeof(IndexModel), "Manage Integrations", "/Devices/ManageIntegrations")]
-    public class ManageIntegrationsModel(IDatabaseConnectionService db, IDeviceService deviceService) : ViewModelPageModel<ManageIntegrationsModel.ManageIntegrationsViewModel>
+    [HirarchyPage(typeof(ManageIntegrationsModel), typeof(IndexModel), "Manage Integrations", "/Devices/ManageIntegrations")]
+    public class ManageIntegrationsModel(IServiceProvider serviceProvider, IDatabaseConnectionService db, IDeviceService deviceService) : ViewModelPageModel<ManageIntegrationsViewModel>(serviceProvider)
     {
-        public class ManageIntegrationsViewModel(ViewModelPageModelBase page) : PageViewModel(page)
-        {
-
-        }
-
-        protected override PageViewModel CreateViewModel()
-        {
-            return new ManageIntegrationsViewModel(this);
-        }
-
         public void OnGet()
         {
 
@@ -31,14 +20,14 @@ namespace HomeControl.Pages.Devices
         {
             var databaseDevices = await db.Select<Device>().ExecuteAsync();
 
-            var tpLinkDevices = HomeControl.Integrations.TPLink.Discovery.Discover();
+            var tpLinkDevices = Integrations.TPLink.Discovery.Discover();
 
             var rediscoveredDeviceIds = new List<int>();
 
             foreach (var tpLinkDevice in tpLinkDevices)
             {
                 var databaseDeviceSelect = db.Select<Device>();
-                databaseDeviceSelect.Where().Compare(i => i.Hostname, ComparisonOperator.Equals, tpLinkDevice.Hostname);
+                databaseDeviceSelect.BeginWhere().Compare(i => i.Hostname, ComparisonOperator.Equals, tpLinkDevice.Hostname);
 
                 var databaseDevice = (await databaseDeviceSelect.ExecuteAsync()).FirstOrDefault();
 
@@ -78,7 +67,7 @@ namespace HomeControl.Pages.Devices
 
         public void OnPostClearTPLinkDevicesCache()
         {
-            if (deviceService.TryGetIntegrationDeviceCache<HomeControl.Integrations.TPLink.DeviceCache>(out var cache))
+            if (deviceService.TryGetIntegrationDeviceCache<Integrations.TPLink.DeviceCache>(out var cache))
             {
                 cache.InvalidateAll();
             }

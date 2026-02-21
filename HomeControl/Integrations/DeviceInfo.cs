@@ -1,5 +1,8 @@
 ﻿using HomeControl.Database;
-using HomeControl.DatabaseModels;
+using HomeControl.Models.DatabaseModels;
+using HomeControl.Models.Integrations;
+using HomeControl.Models.ServicesInterfaces;
+using NTIH.Database;
 
 namespace HomeControl.Integrations
 {
@@ -27,7 +30,7 @@ namespace HomeControl.Integrations
             };
 
             var optionsSelect = db.Select<DeviceOption>();
-            optionsSelect.Where().Compare(i => i.DeviceId, ComparisonOperator.Equals, device.Id);
+            optionsSelect.BeginWhere().Compare(i => i.DeviceId, ComparisonOperator.Equals, device.Id);
 
             instance.Options.AddRange(await optionsSelect.ExecuteAsync());
 

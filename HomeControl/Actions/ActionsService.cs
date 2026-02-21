@@ -1,28 +1,15 @@
 ﻿using HomeControl.Database;
-using HomeControl.DatabaseModels;
 using HomeControl.Events;
-using HomeControl.Events.EventDatas;
 using HomeControl.Integrations;
-using HomeControl.Modeling;
+using HomeControl.Models.DatabaseModels;
+using HomeControl.Models.ServicesInterfaces;
 using System.Collections.ObjectModel;
 
 namespace HomeControl.Actions
 {
-    public interface IActionsService
-    {
-        public static ReadOnlyDictionary<ActionType, Type> ActionTypeDataMap { get; } = new Dictionary<ActionType, Type>
-        {
-            { ActionType.ExecuteFeature, typeof(ExecuteDeviceFeatureActionData) },
-            { ActionType.ScheduleFeatureExecution, typeof(ScheduleDeviceFeatureExecutionActionData) },
-            { ActionType.ClearIntegrationDevicesCache, typeof(ClearIntegrationDevicesCacheActionData) }
-        }.AsReadOnly();
-
-        Task ExecuteActionSequenceAsync<T>(List<T> actions, IServiceProvider serviceProvider) where T : DatabaseModels.Action;
-    }
-
     public class ActionsService(IDatabaseConnectionService db) : IActionsService
     {
-        public async Task ExecuteActionSequenceAsync<T>(List<T> actions, IServiceProvider serviceProvider) where T : DatabaseModels.Action
+        public async Task ExecuteActionSequenceAsync<T>(List<T> actions, IServiceProvider serviceProvider) where T : Models.DatabaseModels.Action
         {
             var deviceService = serviceProvider.GetService<IDeviceService>();
             var eventService = serviceProvider.GetService<IEventService>();
@@ -39,7 +26,7 @@ namespace HomeControl.Actions
                     case ActionType.ScheduleFeatureExecution:
                         var scheduleFeatureExecutionDeviceOptionActionData = (ScheduleDeviceFeatureExecutionActionData)action.Data;
 
-                        await eventService.ScheduleEventAsync(db, EventType.ExecuteDeviceFeature, new ExecuteDeviceFeatureEventData
+                        await eventService.ScheduleEventAsync(db, ActionType.ExecuteFeature, new ExecuteDeviceFeatureActionData
                         {
                             DeviceId = scheduleFeatureExecutionDeviceOptionActionData.DeviceId,
                             FeatureName = scheduleFeatureExecutionDeviceOptionActionData.FeatureName,

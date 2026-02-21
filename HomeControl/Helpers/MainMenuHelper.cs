@@ -54,11 +54,11 @@ namespace HomeControl.Helpers
 
             if (_pageModelTypeMenutItems.ContainsKey(pageModelType)) return false;
 
-            var menuPageAttribute = pageModelType.GetCustomAttribute(typeof(MenuPageAttribute)) as MenuPageAttribute;
+            var menuPageAttribute = pageModelType.GetCustomAttribute<HirarchyPageAttribute>();
 
             if (menuPageAttribute == null) return false;
 
-            _pageModelTypeMenutItems[pageModelType] = menuItem = new MenuItem(menuPageAttribute.MenuItem, menuPageAttribute.Url);
+            _pageModelTypeMenutItems[pageModelType] = menuItem = new MenuItem(menuPageAttribute.Title, menuPageAttribute.Url);
 
             if (menuPageAttribute.ParentPageType == null)
             {
@@ -79,15 +79,15 @@ namespace HomeControl.Helpers
             return GetRoot(menuItem.Parent);
         }
 
-        private static void AddMenuPageModelType(Type menuPageModelType, Dictionary<Type, (MenuItem, MenuPageAttribute)> typeMenuItems)
+        private static void AddMenuPageModelType(Type menuPageModelType, Dictionary<Type, (MenuItem, HirarchyPageAttribute)> typeMenuItems)
         {
             if (typeMenuItems.ContainsKey(menuPageModelType)) return;
 
-            var menuPageAttribute = menuPageModelType.GetCustomAttribute(typeof(MenuPageAttribute)) as MenuPageAttribute;
+            var menuPageAttribute = menuPageModelType.GetCustomAttribute<HirarchyPageAttribute>();
 
             if (menuPageAttribute == null) return;
 
-            typeMenuItems[menuPageModelType] = (new MenuItem(menuPageAttribute.MenuItem, menuPageAttribute.Url), menuPageAttribute);
+            typeMenuItems[menuPageModelType] = (new MenuItem(menuPageAttribute.Title, menuPageAttribute.Url), menuPageAttribute);
 
             if (menuPageAttribute.ParentPageType != null) AddMenuPageModelType(menuPageAttribute.ParentPageType, typeMenuItems);
         }

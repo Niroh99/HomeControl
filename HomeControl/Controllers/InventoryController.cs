@@ -1,6 +1,8 @@
 ﻿using HomeControl.Database;
-using HomeControl.DatabaseModels;
+using HomeControl.Models.DatabaseModels;
+using HomeControl.Models.ServicesInterfaces;
 using Microsoft.AspNetCore.Mvc;
+using NTIH.Database;
 
 namespace HomeControl.Controllers
 {
@@ -21,7 +23,7 @@ namespace HomeControl.Controllers
         public async Task<IActionResult> OnGet()
         {
             var stockSelect = db.Select<Stock>();
-            stockSelect.Where().Compare(x => x.Quantity, ComparisonOperator.NotEquals, 0m);
+            stockSelect.BeginWhere().Compare(x => x.Quantity, ComparisonOperator.NotEquals, 0m);
             stockSelect.LeftJoin(x => x.Product);
             stockSelect.LeftJoin(x => x.Location);
 
@@ -42,7 +44,7 @@ namespace HomeControl.Controllers
         public async Task<IActionResult> BookStock([FromBody] BookStockRequest request)
         {
             var stockSelect = db.Select<Stock>();
-            stockSelect.Where().Compare(x => x.ProductId, ComparisonOperator.Equals, request.ProductId).And().Compare(x => x.LocationId, ComparisonOperator.Equals, request.LocationId);
+            stockSelect.BeginWhere().Compare(x => x.ProductId, ComparisonOperator.Equals, request.ProductId).And().Compare(x => x.LocationId, ComparisonOperator.Equals, request.LocationId);
             stockSelect.LeftJoin(x => x.Product);
             stockSelect.LeftJoin(x => x.Location);
 

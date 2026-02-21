@@ -1,0 +1,91 @@
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace NTIH.Modeling
+{
+    public abstract class Model
+    {
+        public Model()
+        {
+            TypeName = GetType().FullName;
+        }
+
+        public string TypeName { get; }
+
+        private readonly Dictionary<string, object> _properties = new Dictionary<string, object>();
+        private readonly Dictionary<string, object> _modifiedProperties = new Dictionary<string, object>();
+
+        public T Get<T>([System.Runtime.CompilerServices.CallerMemberName] string propertyName = null)
+        {
+            if (TryGetModifiedPropertyValue<T>(propertyName, out var modifiedValue)) return modifiedValue;
+
+            return GetPropertyValue<T>(propertyName);
+        }
+
+        public List<T> GetList<T>([System.Runtime.CompilerServices.CallerMemberName] string propertyName = null)
+        {
+            return GetCollectionCore<List<T>>(propertyName);
+        }
+
+        protected T GetCollectionCore<T>([System.Runtime.CompilerServices.CallerMemberName] string propertyName = null) where T : ICollection
+        {
+            var propertyValue = Get<T>(propertyName);
+
+            if (propertyValue == null)
+            {
+                propertyValue = (T)Activator.CreateInstance(typeof(T));
+                Set(propertyValue, propertyName);
+            }
+
+            return propertyValue;
+        }
+
+        public void Set<T>(T value, [System.Runtime.CompilerServices.CallerMemberName] string propertyName = null)
+        {
+            SetCore(value, propertyName);
+        }
+
+        public void ApplyChanges()
+        {
+            foreach (var property in _modifiedProperties) _properties[property.Key] = property.Value;
+
+            _modifiedProperties.Clear();
+        }
+
+        public void Reset()
+        {
+            _modifiedProperties.Clear();
+        }
+
+        public string[] GetModifiedProperties()
+        {
+            return _modifiedProperties.Keys.ToArray();
+        }
+
+        private T GetPropertyValue<T>(string propertyName)
+        {
+            if (_properties.TryGetValue(propertyName, out var value)) return (T)value;
+
+            return default;
+        }
+
+        private bool TryGetModifiedPropertyValue<T>(string propertyName, out T modifiedValue)
+        {
+            if (_modifiedProperties.TryGetValue(propertyName, out var modifiedPropertyValue))
+            {
+                modifiedValue = (T)modifiedPropertyValue;
+                return true;
+            }
+
+            modifiedValue = default;
+            return false;
+        }
+
+        private void SetCore(object value, [System.Runtime.CompilerServices.CallerMemberName] string propertyName = null)
+        {
+            _modifiedProperties[propertyName] = value;
+        }
+    }
+}

@@ -1,9 +1,9 @@
-﻿using HomeControl.Actions;
-using HomeControl.Database;
-using HomeControl.DatabaseModels;
+﻿using HomeControl.Database;
+using HomeControl.Models.DatabaseModels;
+using HomeControl.Models.ServicesInterfaces;
 using HomeControl.Weather;
+using NTIH.Database;
 using System.Collections.ObjectModel;
-using System.Timers;
 
 namespace HomeControl.Routines
 {
@@ -27,7 +27,7 @@ namespace HomeControl.Routines
         public async Task ExecuteActiveRoutinesAsync()
         {
             var routinesSelect = db.Select<Routine>();
-            routinesSelect.Where().Compare(i => i.IsActive, ComparisonOperator.Equals, true);
+            routinesSelect.BeginWhere().Compare(i => i.IsActive, ComparisonOperator.Equals, true);
 
             foreach (var routine in await routinesSelect.ExecuteAsync())
             {
@@ -36,7 +36,7 @@ namespace HomeControl.Routines
                     try
                     {
                         var actionsSelect = db.Select<RoutineAction>();
-                        actionsSelect.Where().Compare(i => i.RoutineId, ComparisonOperator.Equals, routine.Id);
+                        actionsSelect.BeginWhere().Compare(i => i.RoutineId, ComparisonOperator.Equals, routine.Id);
 
                         var actions = await actionsSelect.ExecuteAsync();
 
@@ -57,7 +57,7 @@ namespace HomeControl.Routines
         private async Task<bool> ShouldExecuteRoutine(Routine routine)
         {
             var triggersSelect = db.Select<RoutineTrigger>();
-            triggersSelect.Where().Compare(i => i.RoutineId, ComparisonOperator.Equals, routine.Id);
+            triggersSelect.BeginWhere().Compare(i => i.RoutineId, ComparisonOperator.Equals, routine.Id);
 
             foreach (var trigger in await triggersSelect.ExecuteAsync())
             {
@@ -78,14 +78,16 @@ namespace HomeControl.Routines
                     case RoutineTriggerType.Sunrise:
                         var sunriseTriggerData = (SunriseRoutineTriggerData)trigger.Data;
 
-                        await weatherService.EnsureValidTodaysForecastAsync();
+                        if (!await weatherService.TryGetTodaysForecastAsync())
+                            return false;
 
                         if (ShouldExecuteFromDailyTrigger(routine, sunriseTriggerData, weatherService.Today.Sunrise)) return true;
                         break;
                     case RoutineTriggerType.Sunset:
                         var sunsetTriggerData = (SunsetRoutineTriggerData)trigger.Data;
 
-                        await weatherService.EnsureValidTodaysForecastAsync();
+                        if (!await weatherService.TryGetTodaysForecastAsync())
+                            return false;
 
                         if (ShouldExecuteFromDailyTrigger(routine, sunsetTriggerData, weatherService.Today.Sunset)) return true;
                         break;

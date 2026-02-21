@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.12.35527.113
+# Visual Studio Version 18
+VisualStudioVersion = 18.0.11205.157 d18.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HomeControl", "HomeControl\HomeControl.csproj", "{31E21F4D-258A-48CA-9E64-65B1EF18FFDD}"
 EndProject
@@ -10,6 +10,18 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HomeInventory.iOS", "HomeInventory\HomeInventory.iOS\HomeInventory.iOS.csproj", "{09273462-8973-4B6B-A055-4F169763686B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HomeInventory", "HomeInventory\HomeInventory\HomeInventory.csproj", "{69E528EA-6998-4AB4-B0FD-38FA94EDCBA7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HomeControl.CLI", "HomeControl.CLI\HomeControl.CLI.csproj", "{46EFE2ED-012A-45F1-8F3C-C11A6323949A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HomeControl.Models", "HomeControl.Models\HomeControl.Models.csproj", "{24BC4095-7771-4F49-88EF-4381A0B61E82}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Libraries", "Libraries", "{8C274CD5-5296-4C85-B79D-58BE0103B654}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NTIH.Database", "..\..\NTIH.Libraries\NTIH.Database\NTIH.Database.csproj", "{4CCE2543-0246-0199-57E2-E6C3C9B70933}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NTIH.Modeling", "..\..\NTIH.Libraries\NTIH.Modeling\NTIH.Modeling.csproj", "{75CEB4A4-3484-8E49-97AF-EC34057CFAF6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NTIH.ViewModeling", "..\..\NTIH.Libraries\NTIH.ViewModeling\NTIH.ViewModeling.csproj", "{9DB2A9DB-81F3-31F0-4B57-932DD56FC782}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,9 +47,34 @@ Global
 		{69E528EA-6998-4AB4-B0FD-38FA94EDCBA7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{69E528EA-6998-4AB4-B0FD-38FA94EDCBA7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{69E528EA-6998-4AB4-B0FD-38FA94EDCBA7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{46EFE2ED-012A-45F1-8F3C-C11A6323949A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{46EFE2ED-012A-45F1-8F3C-C11A6323949A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{46EFE2ED-012A-45F1-8F3C-C11A6323949A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{46EFE2ED-012A-45F1-8F3C-C11A6323949A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{24BC4095-7771-4F49-88EF-4381A0B61E82}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{24BC4095-7771-4F49-88EF-4381A0B61E82}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{24BC4095-7771-4F49-88EF-4381A0B61E82}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{24BC4095-7771-4F49-88EF-4381A0B61E82}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4CCE2543-0246-0199-57E2-E6C3C9B70933}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4CCE2543-0246-0199-57E2-E6C3C9B70933}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4CCE2543-0246-0199-57E2-E6C3C9B70933}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4CCE2543-0246-0199-57E2-E6C3C9B70933}.Release|Any CPU.Build.0 = Release|Any CPU
+		{75CEB4A4-3484-8E49-97AF-EC34057CFAF6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{75CEB4A4-3484-8E49-97AF-EC34057CFAF6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{75CEB4A4-3484-8E49-97AF-EC34057CFAF6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{75CEB4A4-3484-8E49-97AF-EC34057CFAF6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9DB2A9DB-81F3-31F0-4B57-932DD56FC782}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9DB2A9DB-81F3-31F0-4B57-932DD56FC782}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9DB2A9DB-81F3-31F0-4B57-932DD56FC782}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9DB2A9DB-81F3-31F0-4B57-932DD56FC782}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{4CCE2543-0246-0199-57E2-E6C3C9B70933} = {8C274CD5-5296-4C85-B79D-58BE0103B654}
+		{75CEB4A4-3484-8E49-97AF-EC34057CFAF6} = {8C274CD5-5296-4C85-B79D-58BE0103B654}
+		{9DB2A9DB-81F3-31F0-4B57-932DD56FC782} = {8C274CD5-5296-4C85-B79D-58BE0103B654}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {BE13C5BB-7162-433C-A541-D3E9B02BCF8C}

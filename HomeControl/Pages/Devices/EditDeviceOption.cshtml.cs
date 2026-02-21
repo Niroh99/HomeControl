@@ -1,60 +1,36 @@
 using HomeControl.Attributes;
-using HomeControl.Database;
-using HomeControl.DatabaseModels;
-using HomeControl.Helpers;
-using HomeControl.Integrations;
-using HomeControl.Modeling;
+using HomeControl.Models.DatabaseModels;
+using HomeControl.Models.ServicesInterfaces;
+using HomeControl.ViewModels.Devices;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace HomeControl.Pages.Devices
 {
-    [MenuPage(typeof(EditDeviceModel), "Edit Device Option", null)]
-    public class EditDeviceOptionModel(IDatabaseConnectionService db, IDeviceService deviceService) : ViewModelPageModel<EditDeviceOptionModel.EditDeviceOptionViewModel>
+    [HirarchyPage(typeof(EditDeviceOptionModel), typeof(EditDeviceModel), "Edit Device Option", null)]
+    public partial class EditDeviceOptionModel(IServiceProvider serviceProvider, IDatabaseConnectionService db, IDeviceService deviceService) : ViewModelPageModel<EditDeviceOptionViewModel>(serviceProvider), IProvideBreadcrumbInfo
     {
-        public class EditDeviceOptionViewModel(EditDeviceOptionModel page, IDatabaseConnectionService db, IDeviceService deviceService) : PageViewModel(page)
-        {
-            public Device Device { get; set; }
-
-            public IIntegrationDevice IntegrationDevice { get; set; }
-
-            public DeviceOption DeviceOption { get; set; }
-
-            public List<DeviceOptionAction> DeviceOptionActions { get; } = [];
-
-            public List<SelectListItem> DeviceOptionActionTypes { get; } = [];
-
-            public async override Task Initialize()
-            {
-                DeviceOption = await db.SelectSingle<DeviceOption>(page.DeviceOptionId).ExecuteAsync();
-
-                if (DeviceOption == null) return;
-
-                Device = await db.SelectSingle<Device>(DeviceOption.DeviceId).ExecuteAsync();
-                IntegrationDevice = await deviceService.CreateAndInitializeIntegrationDeviceAsync(Device);
-
-                var deviceOptionActionsSelect = db.Select<DeviceOptionAction>();
-                deviceOptionActionsSelect.Where().Compare(i => i.DeviceOptionId, ComparisonOperator.Equals, DeviceOption.Id);
-
-                DeviceOptionActions.AddRange((await deviceOptionActionsSelect.ExecuteAsync()).OrderBy(action => action.Index));
-
-                DeviceOptionActionTypes.AddRange(IDeviceService.DeviceOptionActionTypeDataMap
-                    .Select(type => new SelectListItem(EnumHelper.GetValueDescription(type.Key), type.Key.ToString())));
-            }
-        }
-
         [FromRoute]
         public int DeviceOptionId { get; set; }
 
-        public string TestString()
+        public string GetPageTitle()
         {
-            return "TestStringValue";
+            return ViewModel.DeviceOption?.Name ?? "Edit Device Option";
         }
 
-        protected override PageViewModel CreateViewModel()
+        public string GetParentPageTitle(HirarchyPageAttribute hirarchyPageAttribute)
         {
-            return new EditDeviceOptionViewModel(this, db, deviceService);
+            if (hirarchyPageAttribute.PageType == typeof(EditDeviceModel))
+            {
+                return ViewModel.IntegrationDevice?.DisplayName ?? "Edit Device";
+            }
+
+            return null;
+        }
+
+        protected override Task InitializingViewModelAsync()
+        {
+            ViewModel.DeviceOptionId = DeviceOptionId;
+            return base.InitializingViewModelAsync();
         }
 
         public void OnGet()
@@ -89,7 +65,7 @@ namespace HomeControl.Pages.Devices
 
         public async Task<IActionResult> OnPostCreateDeviceOptionAction(ActionType deviceOptionActionType, string newDeviceOptionActionData)
         {
-            var actionDataObject = (Model)System.Text.Json.JsonSerializer.Deserialize(newDeviceOptionActionData, IDeviceService.DeviceOptionActionTypeDataMap[deviceOptionActionType], new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web));
+            var actionDataObject = (ActionData)System.Text.Json.JsonSerializer.Deserialize(newDeviceOptionActionData, IDeviceService.DeviceOptionActionTypeDataMap[deviceOptionActionType], new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web));
 
             var deviceOptionAction = new DeviceOptionAction
             {

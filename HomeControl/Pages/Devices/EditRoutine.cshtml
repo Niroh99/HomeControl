@@ -1,5 +1,5 @@
 ﻿@page "{RoutineId}"
-@using HomeControl.Modeling
+@using HomeControl.Models.DatabaseModels
 @using HomeControl.Views.Shared
 @model HomeControl.Pages.Devices.EditRoutineModel
 @{
@@ -42,21 +42,21 @@
 			<div class="grid" id="@triggerTypeMapItem.Key">
 				@switch (triggerTypeMapItem.Key)
 				{
-					case DatabaseModels.RoutineTriggerType.Interval:
+					case RoutineTriggerType.Interval:
 						<label for="Interval">Execute every</label>
 						<div class="grid-1fr-auto">
 							<input class="bound" id="Interval" name="Interval" type="number" data-trigger-value="Interval;minutesToTimespan" />
 							<span style="align-self: center">min</span>
 						</div>
 						break;
-					case DatabaseModels.RoutineTriggerType.TimeOfDay:
+					case RoutineTriggerType.TimeOfDay:
 						<label>Time</label>
 						<input type="time" class="bound" data-trigger-value="timeOfDay;inputTimeToTimeOnly" />
 						<label>Active</label>
 						await RenderWeekDaySelection();
 						break;
-					case DatabaseModels.RoutineTriggerType.Sunrise:
-					case DatabaseModels.RoutineTriggerType.Sunset:
+					case RoutineTriggerType.Sunrise:
+					case RoutineTriggerType.Sunset:
 						<label>Active</label>
 						await RenderWeekDaySelection();
 						break;
@@ -79,7 +79,7 @@
 			<div class="grid" id="@actionTypeMapItem.Key">
 				@switch (actionTypeMapItem.Key)
 				{
-					case DatabaseModels.ActionType.ExecuteFeature:
+					case ActionType.ExecuteFeature:
 						<label for="Device">Device</label>
 						<custom-select class="bound" id="NewActionDeviceId" name="DeviceId" data-action-value="DeviceId" onchange="routineActionDeviceChanged()">
 							@foreach (var device in Model.ViewModel.Devices.OrderBy(device => device.IntegrationDevice.DisplayName))
@@ -90,7 +90,7 @@
 						<label for="FeatureName">Feature Name</label>
 						<custom-select class="bound" id="FeatureName" name="FeatureName" data-action-value="FeatureName"></custom-select>
 						break;
-					case DatabaseModels.ActionType.ScheduleFeatureExecution:
+					case ActionType.ScheduleFeatureExecution:
 						<label for="Device">Device</label>
 						<custom-select class="bound" id="NewActionDeviceId" name="DeviceId" data-action-value="DeviceId" onchange="routineActionDeviceChanged()">
 							@foreach (var device in Model.ViewModel.Devices)
@@ -252,11 +252,9 @@
 		else
 		{
 			<div class="card card-children-separator">
-				@for (int i = 0; i < Model.ViewModel.RoutineTriggers.Count; i++)
+				@foreach (var routineTrigger in Model.ViewModel.RoutineTriggers)
 				{
-					var routineTrigger = Model.ViewModel.RoutineTriggers[i];
-
-					<card-element class="bound card-padding" data-binding-header="routineTriggers[@(i)].display" data-binding-info-text="routineTriggers[@(i)].additionalInfo">
+					<card-element class="bound card-padding" displayable="routineTrigger">
 						<button onclick="openRemoveRoutineTriggerQuestionDialog('@routineTrigger.Id')">Remove</button>
 					</card-element>
 				}
@@ -278,11 +276,9 @@
 		else
 		{
 			<div class="card card-children-separator">
-				@for (int i = 0; i < Model.ViewModel.RoutineActions.Count; i++)
+				@foreach (var routineAction in Model.ViewModel.RoutineActions)
 				{
-					var routineAction = Model.ViewModel.RoutineActions[i];
-
-					<card-element class="bound card-padding" data-binding-header="routineActions[@(i)].display">
+					<card-element class="bound card-padding" displayable="routineAction">
 						<button onclick="openRemoveRoutineActionQuestionDialog('@routineAction.Id')">Remove</button>
 					</card-element>
 				}

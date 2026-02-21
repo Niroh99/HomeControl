@@ -1,32 +1,13 @@
-﻿using HomeControl.Actions;
-using HomeControl.Database;
-using HomeControl.DatabaseModels;
+﻿using HomeControl.Database;
+using HomeControl.Models.DatabaseModels;
+using HomeControl.Models.Integrations;
+using HomeControl.Models.ServicesInterfaces;
+using NTIH.Database;
 using System.Collections.ObjectModel;
 using System.Reflection;
 
 namespace HomeControl.Integrations
 {
-    public interface IDeviceService
-    {
-        public static ReadOnlyDictionary<ActionType, Type> DeviceOptionActionTypeDataMap { get; } =
-            new ActionType[] { ActionType.ExecuteFeature, ActionType.ScheduleFeatureExecution }
-            .ToDictionary(actionType => actionType, actionType => IActionsService.ActionTypeDataMap[actionType]).AsReadOnly();
-
-        ReadOnlyCollection<IIntegrationDeviceCache> IntegrationDeviceCaches { get; }
-
-        bool TryGetIntegrationDeviceCache<T>(out T cache) where T : IIntegrationDeviceCache;
-
-        IIntegrationDevice CreateIntegrationDevice(Device device);
-
-        Task<IIntegrationDevice> CreateAndInitializeIntegrationDeviceAsync(Device device);
-
-        Task ExecuteFeatureAsync(int deviceId, string featureName);
-
-        Task ExecuteFeatureAsync(Device device, string featureName);
-
-        Task ExecuteDeviceOptionAsync(int deviceOptionId);
-    }
-
     public class DeviceService(IDatabaseConnectionService db, IActionsService actionsService, IServiceProvider serviceProvider) : IDeviceService
     {
         static DeviceService()
@@ -115,7 +96,7 @@ namespace HomeControl.Integrations
             var device = await db.SelectSingle<Device>(deviceOption.DeviceId).ExecuteAsync();
 
             var actionsSelect = db.Select<DeviceOptionAction>();
-            actionsSelect.Where().Compare(i => i.DeviceOptionId, ComparisonOperator.Equals, deviceOption.Id);
+            actionsSelect.BeginWhere().Compare(i => i.DeviceOptionId, ComparisonOperator.Equals, deviceOption.Id);
 
             var actions = await actionsSelect.ExecuteAsync();
 
